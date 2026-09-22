@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F2230">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dip Dönüş">
+<title>Dipten Dönüş Tarayıcı</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F2230; --surface:#16303F; --surface2:#1C3A4B; --line:#274A5C;
+  --text:#E4EDEF; --muted:#8FA9B3; --sonar:#5EC8C0; --amber:#E8B04B;
+  --loss:#E8705F; --gain:#7BD389; --onSonar:#07262A;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#EEF3F4; --surface:#FFFFFF; --surface2:#E3ECEE; --line:#CFDDE1;
+    --text:#10283A; --muted:#5A7480; --sonar:#16827B; --amber:#A8700F;
+    --loss:#C2412F; --gain:#2E8A4A; --onSonar:#FFFFFF;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font-family:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--sonar);outline-offset:2px}
+
+/* Başlık */
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+h1{font-size:26px;line-height:1.1;font-weight:800;letter-spacing:-.02em;margin:0}
+.sub{color:var(--muted);font-size:14px;margin:4px 0 0}
+.btc{flex:none;font-size:12.5px;line-height:1.3;text-align:right;padding:7px 10px;border-radius:10px;background:var(--surface);border:1px solid var(--line)}
+.btc b{display:block;font-size:13px}
+.btc.up b{color:var(--gain)} .btc.down b{color:var(--loss)} .btc.flat b{color:var(--amber)}
+
+/* Tarama alanı — sonar */
+.scan{margin:22px 0 18px;display:flex;flex-direction:column;align-items:center}
+.radar{
+  position:relative;width:176px;height:176px;border-radius:50%;border:0;cursor:pointer;
+  background:
+    radial-gradient(circle,transparent 0 31%,var(--line) 31% 31.6%,transparent 31.6% 58%,var(--line) 58% 58.6%,transparent 58.6%),
+    var(--surface);
+  box-shadow:inset 0 0 0 1px var(--line);
+  display:grid;place-items:center;overflow:hidden;-webkit-tap-highlight-color:transparent;
+}
+.radar::before{
+  content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 0deg,transparent 0 75%,color-mix(in srgb,var(--sonar) 45%,transparent) 100%);
+  opacity:0;
+}
+.radar.busy::before{opacity:1;animation:sweep 1.6s linear infinite}
+@keyframes sweep{to{transform:rotate(360deg)}}
+.radar span{
+  position:relative;z-index:1;width:92px;height:92px;border-radius:50%;
+  background:var(--sonar);color:var(--onSonar);display:grid;place-items:center;
+  font-weight:800;font-size:17px;box-shadow:0 0 0 8px color-mix(in srgb,var(--sonar) 18%,transparent);
+}
+.radar:active span{transform:scale(.96)}
+.radar:disabled{cursor:default}
+.status{margin-top:12px;font-size:13.5px;color:var(--muted);text-align:center;min-height:42px}
+.status strong{color:var(--text);font-weight:600}
+.bar{height:4px;width:176px;background:var(--surface2);border-radius:4px;overflow:hidden;margin:8px auto 0;display:none}
+.bar i{display:block;height:100%;width:0;background:var(--sonar);transition:width .2s}
+.busy-on .bar{display:block}
+
+.alert{background:color-mix(in srgb,var(--loss) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--loss) 45%,transparent);border-radius:12px;padding:12px 14px;font-size:14px;margin-bottom:16px;display:none}
+.alert.show{display:block}
+
+/* Sekmeler */
+.tabs{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;gap:4px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.tabs button{flex:1;border:0;background:transparent;padding:9px 4px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface2);color:var(--text)}
+.tabs em{font-style:normal;font-size:12px;opacity:.8;margin-left:3px}
+.panel{margin-top:14px}
+.empty{color:var(--muted);font-size:14px;padding:22px 6px;text-align:center}
+
+/* Sinyal kartı */
+.sig{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.sig.strong{border-color:color-mix(in srgb,var(--gain) 55%,var(--line))}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pair{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.pair small{font-size:13px;color:var(--muted);font-weight:600}
+.score{display:flex;align-items:baseline;gap:6px;padding:4px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.score b{font-size:17px}
+.score.strong{background:color-mix(in srgb,var(--gain) 18%,transparent);color:var(--gain)}
+.score.watch{background:color-mix(in srgb,var(--amber) 18%,transparent);color:var(--amber)}
+.meta{color:var(--muted);font-size:13px;margin:4px 0 14px}
+
+.ladder{position:relative;height:46px;margin:0 6px 6px}
+.ladder .track{position:absolute;left:0;right:0;top:18px;height:8px;border-radius:4px;overflow:hidden;display:flex}
+.ladder .risk{background:var(--loss)} .ladder .reward{background:var(--gain);flex:1}
+.ladder .tick{position:absolute;top:12px;width:2px;height:20px;background:var(--text);transform:translateX(-1px)}
+.ladder .lbl{position:absolute;top:34px;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.ladder .lbl.l{transform:none} .ladder .lbl.r{transform:translateX(-100%)}
+.ladder .entry{position:absolute;top:0;font-size:11px;font-weight:700;transform:translateX(-50%);white-space:nowrap}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-top:10px}
+.grid div{font-size:13px;color:var(--muted)}
+.grid b{display:block;color:var(--text);font-size:15.5px;font-weight:700}
+.grid .neg{color:var(--loss)} .grid .pos{color:var(--gain)}
+details.more{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+details.more summary{cursor:pointer;font-size:13.5px;font-weight:600;color:var(--muted);list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:" +"} details.more[open] summary::after{content:" −"}
+.parts{list-style:none;padding:0;margin:8px 0 0;font-size:13.5px}
+.parts li{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line)}
+.parts li:last-child{border:0}
+.actions{display:flex;gap:8px;margin-top:14px}
+.btn{flex:1;text-align:center;text-decoration:none;padding:10px;border-radius:10px;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--surface2);color:var(--text);cursor:pointer}
+
+/* Takip / elenen satırları */
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;text-decoration:none;color:inherit}
+.row .n{font-weight:700;font-size:15.5px}
+.row .d{font-size:12.5px;color:var(--muted)}
+.row .v{text-align:right;font-size:13px;font-weight:700;flex:none}
+.row .v small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+
+.note{font-size:12.5px;color:var(--muted);margin-top:26px;line-height:1.55}
+details.settings{margin-top:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+details.settings summary{cursor:pointer;font-weight:600;font-size:14px}
+details.settings label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+details.settings input[type=url],details.settings input[type=number]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+details.settings .save{margin-top:10px;width:100%}
+@media (prefers-reduced-motion: reduce){.radar.busy::before{animation:none;opacity:.6}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Dipten Dönüş</h1>
+      <p class="sub">Binance TRY coinlerini senin kurallarınla tarar</p>
+    </div>
+    <div class="btc flat" id="btc" aria-live="polite"><span>BTC</span><b>—</b></div>
+  </header>
+
+  <section class="scan" id="scanArea">
+    <button class="radar" id="scanBtn" aria-label="Taramayı başlat"><span>Tara</span></button>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="status" id="status">Son 4 saatlik mumlara göre tüm TRY coinleri taranır.</div>
+  </section>
+
+  <div class="alert" id="alert"></div>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="signals">Sinyaller<em id="cSig"></em></button>
+    <button role="tab" aria-selected="false" data-tab="watch">Takip<em id="cWatch"></em></button>
+    <button role="tab" aria-selected="false" data-tab="rejected">Elenen<em id="cRej"></em></button>
+  </nav>
+
+  <section class="panel" id="p-signals"><div class="empty">Taramak için yukarıdaki düğmeye bas.</div></section>
+  <section class="panel" id="p-watch" hidden><div class="empty">Desteğe yaklaşan ama henüz dönmemiş coinler burada görünür.</div></section>
+  <section class="panel" id="p-rejected" hidden><div class="empty">Kurulumu olup R/R, stop mesafesi veya puan yüzünden elenen coinler burada görünür.</div></section>
+
+  <details class="settings">
+    <summary>Ayarlar</summary>
+    <label for="minVol">Minimum 24 saatlik hacim (milyon TL)</label>
+    <input type="number" id="minVol" min="0" step="1" inputmode="numeric">
+    <label for="proxy">Worker adresi (sadece bağlantı sorunu olursa)</label>
+    <input type="url" id="proxy" placeholder="https://dip-proxy.kullanici.workers.dev" inputmode="url" autocomplete="off">
+    <button class="btn save" id="saveSettings">Ayarları kaydet</button>
+  </details>
+
+  <p class="note">
+    Mum kapanışları Türkiye saatiyle 03:00, 07:00, 11:00, 15:00, 19:00 ve 23:00'te. En taze sinyal için kapanıştan birkaç dakika sonra tara.<br><br>
+    Veriler Binance'in herkese açık piyasa verisinden gelir; Binance TR fiyatlarıyla küçük fark olabilir, emir vermeden önce kontrol et. Bu bir yatırım tavsiyesi değildir; stratejinin geçmiş performansı backtest ile henüz doğrulanmadı.
+  </p>
+</div>
+
+<script>
+"use strict";
+/* ───────── STRATEJİ AYARLARI (Python botla aynı) ───────── */
+const C = {
+  QUOTE:"TRY", INTERVAL:"4h", BTC:"BTCUSDT",
+  MIN_24H_VOLUME:5e6, MIN_HISTORY:200, MAX_SPREAD:0.5,
+  DROP_LB:30, DROP_MIN:20, DROP_MAX:50,
+  SUP_LB:60, PL:2, PR:2, TOL:1.5, MIN_TOUCH:2, MIN_GAP:6, MAX_BREAK:2,
+  VOL_P:20, VOL_MULT:1.5,
+  MAX_GAP:1.5, STOP_BELOW:1, STOP_MIN:1.5, STOP_MAX:5,
+  TP1:8, TP1_SIZE:0.5, TP2:10, MIN_RR:1.8,
+  STRONG:70, WATCH:50, RSI_P:14, RSI_OS:30,
+  BTC_EMA:20, BTC_LB:6, BTC_PEN:5, HIGH_LIQ:25e6,
+  NEAR_SUPPORT:4 // takip listesi: desteğin en fazla %4 üstü
+};
+const EXCL = new Set(["USDT","USDC","FDUSD","TUSD","BUSD","DAI","USDP","PAX","EUR","AEUR","EURI","GBP","XUSD","USD1","BFUSD","PAXG"]);
+const DIRECT = "https://data-api.binance.vision";
+const H4 = 4*3600*1000;
+
+/* ───────── ayar saklama ───────── */
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+let settings = store.get("ddt_settings",{minVol:5, proxy:""});
+
+/* ───────── biçimlendirme ───────── */
+function tl(px){
+  if(!(px>0)) return "0";
+  const d = px>=1 ? 2 : Math.min(8, Math.max(2, -Math.floor(Math.log10(px))+3));
+  return px.toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d});
+}
+const pc = (v,d=1)=> v.toLocaleString("tr-TR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const pair = s => s.endsWith(C.QUOTE) ? `${s.slice(0,-C.QUOTE.length)}<small>/${C.QUOTE}</small>` : s;
+const plain = s => s.endsWith(C.QUOTE) ? `${s.slice(0,-C.QUOTE.length)}/${C.QUOTE}` : s;
+const tvLink = s => `https://www.tradingview.com/chart/?symbol=BINANCE:${encodeURIComponent(s)}&interval=240`;
+function ago(ms){
+  const m = Math.round(ms/60000);
+  if(m<60) return `${m} dk önce`;
+  const h=Math.floor(m/60), r=m%60;
+  return r? `${h} sa ${r} dk önce` : `${h} saat önce`;
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ───────── API ───────── */
+class NetErr extends Error{}
+async function api(path){
+  const base = (settings.proxy||"").trim().replace(/\/+$/,"") || DIRECT;
+  for(let attempt=0; attempt<4; attempt++){
+    let r;
+    try{ r = await fetch(base+path,{cache:"no-store"}); }
+    catch(e){
+      if(attempt===3) throw new NetErr("bağlantı");
+      await sleep(800*(attempt+1)); continue;
+    }
+    if(r.status===429||r.status===418){ await sleep(5000); continue; }
+    if(r.status===451||r.status===403) throw new NetErr("engel");
+    if(!r.ok) throw new Error(`Binance ${r.status}`);
+    return r.json();
+  }
+  throw new NetErr("bağlantı");
+}
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const parseK = k => ({t:+k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],ct:+k[6],qv:+k[7]});
+const closedOnly = (cs,now) => cs.filter(c=>c.ct<now);
+
+/* ───────── indikatörler ───────── */
+function ema(v,p){
+  const out=new Array(v.length).fill(null);
+  if(v.length<p) return out;
+  const k=2/(p+1); let e=v.slice(0,p).reduce((a,b)=>a+b,0)/p; out[p-1]=e;
+  for(let i=p;i<v.length;i++){ e=v[i]*k+e*(1-k); out[i]=e; }
+  return out;
+}
+function rsi(cl,p=C.RSI_P){
+  const out=new Array(cl.length).fill(null);
+  if(cl.length<=p) return out;
+  let g=0,l=0;
+  for(let i=1;i<=p;i++){const d=cl[i]-cl[i-1]; g+=Math.max(d,0); l+=Math.max(-d,0);}
+  let ag=g/p, al=l/p; out[p]= al===0?100:100-100/(1+ag/al);
+  for(let i=p+1;i<cl.length;i++){
+    const d=cl[i]-cl[i-1];
+    ag=(ag*(p-1)+Math.max(d,0))/p; al=(al*(p-1)+Math.max(-d,0))/p;
+    out[i]= al===0?100:100-100/(1+ag/al);
+  }
+  return out;
+}
+function btcContext(cs){
+  const idx=new Map(cs.map((c,i)=>[c.t,i]));
+  const e=ema(cs.map(c=>c.c),C.BTC_EMA);
+  return {
+    state(t){
+      const i=idx.get(t);
+      if(i===undefined||e[i]===null||i<C.BTC_LB) return null;
+      const c=cs[i].c, prev=cs[i-C.BTC_LB].c;
+      return {above:c>e[i], chg:(c/prev-1)*100};
+    },
+    last(){
+      const i=cs.length-1; if(i<C.BTC_LB||e[i]===null) return null;
+      return {above:cs[i].c>e[i], chg:(cs[i].c/cs[i-C.BTC_LB].c-1)*100};
+    }
+  };
+}
+
+/* ───────── destek ───────── */
+function pivotLows(cs,start,end){
+  const res=[];
+  for(let i=Math.max(start,C.PL); i<=end-C.PR; i++){
+    const low=cs[i].l; let ok=true;
+    for(let j=i-C.PL;j<i;j++) if(!(low<cs[j].l)){ok=false;break;}
+    if(ok) for(let j=i+1;j<=i+C.PR;j++) if(!(low<=cs[j].l)){ok=false;break;}
+    if(ok) res.push(i);
+  }
+  return res;
+}
+function supportZones(cs,s){
+  const piv=pivotLows(cs,s-C.SUP_LB,s-1), tol=C.TOL/100, zones=new Map();
+  for(const i of piv){
+    const base=cs[i].l;
+    const m=piv.filter(j=>Math.abs(cs[j].l-base)/base<=tol);
+    if(m.length<C.MIN_TOUCH) continue;
+    if(m[m.length-1]-m[0]<C.MIN_GAP) continue;
+    const lows=m.map(j=>cs[j].l);
+    zones.set(m.join(","),{low:Math.min(...lows),high:Math.max(...lows),touches:m.length,lastPivot:m[m.length-1]});
+  }
+  return [...zones.values()];
+}
+function dropAt(cs,s){
+  const first=s-C.DROP_LB+1; let pk=first;
+  for(let k=first;k<=s;k++) if(cs[k].h>cs[pk].h) pk=k;
+  const trough=Math.min(cs[s-2].l,cs[s-1].l,cs[s].l);
+  return {peakIdx:pk, peak:cs[pk].h, trough, drop:(cs[pk].h-trough)/cs[pk].h*100};
+}
+
+/* ───────── kurulum ───────── */
+function findSetup(cs,s,rv){
+  const need=Math.max(C.SUP_LB,C.DROP_LB,C.VOL_P)+1;
+  if(s<need) return null;
+  const c=cs[s];
+  let vol24=0; for(let k=s-5;k<=s;k++) vol24+=cs[k].qv;
+  if(vol24<settings.minVol*1e6) return null;
+  if(!(c.c>c.o)) return null;
+  let avg=0; for(let k=s-C.VOL_P;k<s;k++) avg+=cs[k].qv; avg/=C.VOL_P;
+  if(avg<=0) return null;
+  const volMult=c.qv/avg;
+  if(volMult<C.VOL_MULT) return null;
+  const d=dropAt(cs,s);
+  if(d.peakIdx>s-3) return null;
+  if(d.drop<C.DROP_MIN||d.drop>C.DROP_MAX) return null;
+  const tol=C.TOL/100, brk=C.MAX_BREAK/100;
+  let best=null;
+  for(const z of supportZones(cs,s)){
+    const touched=c.l>=z.low*(1-brk) && c.l<=z.high*(1+tol);
+    const bounced=c.c>z.high;
+    if(touched&&bounced){
+      if(!best||z.touches>best.touches||(z.touches===best.touches&&z.high>best.high)) best=z;
+    }
+  }
+  if(!best) return null;
+  const swingLow=Math.min(d.trough,cs[best.lastPivot].l);
+  const rng=c.h-c.l, strength=rng>0?(c.c-c.l)/rng:0;
+  let rsiOk=false;
+  if(rv[s]!==null&&rv[s-1]!==null){
+    const rec=rv.slice(s-5,s+1).filter(v=>v!==null);
+    rsiOk=rec.length>0&&Math.min(...rec)<C.RSI_OS&&rv[s]>rv[s-1];
+  }
+  return {s,t:c.t,ct:c.ct,close:c.c,drop:d.drop,volMult,vol24,zone:best,swingLow,strength,rsiOk};
+}
+function scoreSignal(st,rr,btc){
+  const p=[];
+  p.push(["Düşüş derinliği", st.drop>=25&&st.drop<=45?15:5]);
+  p.push(["Destek gücü", st.zone.touches>=3?15:5]);
+  p.push(["Hacim", st.volMult>=2?15:5]);
+  p.push(["RSI dönüşü", st.rsiOk?10:0]);
+  p.push(["Mum gücü", st.strength>=0.66?10:0]);
+  p.push(["R/R", rr>=2.5?10:5]);
+  p.push(["Likidite", st.vol24>=C.HIGH_LIQ?10:0]);
+  p.push(["BTC", !btc?0: btc.above?15: btc.chg>-C.BTC_PEN?5:-15]);
+  const total=Math.max(0,Math.min(100,p.reduce((a,[,v])=>a+v,0)));
+  return {total,parts:p};
+}
+function buildSignal(st,entry,btc){
+  if(entry>st.close*(1+C.MAX_GAP/100)) return {err:"fiyat destekten uzaklaştı (giriş kaçtı)"};
+  const stop=st.swingLow*(1-C.STOP_BELOW/100);
+  if(stop>=entry) return {err:"fiyat stop seviyesinin altında"};
+  const stopPct=(entry-stop)/entry*100;
+  if(stopPct<C.STOP_MIN) return {err:`stop çok yakın (%${pc(stopPct)})`};
+  if(stopPct>C.STOP_MAX) return {err:`stop çok uzak (%${pc(stopPct)})`};
+  const avgTp=C.TP1_SIZE*C.TP1+(1-C.TP1_SIZE)*C.TP2, rr=avgTp/stopPct;
+  if(rr<C.MIN_RR) return {err:`R/R yetersiz (${pc(rr,2)})`};
+  const sc=scoreSignal(st,rr,btc);
+  return {entry,stop,stopPct,tp1:entry*(1+C.TP1/100),tp2:entry*(1+C.TP2/100),rr,score:sc.total,parts:sc.parts,
+          label: sc.total>=C.STRONG?"GÜÇLÜ": sc.total>=C.WATCH?"İZLE":"ZAYIF", btc};
+}
+function watchCheck(cs,price){
+  const n=cs.length, s=n-1;
+  let vol24=0; for(let k=s-5;k<=s;k++) vol24+=cs[k].qv;
+  if(vol24<settings.minVol*1e6) return null;
+  const d=dropAt(cs,s);
+  if(d.drop<C.DROP_MIN||d.drop>C.DROP_MAX) return null;
+  let best=null;
+  for(const z of supportZones(cs,n)){
+    if(price<z.low*(1-C.MAX_BREAK/100)) continue;
+    const dist=(price-z.high)/z.high*100;
+    if(dist<=C.NEAR_SUPPORT && (!best||dist<best.dist)) best={...z,dist};
+  }
+  return best?{drop:d.drop,zone:best,dist:best.dist}:null;
+}
+
+/* ───────── tarama ───────── */
+const $=id=>document.getElementById(id);
+let busy=false;
+
+async function pool(items,n,fn,onDone){
+  let i=0,done=0;
+  await Promise.all(Array.from({length:n},async()=>{
+    while(i<items.length){
+      const it=items[i++];
+      try{ await fn(it); }catch(e){ if(e instanceof NetErr) throw e; }
+      onDone(++done);
+    }
+  }));
+}
+
+async function scan(){
+  if(busy) return; busy=true;
+  const btn=$("scanBtn");
+  btn.disabled=true; btn.classList.add("busy"); $("scanArea").classList.add("busy-on");
+  btn.querySelector("span").textContent="…"; $("barFill").style.width="0%";
+  $("alert").classList.remove("show");
+  setStatus("Coin listesi alınıyor…");
+  const now=Date.now();
+  const result={time:now,signals:[],watch:[],rejected:[],total:0,btc:null};
+  try{
+    const books=await api("/api/v3/ticker/bookTicker");
+    const bookMap=new Map();
+    let syms=[];
+    for(const b of books){
+      const s=b.symbol; if(!s.endsWith(C.QUOTE)) continue;
+      const base=s.slice(0,-C.QUOTE.length); if(EXCL.has(base)) continue;
+      const bid=+b.bidPrice, ask=+b.askPrice; if(!(bid>0&&ask>0)) continue;
+      bookMap.set(s,{bid,ask}); syms.push(s);
+    }
+    // ön eleme: 24 saatlik hacim
+    const liquid=[];
+    for(let i=0;i<syms.length;i+=100){
+      const chunk=syms.slice(i,i+100);
+      const t=await api(`/api/v3/ticker/24hr?type=MINI&symbols=${encodeURIComponent(JSON.stringify(chunk))}`);
+      for(const x of t) if(+x.quoteVolume>=settings.minVol*1e6*0.6) liquid.push(x.symbol);
+    }
+    result.total=syms.length;
+    const btcK=closedOnly((await api(`/api/v3/klines?symbol=${C.BTC}&interval=${C.INTERVAL}&limit=100`)).map(parseK),now);
+    const ctx=btcContext(btcK);
+    result.btc=ctx.last(); renderBtc(result.btc);
+
+    setStatus(`<strong>${liquid.length}</strong> likit coin taranıyor…`);
+    await pool(liquid,6,async sym=>{
+      const raw=await api(`/api/v3/klines?symbol=${sym}&interval=${C.INTERVAL}&limit=250`);
+      const cs=closedOnly(raw.map(parseK),now);
+      if(cs.length<C.MIN_HISTORY) return;
+      const rv=rsi(cs.map(c=>c.c));
+      const bk=bookMap.get(sym); const mid=(bk.bid+bk.ask)/2;
+      let setup=null;
+      for(const s of [cs.length-1,cs.length-2]){ setup=findSetup(cs,s,rv); if(setup) break; }
+      if(setup){
+        const spread=(bk.ask-bk.bid)/mid*100;
+        if(spread>C.MAX_SPREAD){ result.rejected.push({sym,reason:`alış-satış farkı yüksek (%${pc(spread,2)})`,setup}); return; }
+        const sig=buildSignal(setup,bk.ask,ctx.state(setup.t));
+        if(sig.err){ result.rejected.push({sym,reason:sig.err,setup}); return; }
+        if(sig.score<C.WATCH){ result.rejected.push({sym,reason:`puan düşük (${sig.score})`,setup}); return; }
+        result.signals.push({sym,setup,sig});
+        return;
+      }
+      const w=watchCheck(cs,mid);
+      if(w) result.watch.push({sym,price:mid,...w});
+    },done=>{
+      $("barFill").style.width=`${Math.round(done/liquid.length*100)}%`;
+    });
+
+    result.signals.sort((a,b)=>b.sig.score-a.sig.score);
+    result.watch.sort((a,b)=>a.dist-b.dist);
+    store.set("ddt_last",result);
+    render(result);
+  }catch(e){
+    showError(e);
+    setStatus("Tarama tamamlanamadı.");
+  }finally{
+    busy=false; btn.disabled=false; btn.classList.remove("busy"); $("scanArea").classList.remove("busy-on");
+    btn.querySelector("span").textContent="Tara";
+  }
+}
+
+function showError(e){
+  const a=$("alert");
+  if(e instanceof NetErr){
+    a.innerHTML = e.message==="engel"
+      ? "Binance bu bağlantıya veri vermedi. Ayarlar'a Worker adresini girip tekrar dene."
+      : "Binance'e bağlanılamadı. İnternetini kontrol et; sorun sürerse tarayıcı doğrudan erişimi engelliyor olabilir, o zaman Ayarlar'a Worker adresini gir.";
+  }else{
+    a.textContent = "Tarama sırasında hata oluştu: "+(e.message||e)+". Birkaç dakika sonra tekrar dene.";
+  }
+  a.classList.add("show");
+}
+function setStatus(h){ $("status").innerHTML=h; }
+
+/* ───────── görünüm ───────── */
+function renderBtc(b){
+  const el=$("btc");
+  if(!b){ el.className="btc flat"; el.innerHTML="<span>BTC</span><b>—</b>"; return; }
+  const cls = b.above?"up": b.chg<=-C.BTC_PEN?"down":"flat";
+  el.className="btc "+cls;
+  el.innerHTML=`<span>BTC ${b.above?"trend üstü":"trend altı"}</span><b>24 sa ${b.chg>=0?"+":"−"}%${pc(Math.abs(b.chg))}</b>`;
+}
+
+function ladder(sig){
+  const span=sig.tp2-sig.stop, pos=v=>((v-sig.stop)/span*100);
+  const e=pos(sig.entry), t1=pos(sig.tp1);
+  return `<div class="ladder" aria-hidden="true">
+    <span class="entry" style="left:${e}%">Giriş</span>
+    <div class="track"><span class="risk" style="width:${e}%"></span><span class="reward"></span></div>
+    <span class="tick" style="left:0%"></span><span class="tick" style="left:${e}%"></span>
+    <span class="tick" style="left:${t1}%"></span><span class="tick" style="left:100%"></span>
+    <span class="lbl l" style="left:0">Stop</span>
+    <span class="lbl" style="left:${t1}%">TP1</span>
+    <span class="lbl r" style="left:100%">TP2</span>
+  </div>`;
+}
+
+function signalCard({sym,setup,sig},now){
+  const strong=sig.label==="GÜÇLÜ";
+  const btc=sig.btc? `${sig.btc.above?"trend üstünde":"trend altında"}, 24 sa ${sig.btc.chg>=0?"+":"−"}%${pc(Math.abs(sig.btc.chg))}`:"veri yok";
+  return `<article class="sig ${strong?"strong":""}">
+    <div class="head">
+      <div class="pair">${pair(sym)}</div>
+      <div class="score ${strong?"strong":"watch"}">${sig.label}<b>${sig.score}</b></div>
+    </div>
+    <div class="meta">Mum ${ago(now-setup.ct)} kapandı, 30 mumda −%${pc(setup.drop)} düşüş, hacim ${pc(setup.volMult)}×</div>
+    ${ladder(sig)}
+    <div class="grid">
+      <div>Giriş<b>${tl(sig.entry)} TL</b></div>
+      <div>Stop<b class="neg">${tl(sig.stop)} TL <small>−%${pc(sig.stopPct)}</small></b></div>
+      <div>TP1 (%${Math.round(C.TP1_SIZE*100)} sat)<b class="pos">${tl(sig.tp1)} TL</b></div>
+      <div>TP2<b class="pos">${tl(sig.tp2)} TL</b></div>
+      <div>Destek bölgesi<b>${tl(setup.zone.low)} – ${tl(setup.zone.high)}</b></div>
+      <div>Risk / getiri<b>1 : ${pc(sig.rr,2)}</b></div>
+    </div>
+    <details class="more">
+      <summary>Puan dökümü</summary>
+      <ul class="parts">
+        ${sig.parts.map(([k,v])=>`<li><span>${k}</span><b>${v>0?"+":""}${v}</b></li>`).join("")}
+        <li><span>Destek tepkisi</span><b>${setup.zone.touches} kez</b></li>
+        <li><span>BTC durumu</span><b>${btc}</b></li>
+      </ul>
+      <p class="d" style="font-size:12.5px;color:var(--muted);margin:10px 0 0">TP1 gelince pozisyonun yarısını sat, stop'u girişe çek.</p>
+    </details>
+    <div class="actions"><a class="btn" href="${tvLink(sym)}" target="_blank" rel="noopener">Grafiği aç</a></div>
+  </article>`;
+}
+
+function render(r){
+  const now=Date.now();
+  $("cSig").textContent=r.signals.length?` ${r.signals.length}`:"";
+  $("cWatch").textContent=r.watch.length?` ${r.watch.length}`:"";
+  $("cRej").textContent=r.rejected.length?` ${r.rejected.length}`:"";
+  const t=new Date(r.time).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+  setStatus(`Son tarama <strong>${t}</strong>, ${r.total} coin. Sonraki mum kapanışı <strong>${nextClose()}</strong>.`);
+  if(r.btc) renderBtc(r.btc);
+
+  $("p-signals").innerHTML = r.signals.length
+    ? r.signals.map(x=>signalCard(x,now)).join("")
+    : `<div class="empty">Şu an kurallara uyan sinyal yok. Şartlar sıkı olduğu için bu sık görülür. Takip sekmesindeki coinlere bak, ${nextClose()} kapanışından sonra tekrar tara.</div>`;
+
+  $("p-watch").innerHTML = r.watch.length
+    ? r.watch.map(w=>`<a class="row" href="${tvLink(w.sym)}" target="_blank" rel="noopener">
+        <div><div class="n">${esc(plain(w.sym))}</div><div class="d">−%${pc(w.drop)} düşüş, destek ${tl(w.zone.low)} – ${tl(w.zone.high)} (${w.zone.touches} tepki)</div></div>
+        <div class="v">${w.dist<=0?"Destekte":`%${pc(w.dist)} üstünde`}<small>${tl(w.price)} TL</small></div>
+      </a>`).join("") + `<p class="note" style="margin-top:10px">Bu coinler henüz hacimli dönüş yapmadı. Destekte yeşil ve hacimli bir 4 saatlik kapanış gelirse sinyale dönüşebilir.</p>`
+    : `<div class="empty">Şu an desteğe yaklaşan, %20–50 düşmüş coin yok.</div>`;
+
+  $("p-rejected").innerHTML = r.rejected.length
+    ? r.rejected.map(x=>`<a class="row" href="${tvLink(x.sym)}" target="_blank" rel="noopener">
+        <div><div class="n">${esc(plain(x.sym))}</div><div class="d">${esc(x.reason)}</div></div>
+        <div class="v">−%${pc(x.setup.drop)}<small>hacim ${pc(x.setup.volMult)}×</small></div>
+      </a>`).join("")
+    : `<div class="empty">Elenen kurulum yok.</div>`;
+}
+
+function nextClose(){
+  const n=Math.ceil(Date.now()/H4)*H4;
+  return new Date(n).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"});
+}
+
+/* sekmeler */
+document.querySelectorAll(".tabs button").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
+  ["signals","watch","rejected"].forEach(id=>$("p-"+id).hidden = id!==b.dataset.tab);
+}));
+
+/* ayarlar */
+$("minVol").value=settings.minVol; $("proxy").value=settings.proxy;
+$("saveSettings").addEventListener("click",()=>{
+  const mv=parseFloat($("minVol").value);
+  settings={minVol: isFinite(mv)&&mv>=0?mv:5, proxy:$("proxy").value.trim()};
+  store.set("ddt_settings",settings);
+  $("saveSettings").textContent="Kaydedildi";
+  setTimeout(()=>$("saveSettings").textContent="Ayarları kaydet",1500);
+});
+
+$("scanBtn").addEventListener("click",scan);
+
+/* son taramayı göster */
+const last=store.get("ddt_last",null);
+if(last&&last.signals){ render(last); }
+</script>
+</body>
+</html>
