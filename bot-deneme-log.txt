@@ -1,0 +1,83 @@
+Binance TR: 305 coin, 2 sinyal (2 yeni), 30 takip, 4 elenen, piyasa bull
+  GÜÇLÜ 91 Retest BNBTRY giriş 38812 stop 38061.54
+  GÜÇLÜ 75 Kırılım SUITRY giriş 59.56 stop 57.6304
+Binance Global: 491 coin, 3 sinyal (3 yeni), 13 takip, 1 elenen, piyasa bull
+  GÜÇLÜ 91 Retest BNBUSDT giriş 790.1 stop 774.3285
+  GÜÇLÜ 80 Kırılım SUIUSDT giriş 1.2118 stop 1.1723089999999998
+  İZLE 50 Trend JTOUSDT giriş 0.5697 stop 0.5445
+[Telegram ayarlı değil — 5 mesaj gönderilmedi]
+---
+🟢 <b>GÜÇLÜ 91 · Kırılım Retest</b>
+<b>BNB/TRY</b> · Binance TR
+
+Giriş: <b>38.812,00 TL</b>
+Stop: 38.061,54 (−%1,9)
+TP1: 39.937,69 (+%2,9) → yarısını sat, stop girişe
+TP2: 41.063,38 (+%5,8) · kalan yarı iz süren stopla
+R/R: 1 : 1,84
+Önerilen alım: 1.000 TL (1.000 TL sermaye, %2 risk)
+<i>Boştaki paraya göre küçültüldü.</i>
+
+30 mumluk direnç (5 temas) 2,0× hacimle kırıldı. Fiyat 6 mum içinde seviyeye geri dönüp retest yaptı ve destek olarak tuttu; geri çekilme hacmi kırılıma göre %57 seviyesinde kaldı. Onay (6/7): retestte yeşil kapanış, RSI yükseliyor, hacim ortalamanın üstünde, alıcılar baskın, BTC trend üstünde, BTC'den güçlü. EMA50 &gt; EMA200 ve yükseliyor. R/R: 1,84 (komisyon ve kayma dahil). Puan: 91.
+
+<a href="https://www.tradingview.com/chart/?symbol=BINANCE:BNBTRY&interval=240">Grafiği aç</a>
+---
+🟢 <b>GÜÇLÜ 75 · Güçlü Kırılım</b>
+<b>SUI/TRY</b> · Binance TR
+
+Giriş: <b>59,56 TL</b>
+Stop: 57,63 (−%3,2)
+TP1: 62,45 (+%4,9) → yarısını sat, stop girişe
+TP2: 69,21 (+%16,2) · kalan yarı iz süren stopla
+R/R: 1 : 3,25
+Önerilen alım: 463 TL (1.000 TL sermaye, %2 risk)
+<i>Kırılım daha riskli olduğu için tutar %25 küçük.</i>
+
+20 mum boyunca %10,0'lik dar aralıkta sıkıştı (son 100 mumun en dar bölgelerinden), 2,5× hacimle yukarı kırdı; hacmin %55'i agresif alıcılardan geldi.
+
+<a href="https://www.tradingview.com/chart/?symbol=BINANCE:SUITRY&interval=240">Grafiği aç</a>
+---
+🟢 <b>GÜÇLÜ 91 · Kırılım Retest</b>
+<b>BNB/USDT</b> · Binance Global
+
+Giriş: <b>790,10 USDT</b>
+Stop: 774,33 (−%2,0)
+TP1: 813,76 (+%3,0) → yarısını sat, stop girişe
+TP2: 837,41 (+%6,0) · kalan yarı iz süren stopla
+R/R: 1 : 1,85
+Önerilen alım: 100,00 USDT (100,00 USDT sermaye, %2 risk)
+<i>Boştaki paraya göre küçültüldü.</i>
+
+30 mumluk direnç (5 temas) 2,4× hacimle kırıldı. Fiyat 6 mum içinde seviyeye geri dönüp retest yaptı ve destek olarak tuttu; geri çekilme hacmi kırılıma göre %27 seviyesinde kaldı. Onay (4/7): retestte yeşil kapanış, RSI yükseliyor, BTC trend üstünde, BTC'den güçlü. EMA50 &gt; EMA200 ve yükseliyor. R/R: 1,85 (komisyon ve kayma dahil). Puan: 91.
+
+<a href="https://www.tradingview.com/chart/?symbol=BINANCE:BNBUSDT&interval=240">Grafiği aç</a>
+---
+🟢 <b>GÜÇLÜ 80 · Güçlü Kırılım</b>
+<b>SUI/USDT</b> · Binance Global
+
+Giriş: <b>1,21 USDT</b>
+Stop: 1,17 (−%3,3)
+TP1: 1,27 (+%4,9) → yarısını sat, stop girişe
+TP2: 1,41 (+%16,3) · kalan yarı iz süren stopla
+R/R: 1 : 3,25
+Önerilen alım: 46,03 USDT (100,00 USDT sermaye, %2 risk)
+<i>Kırılım daha riskli olduğu için tutar %25 küçük.</i>
+
+20 mum boyunca %10,5'lik dar aralıkta sıkıştı (son 100 mumun en dar bölgelerinden), 2,2× hacimle yukarı kırdı; hacmin %55'i agresif alıcılardan geldi.
+
+<a href="https://www.tradingview.com/chart/?symbol=BINANCE:SUIUSDT&interval=240">Grafiği aç</a>
+---
+🟡 <b>İZLE 50 · Trend Dalgası</b>
+<b>JTO/USDT</b> · Binance Global
+
+Giriş: <b>0,5697 USDT</b>
+Stop: 0,5445 (−%4,4)
+TP1: 0,6075 (+%6,6) → yarısını sat, stop girişe
+TP2: 0,6453 (+%13,3)
+R/R: 1 : 2,25
+Önerilen alım: 45,21 USDT (100,00 USDT sermaye, %2 risk)
+
+Yükselen trendde %6,2 düzeltme yaptı, 50'lik ortalamadan 1,5× hacimle önceki mumun tepesini aşarak döndü.
+
+<a href="https://www.tradingview.com/chart/?symbol=BINANCE:JTOUSDT&interval=240">Grafiği aç</a>
+Bitti: 12 sn, 5 mesaj, karnede 5 kayıt.
