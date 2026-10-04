@@ -10,7 +10,7 @@ function cekirdegiYukle(depo){
   const kod=script.slice(0,son)+`
 ;globalThis.__c={settings,get K(){return K},MKT,KINDS,BASE_KINDS,STR,DAY,H1,H4,loadMkt,rebuildK,scanCore,recordSignals,updateKarne,
   get karne(){return karne},sizing,tl,pc,sgn,rStr,plain,money,esc,tvLink,reasonTxt,ago,
-  marketUniverse,fetchRange,pool,btcContext,breadthFn,genTrades,portfolio,fullStats,wfSplit,tStats,api,parseK,closedOnly,prep,SETUP,SIGNAL,stepCandle,relStrength,regimeOf,minScore,ema,rsi,atr};`;
+  marketUniverse,fetchRange,pool,btcContext,breadthFn,genTrades,portfolio,fullStats,wfSplit,tStats,anaTrend,api,parseK,closedOnly,prep,SETUP,SIGNAL,stepCandle,relStrength,regimeOf,minScore,ema,rsi,atr};`;
   const ls={getItem:k=>Object.prototype.hasOwnProperty.call(depo,k)?depo[k]:null,setItem:(k,v)=>{depo[k]=String(v);},removeItem:k=>{delete depo[k];}};
   const yasak=new Proxy({},{get(){throw new Error("bot içinde ekran (document) kullanılamaz");}});
   const ctx={localStorage:ls,fetch,setTimeout,clearTimeout,console,URL,Blob,document:yasak};

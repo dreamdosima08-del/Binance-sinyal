@@ -1,7 +1,8 @@
 # Telegram botu kurulumu (telefondan 5 dakika)
 
 Bot GitHub'da her 4 saatlik mum kapanışından birkaç dakika sonra kendi kendine çalışır.
-Binance TR ve Binance Global'i tarar, sinyalleri ve sonuçlarını Telegram'a yazar.
+BTC ve ETH ana trendi (50 günlük ortalama) değişince haber verir; bu, 2018'den beri testte işe yarayan kuraldır.
+Ayrıca Binance TR ve Binance Global'i tarayıp gözlem sinyallerini ve sonuçlarını yazar (bunlar kanıtlanmamıştır, işlem için değildir).
 Senin telefonun kapalı olsa da çalışır. Ücretsizdir.
 
 ## 1. Telegram'da bot oluştur

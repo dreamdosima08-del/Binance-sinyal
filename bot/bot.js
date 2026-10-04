@@ -54,7 +54,7 @@ async function sohbetiKaydet(){
     const m=u.message;if(!m||!m.chat||m.chat.type!=="private")continue;
     if(!durum.chatId&&/^\/start/.test(m.text||"")){
       durum.chatId=m.chat.id;
-      yaz(`✅ <b>Bağlandı!</b>\n\nBundan sonra her 4 saatlik mum kapanışından birkaç dakika sonra ${AYAR.piyasalar.map(p=>C.MKT[p].name).join(" ve ")} taranacak.\n\n• Sinyal çıkınca giriş, stop ve hedefleriyle buraya yazacağım.\n• Sinyaller hedefe ya da stopa gidince sonucunu bildireceğim.\n• Her sabah kısa bir karne özeti göndereceğim.\n\nSiteden de Karne → Bot sekmesinden tüm sonuçları görebilirsin.`);
+      yaz(`✅ <b>Bağlandı!</b>\n\nBundan sonra her 4 saatlik mum kapanışından birkaç dakika sonra ${AYAR.piyasalar.map(p=>C.MKT[p].name).join(" ve ")} taranacak.\n\n• BTC ve ETH ana trendi (50 günlük ortalama) değişince haber vereceğim. Testte işe yarayan kural bu.\n• Gözlem sinyallerini giriş, stop ve hedefleriyle yazacağım (kanıtlanmamış, işlem için değil).\n• Sinyaller hedefe ya da stopa gidince sonucunu bildireceğim.\n• Her sabah kısa bir karne özeti göndereceğim.\n\nSiteden de Karne → Bot sekmesinden tüm sonuçları görebilirsin.`);
     }
   }
 }
@@ -94,13 +94,34 @@ function ozetMesaji(){
     const p=durum.piyasalar[m];if(p&&p.rejim)s+=`\nPiyasa: ${{bull:"güçlü",mixed:"karışık",bear:"zayıf"}[p.rejim]}`;
     satir.push(s);
   }
-  return `📒 <b>Günlük karne</b>\n\n${satir.join("\n\n")}\n\n<i>Kararı en az 20–30 sonuçlanan sinyalden sonra ver.</i>`;
+  const at=durum.anaTrend?`<b>Ana trend</b>\n${anaSatir("BTC",durum.anaTrend.BTC)}\n${anaSatir("ETH",durum.anaTrend.ETH)}\n\n`:"";
+  return `📒 <b>Günlük karne</b>\n\n${at}<b>Gözlem sinyalleri</b> (kanıtlanmamış)\n\n${satir.join("\n\n")}\n\n<i>Kararı en az 20–30 sonuçlanan sinyalden sonra ver.</i>`;
+}
+
+/* ── ana trend (BTC/ETH 50 günlük ortalama) ── */
+const tarihKisa=ms=>new Date(ms).toLocaleDateString("tr-TR",{day:"numeric",month:"short",timeZone:"Europe/Istanbul"});
+function anaSatir(ad,x){return `${ad}: <b>${x.ic?"İÇERİDE":"NAKİTTE"}</b> (${tarihKisa(x.bas)} itibarıyla, ortalamanın %${C.pc(Math.abs(x.uzak))} ${x.uzak>=0?"üstünde":"altında"})`;}
+function anaDegisim(ad,x){
+  return x.ic?`🟢 <b>${ad} ana trend: İÇERİDE</b>\nGünlük kapanış (${C.tl(x.kapanis)} USDT) 50 günlük ortalamanın (${C.tl(x.ort)}) üstüne çıktı.\nKurala göre: bugün ${ad} al ya da tut.\n\n<i>Bu kural 2018'den beri testte düşüşleri azaltıp getiriyi artırdı, ama yatay piyasada yanlış sinyali çok olur.</i>`
+    :`🔴 <b>${ad} ana trend: NAKİTTE</b>\nGünlük kapanış (${C.tl(x.kapanis)} USDT) 50 günlük ortalamanın (${C.tl(x.ort)}) altına indi.\nKurala göre: bugün ${ad} sat ve USDT'de bekle (Binance TR'deysen TL'ye değil USDT'ye geç).\n\n<i>Yanlış sinyal olabilir; kural, ortalamanın üstüne dönünce tekrar alır.</i>`;
 }
 
 /* ── ana akış ── */
 (async()=>{
   const baslangic=Date.now();
   await sohbetiKaydet();
+
+  // 0) ana trend
+  try{
+    const a=await C.anaTrend(),eski=durum.anaTrend;
+    for(const ad of ["BTC","ETH"]){
+      const x=a[ad];if(!x||x.ic==null)continue;
+      if(eski&&eski[ad]&&eski[ad].ic!=null&&eski[ad].ic!==x.ic)yaz(anaDegisim(ad,x));
+    }
+    if(!eski&&durum.chatId)yaz(`📈 <b>Ana trend takibi başladı</b>\n${anaSatir("BTC",a.BTC)}\n${anaSatir("ETH",a.ETH)}\n\nKural: günlük kapanış 50 günlük ortalamanın üstündeyse tut, altına inerse sat. Değişince haber vereceğim.`);
+    durum.anaTrend=a;
+    console.log("Ana trend:",["BTC","ETH"].map(k=>`${k} ${a[k].ic?"içeride":"nakitte"} (%${a[k].uzak.toFixed(1)})`).join(", "));
+  }catch(e){console.log("Ana trend hesaplanamadı:",e.message);}
 
   // 1) eski sinyallerin sonuçları
   const once=new Map(C.karne.map(k=>[k.id,k.status]));

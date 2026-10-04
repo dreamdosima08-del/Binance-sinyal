@@ -71,6 +71,11 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
   background:color-mix(in srgb,var(--loss) 14%,var(--surface));border:1px solid color-mix(in srgb,var(--loss) 45%,transparent)}
 .alert.warn{background:color-mix(in srgb,var(--amber) 14%,var(--surface));border-color:color-mix(in srgb,var(--amber) 45%,transparent)}
 
+.ana .row2{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}
+.ana .row2:first-of-type{border-top:0}
+.ana .row2 b{font-size:16px}
+.ana .row2 span{font-size:12.5px;color:var(--muted);text-align:right}
+.ana .st{font-weight:800}
 .compass{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .compass .h{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .compass .h b{font-size:15px}
@@ -204,11 +209,12 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <section class="scan">
       <button class="radar" id="scanBtn" aria-label="Taramayı başlat"><span>Tara</span></button>
       <div class="bar" id="scanBar"><i></i></div>
-      <div class="status" id="status">Dört stratejiyle tüm TRY coinleri son 4 saatlik mumlara göre taranır.</div>
+      <div class="status" id="status">Tüm coinler son 4 saatlik mumlara göre taranır.</div>
     </section>
     <div id="scanAlerts"></div>
-    <div id="compass"></div>
+    <div id="anaTrend"></div>
     <div class="alert warn" id="honest" style="font-size:13.5px">Bu sinyaller 2 yıllık gerçek veri testinde kâr göstermedi. Gerçek parayla işlem için değil, gözlem içindir. Sonuçları Karne ekranından takip et.</div>
+    <div id="compass"></div>
     <div class="wallet" id="wallet"></div>
     <nav class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="signals">Sinyaller<em id="cSig"></em></button>
@@ -779,6 +785,23 @@ function sizing(stopPct,kind,regime){
 function lossStreak(){const cl=journal.filter(t=>inMkt(t)&&t.status==="closed").sort((a,b)=>a.closedAt-b.closedAt);
   if(cl.length<3)return false;const l3=cl.slice(-3);return l3.every(t=>t.pnlTL<0)&&Date.now()-l3[2].closedAt<DAY;}
 
+/* ═══════════ ANA TREND (BTC / ETH, 50 günlük ortalama) ═══════════
+   Ekim 2026 testi (2018-03 → 2026-10, maliyet dahil): BTC yıllık %44 (al-tut %26), en büyük düşüş -%58 (al-tut -%77);
+   ETH yıllık %51 (al-tut %14), en büyük düşüş -%56 (al-tut -%90). 7 büyük coinin 7'sinde riske göre getiri al-tut'tan iyi. */
+const ANA=[["BTCUSDT","BTC"],["ETHUSDT","ETH"]],ANA_N=50;
+async function anaTrend(){
+  const now=Date.now(),out={zaman:now};
+  for(const [sym,ad] of ANA){
+    const cs=closedOnly((await api(`/api/v3/klines?symbol=${sym}&interval=1d&limit=250`)).map(parseK),now);
+    const c=cs.map(x=>x.c),n=c.length-1;
+    const ort=i=>{if(i<ANA_N-1)return null;let t=0;for(let k=i-ANA_N+1;k<=i;k++)t+=c[k];return t/ANA_N;};
+    const ic=i=>{const m=ort(i);return m==null?null:c[i]>m;};
+    const cur=ic(n);let bas=n;while(bas>0&&ic(bas-1)===cur)bas--;
+    out[ad]={sym,ic:cur,kapanis:c[n],ort:ort(n),uzak:(c[n]/ort(n)-1)*100,bas:cs[bas].t,gun:n-bas+1,enAz:ic(bas-1)==null,mum:cs[n].t};
+  }
+  return out;
+}
+
 /* ═══════════ TARAMA ═══════════ */
 let scanBusy=false,lastScan=store.get(MKT[Q()].lastKey,null);
 function brkWatch(cs,I,price){
@@ -842,7 +865,7 @@ async function scan(){
   try{
     const r=await scanCore({btc:renderBtc,start:n=>{$("status").innerHTML=`<strong>${n}</strong> likit coin taranıyor…`;},
       progress:(d,n)=>{bar.firstElementChild.style.width=`${Math.round(d/n*100)}%`;}});
-    lastScan=r;store.set(MKT[r.mkt].lastKey,r);renderScan();
+    lastScan=r;store.set(MKT[r.mkt].lastKey,r);renderScan();loadAna();
     if(recordSignals(r))renderKarne();
     if(active().length)updateJournal().then(renderAll).catch(()=>{});
   }catch(e){showErr("scanAlerts",e);$("status").textContent="Tarama tamamlanamadı.";}
@@ -1398,12 +1421,28 @@ async function refreshKarne(manual){
   finally{if(manual){b.disabled=false;b.textContent="Sonuçları güncelle";}}
 }
 
+/* ═══════════ ANA TREND KARTI ═══════════ */
+let ana=store.get("ddt_ana",null);
+function renderAna(){
+  const box=$("anaTrend");if(!ana||!ana.BTC){box.innerHTML="";return;}
+  const satir=a=>{const x=ana[a];if(!x||x.ic==null)return "";
+    return `<div class="row2"><div><b>${a}</b> <span class="st ${x.ic?"pos":"neg"}">${x.ic?"İÇERİDE":"NAKİTTE"}</span></div>
+      <span>${dShort(x.bas)} ${x.enAz?"veya öncesinden":"itibarıyla"} (${x.gun} gün)<br>ortalamanın %${pc(Math.abs(x.uzak))} ${x.uzak>=0?"üstünde":"altında"}</span></div>`;};
+  const hepsi=ana.BTC.ic&&ana.ETH&&ana.ETH.ic,hic=!ana.BTC.ic&&ana.ETH&&!ana.ETH.ic;
+  box.innerHTML=`<div class="compass ana"><div class="h"><b>Ana trend: BTC ve ETH</b><span class="chip ${hepsi?"strong":hic?"bad":"watch"}">${hepsi?"İçeride":hic?"Nakitte":"Karışık"}</span></div>
+    ${satir("BTC")}${satir("ETH")}
+    <p>Kural: günlük kapanış 50 günlük ortalamanın üstündeyse tut; altına inerse ertesi gün sat ve ${Q()==="TRY"?"TL'ye değil USDT'ye geçip":"USDT'de"} bekle. Değişince bot Telegram'dan haber verir.</p>
+    <details class="more"><summary>Neden bu kural?</summary><p class="why">2018'den bugüne günlük veriyle test edildi (komisyon ve kayma dahil). BTC'de yıllık %44 (al-tut %26), en büyük düşüş −%58 (al-tut −%77). ETH'de yıllık %51 (al-tut %14), en büyük düşüş −%56 (al-tut −%90). 7 büyük coinin hepsinde riske göre getiri al-tut'tan iyi çıktı.</p>
+      <p class="why">Zayıf yanları: düşüşleri azaltır ama sıfırlamaz (2022'de BTC'de −%51). Yatay piyasada çok yanlış sinyal verir (yılda 20–45 al-sat). Güçlü yükselişlerde al-tut'un gerisinde kalabilir. Daha temkinli istersen sermayenin yarısıyla uygula: testte en büyük düşüş −%33–35'e iniyor.</p></details></div>`;
+}
+async function loadAna(){try{ana=await anaTrend();store.set("ddt_ana",ana);}catch(e){}renderAna();}
+
 /* ═══════════ PİYASA SEÇİMİ ═══════════ */
 const SCAN_EMPTY={signals:"Taramak için yukarıdaki düğmeye bas.",watch:"Retest bekleyen, desteğe yaklaşan ya da kırılıma hazırlanan coinler burada görünür.",rejected:"Kurulumu olup stop mesafesi veya puan yüzünden elenen coinler burada görünür."};
 function renderMkt(){
   const m=MKT[Q()];
   document.querySelectorAll(".mkt button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===Q())));
-  SUBS.scan=`Dört stratejiyle ${m.name} ${Q()} coinlerini tarar`;
+  SUBS.scan=`${m.name} ${Q()} coinlerini tarar`;
   if(!$("v-scan").hidden)$("viewSub").textContent=SUBS.scan;
   $("scanNote").textContent=`Mum kapanışları Türkiye saatiyle 03:00, 07:00, 11:00, 15:00, 19:00 ve 23:00'te. En taze sinyal için kapanıştan birkaç dakika sonra tara. Veriler Binance'in herkese açık piyasa verisinden gelir; emir vermeden önce fiyatı ${m.name}'de kontrol et.${Q()==="USDT"?" Bu sekmedeki sermaye, günlük ve tutarlar USDT cinsindendir ve Binance TR'den ayrı tutulur.":""} Yatırım tavsiyesi değildir.`;
   $("sMktHead").textContent=`Sermaye ve risk: ${m.name}`;
@@ -1423,12 +1462,12 @@ function switchMarket(m){
     ["cSig","cWatch","cRej"].forEach(id=>$(id).textContent="");$("compass").innerHTML="";
     $("status").textContent=`${MKT[m].name} için henüz tarama yapılmadı.`;
   }
-  renderMkt();renderAll();if(!$("v-settings").hidden)fillSettings();toast(`${MKT[m].name} seçildi`);
+  renderMkt();renderAll();renderAna();if(!$("v-settings").hidden)fillSettings();toast(`${MKT[m].name} seçildi`);
 }
 document.querySelectorAll(".mkt button").forEach(b=>b.addEventListener("click",()=>switchMarket(b.dataset.m)));
 
 /* ═══════════ görünüm ═══════════ */
-const SUBS={scan:"Dört stratejiyle Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu"};
+const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu"};
 function show(v){
   ["scan","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
   document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
@@ -1496,7 +1535,7 @@ $("bUp").addEventListener("click",()=>$("bFile").click());
 $("bFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)backupUpload(f);e.target.value="";});
 $("sWipe").addEventListener("click",()=>{if(confirm("Tüm işlem günlüğü silinsin mi? Bu geri alınamaz.")){journal=[];saveJ();renderAll();toast("Günlük sıfırlandı");}});
 
-renderMkt();$("viewSub").textContent=SUBS.scan;syncSegs();renderAll();
+renderMkt();$("viewSub").textContent=SUBS.scan;syncSegs();renderAll();renderAna();loadAna();
 if(lastScan&&lastScan.btc)renderBtc(lastScan.btc);
 if(active().length)updateJournal().then(renderAll).catch(()=>{});
 if(karne.some(k=>k.status!=="closed"))updateKarne().then(renderKarne).catch(()=>{});
