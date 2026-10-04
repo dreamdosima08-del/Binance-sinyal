@@ -257,6 +257,21 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <div id="tResult"></div>
   </main>
 
+  <!-- ═════════ KARNE ═════════ -->
+  <main id="v-karne" hidden>
+    <div id="kAlerts"></div>
+    <div class="hero"><div class="big" id="kHead">—</div><div class="cap" id="kSub"></div></div>
+    <div class="stats" id="kStats"></div>
+    <div class="actions" style="margin-top:12px"><button class="btn" id="kRefresh">Sonuçları güncelle</button></div>
+    <div id="kTables"></div>
+    <div class="sect">Takipteki sinyaller</div>
+    <div id="kOpen"></div>
+    <div class="sect">Sonuçlanan sinyaller</div>
+    <div id="kClosed"></div>
+    <p class="note">Tarama yaptığında çıkan her sinyal, işleme girsen de girmesen de buraya kaydedilir ve sonucu saatlik mumlardan hesaplanır: giriş tarama anındaki fiyat, aynı mumda hem hedef hem stop varsa stop sayılır, komisyon ve kayma düşülür. Sadece tarama yaptığın anlarda çıkan sinyaller kaydedilebilir. Bu, geçmiş veriye değil geleceğe bakan gerçek bir testtir.</p>
+    <div class="actions"><button class="btn danger" id="kWipe">Bu piyasanın karnesini sıfırla</button></div>
+  </main>
+
   <!-- ═════════ AYARLAR ═════════ -->
   <main id="v-settings" hidden>
     <span class="grp">Stratejiler</span>
@@ -287,6 +302,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
   <button data-view="scan" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-4"/></svg>Tara</button>
   <button data-view="journal"><span class="dot" id="navJ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h6M9 15h6"/></svg></span>Günlük</button>
   <button data-view="test"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16"/><path d="M5 16l4-5 3 3 6-8"/></svg>Test</button>
+  <button data-view="karne"><span class="dot" id="navK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9z"/><path d="M15 5h3v15H6V5h3"/><path d="M9 13l2 2 4-4"/></svg></span>Karne</button>
   <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ayarlar</button>
 </div></nav>
 
@@ -813,6 +829,7 @@ async function scan(){
     r.breadth=counted>=5?above/counted:null;r.regime=regimeOf(r.breadth,r.btc);
     r.signals=found.sort((a,b)=>b.sig.score-a.sig.score);r.watch.sort((a,b)=>a.dist-b.dist);
     r.mkt=Q();lastScan=r;store.set(MKT[r.mkt].lastKey,r);renderScan();
+    if(recordSignals(r))renderKarne();
     if(active().length)updateJournal().then(renderAll).catch(()=>{});
   }catch(e){showErr("scanAlerts",e);$("status").textContent="Tarama tamamlanamadı.";}
   finally{scanBusy=false;btn.disabled=false;btn.classList.remove("busy");btn.querySelector("span").textContent="Tara";bar.classList.remove("on");}
@@ -1249,6 +1266,102 @@ function saveSettings(){
   if(btData&&lastTest&&!tBusy)runTest();
 }
 
+/* ═══════════ SİNYAL KARNESİ ═══════════
+   Taramada görülen her sinyal kaydedilir; sonradan saatlik mumlarla ne olduğu hesaplanır.
+   Kural testtekiyle aynı: aynı mumda önce stop, TP1'de yarısı, iz süren stop, komisyon ve kayma dahil. */
+let karne=store.get("ddt_karne",[]);
+const saveKarne=()=>store.set("ddt_karne",karne);
+const kMine=()=>karne.filter(k=>k.mkt===Q());
+function recordSignals(r){
+  const now=Date.now();let added=0;
+  for(const x of r.signals){
+    const id=[r.mkt,x.sym,x.kind,x.st.ct].join("|");
+    if(karne.some(k=>k.id===id))continue;
+    const s=x.sig;
+    karne.push({id,mkt:r.mkt,sym:x.sym,kind:x.kind,label:s.label,score:s.score,at:now,entry:s.entry,stop:s.stop,stop0:s.stop,
+      tp1:s.tp1,tp2:s.tp2,trail:s.trail||null,hh:0,stopPct:s.stopPct,holdMs:(s.hold||60)*H4,fee:settings.feePct,
+      status:"open",tp1Hit:false,realized:0,remaining:1,lastChecked:0,lastPx:s.entry});
+    added++;
+  }
+  if(added){
+    // en fazla 600 kayıt: önce en eski sonuçlananlar silinir
+    if(karne.length>600){const closed=karne.filter(k=>k.status==="closed").sort((a,b)=>a.closedAt-b.closedAt);
+      const drop=new Set(closed.slice(0,karne.length-600).map(k=>k.id));karne=karne.filter(k=>!drop.has(k.id));}
+    saveKarne();
+  }
+  return added;
+}
+let kBusy=false;
+async function updateKarne(){
+  if(kBusy)return;kBusy=true;
+  try{
+    const now=Date.now(),open=karne.filter(k=>k.status!=="closed"),slip=K.SLIP/100;
+    await pool(open,4,async k=>{
+      const from=Math.max(k.lastChecked||0,Math.ceil(k.at/H1)*H1);if(from>now-H1)return;
+      const cs=closedOnly((await api(`/api/v3/klines?symbol=${k.sym}&interval=1h&limit=1000&startTime=${from}`)).map(parseK),now);
+      for(const c of cs){
+        if(c.t>=k.at+k.holdMs){                         // süre doldu: o mumun açılışından kapanır
+          const px=c.o*(1-slip);k.realized+=k.remaining*(px/k.entry-1);k.remaining=0;k.exitPx=px;closeK(k,"SÜRE",c.t);break;}
+        const reason=stepCandle(k,c,slip);k.lastPx=c.c;
+        if(k.tp1Event){k.tp1Event=false;k.status="tp1";}
+        if(reason){closeK(k,reason,c.ct);break;}
+        k.lastChecked=c.ct+1;
+      }
+    });
+    saveKarne();
+  }finally{kBusy=false;}
+}
+function closeK(k,reason,time){k.status="closed";k.reason=reason;k.closedAt=time;k.pnl=k.realized-2*k.fee/100;k.r=k.pnl/(k.stopPct/100);}
+function kGroupTable(title,groups,nameOf,clsOf){
+  const rows=Object.entries(groups).filter(([,a])=>a.length);if(!rows.length)return "";
+  return `<div class="sect">${title}</div><table class="table"><thead><tr><th></th><th>Sinyal</th><th>Kazanma</th><th>Ort. R</th></tr></thead><tbody>
+    ${rows.map(([key,a])=>{const w=a.filter(k=>k.pnl>0).length,avg=a.reduce((x,k)=>x+k.r,0)/a.length;
+      return `<tr class="${clsOf?clsOf(key):""}"><td>${clsOf?`<span class="dot"></span>`:""}${nameOf(key)}</td><td>${a.length}</td><td>%${pc(w/a.length*100,0)}</td><td class="${avg>=0?"pos":"neg"}">${rStr(avg)}</td></tr>`;}).join("")}
+    </tbody></table>`;
+}
+function renderKarne(){
+  const mine=kMine(),closed=mine.filter(k=>k.status==="closed").sort((a,b)=>b.closedAt-a.closedAt),open=mine.filter(k=>k.status!=="closed").sort((a,b)=>b.at-a.at);
+  const m=MKT[Q()];
+  if(!closed.length){
+    $("kHead").textContent=open.length?`${open.length} sinyal takipte`:"Henüz sinyal yok";
+    $("kSub").textContent=open.length?`${m.name}: sonuçlandıkça burada karne oluşacak.`:`${m.name}: tarama yaptıkça çıkan her sinyal buraya kaydedilir.`;
+    $("kStats").innerHTML="";$("kTables").innerHTML="";
+  }else{
+    const wins=closed.filter(k=>k.pnl>0),losses=closed.filter(k=>k.pnl<=0);
+    const sumR=closed.reduce((a,k)=>a+k.r,0),avgR=sumR/closed.length;
+    const gw=wins.reduce((a,k)=>a+k.r,0),gl=-losses.reduce((a,k)=>a+k.r,0);
+    let run=0,maxRun=0;[...closed].reverse().forEach(k=>{if(k.pnl<=0){run++;maxRun=Math.max(maxRun,run);}else run=0;});
+    const hyp=sumR*settings.riskPct;
+    $("kHead").innerHTML=`<span class="${hyp>=0?"pos":"neg"}">${sgn(hyp)}</span> <small>varsayımsal getiri</small>`;
+    $("kSub").textContent=`${m.name}: her sinyale %${pc(settings.riskPct)} riskle girseydin (bileşik değil, aynı anda işlem sınırı yok). ${closed.length} sonuçlanan, ${open.length} takipte sinyal.`;
+    $("kStats").innerHTML=`<div>Sonuçlanan<b>${closed.length}</b></div><div>Kazanan / kaybeden<b>${wins.length} / ${losses.length}</b></div>
+      <div>Kazanma oranı<b>%${pc(wins.length/closed.length*100,0)}</b></div><div>Ortalama R<b class="${avgR>=0?"pos":"neg"}">${rStr(avgR)}</b></div>
+      <div>Kâr faktörü<b>${gl>0?pc(gw/gl,2):"∞"}</b></div><div>En uzun kayıp serisi<b>${maxRun} sinyal</b></div>`;
+    const byK={},byL={};closed.forEach(k=>{(byK[k.kind]=byK[k.kind]||[]).push(k);(byL[k.label]=byL[k.label]||[]).push(k);});
+    $("kTables").innerHTML=kGroupTable("Stratejiye göre",byK,key=>STR[key].name,key=>"s-"+key)+
+      kGroupTable("Etikete göre",byL,key=>key==="GÜÇLÜ"?"GÜÇLÜ sinyaller":"İZLE sinyaller")+
+      (closed.length<20?`<p class="note" style="margin-top:8px">${closed.length} sonuç henüz az. Kararı en az 20–30 sonuçlanan sinyalden sonra ver.</p>`:"");
+  }
+  $("kOpen").innerHTML=open.length?open.map(k=>{const now=k.lastPx||k.entry,chg=(now/k.entry-1)*100;
+    return `<a class="row s-${k.kind}" href="${tvLink(k.sym)}" target="_blank" rel="noopener">
+      <div><div class="n">${esc(plain(k.sym))}</div><div class="d">${STR[k.kind].tag} ${k.score}, ${ago(Date.now()-k.at)}, giriş ${tl(k.entry)}</div></div>
+      <div class="v ${chg>=0?"pos":"neg"}">${k.status==="tp1"?"TP1 alındı":sgn(chg)}<small>son ${tl(now)}</small></div></a>`;}).join("")
+    :`<div class="empty">Takipte sinyal yok.</div>`;
+  $("kClosed").innerHTML=closed.length?closed.slice(0,60).map(k=>`<a class="row s-${k.kind}" href="${tvLink(k.sym)}" target="_blank" rel="noopener">
+      <div><div class="n">${esc(plain(k.sym))}</div><div class="d">${STR[k.kind].tag} ${k.score}: ${reasonTxt(k.reason)}, ${dShort(k.closedAt)}</div></div>
+      <div class="v ${k.pnl>0?"pos":"neg"}">${rStr(k.r)}<small>${sgn(k.pnl*100)}</small></div></a>`).join("")
+    +(closed.length>60?`<p class="note">Son 60 sonuç gösteriliyor; istatistikler hepsini kapsar.</p>`:"")
+    :`<div class="empty">Henüz sonuçlanan sinyal yok.</div>`;
+  const nOpen=karne.filter(k=>k.status!=="closed"&&k.mkt===Q()).length;
+  $("navK").toggleAttribute("data-n",nOpen>0);if(nOpen)$("navK").dataset.n=nOpen;
+}
+async function refreshKarne(manual){
+  const b=$("kRefresh");if(manual){b.disabled=true;b.textContent="Güncelleniyor…";}
+  try{await updateKarne();setAlerts("kAlerts","");renderKarne();if(manual)toast("Karne güncellendi");}
+  catch(e){showErr("kAlerts",e);}
+  finally{if(manual){b.disabled=false;b.textContent="Sonuçları güncelle";}}
+}
+
 /* ═══════════ PİYASA SEÇİMİ ═══════════ */
 const SCAN_EMPTY={signals:"Taramak için yukarıdaki düğmeye bas.",watch:"Retest bekleyen, desteğe yaklaşan ya da kırılıma hazırlanan coinler burada görünür.",rejected:"Kurulumu olup stop mesafesi veya puan yüzünden elenen coinler burada görünür."};
 function renderMkt(){
@@ -1279,15 +1392,16 @@ function switchMarket(m){
 document.querySelectorAll(".mkt button").forEach(b=>b.addEventListener("click",()=>switchMarket(b.dataset.m)));
 
 /* ═══════════ görünüm ═══════════ */
-const SUBS={scan:"Dört stratejiyle Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk"};
+const SUBS={scan:"Dört stratejiyle Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu"};
 function show(v){
-  ["scan","journal","test","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
+  ["scan","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
   document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
   $("viewSub").textContent=SUBS[v];window.scrollTo(0,0);
   if(v==="journal"){renderJournal();if(active().length)updateJournal().then(renderJournal).catch(e=>showErr("jAlerts",e));}
   if(v==="settings")fillSettings();
+  if(v==="karne"){renderKarne();refreshKarne(false);}
 }
-function renderAll(){renderScan();renderJournal();}
+function renderAll(){renderScan();renderJournal();renderKarne();}
 function syncSegs(){document.querySelectorAll(".seg").forEach(seg=>{const k=seg.dataset.key;
   seg.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(String(b.dataset.v)===String(testSel[k]))));});}
 
@@ -1319,11 +1433,14 @@ $("tResult").addEventListener("click",e=>{
   saveS();rebuildK();renderTest();toast("Tarama ayarları güncellendi");}});
 $("sSave").addEventListener("click",saveSettings);
 $("sStratReset").addEventListener("click",()=>{settings.strat={};saveS();rebuildK();fillSettings();toast("Varsayılana dönüldü");});
+$("kRefresh").addEventListener("click",()=>refreshKarne(true));
+$("kWipe").addEventListener("click",()=>{if(confirm(`${MKT[Q()].name} karnesi silinsin mi? Bu geri alınamaz.`)){karne=karne.filter(k=>k.mkt!==Q());saveKarne();renderKarne();toast("Karne sıfırlandı");}});
 $("sWipe").addEventListener("click",()=>{if(confirm("Tüm işlem günlüğü silinsin mi? Bu geri alınamaz.")){journal=[];saveJ();renderAll();toast("Günlük sıfırlandı");}});
 
 renderMkt();$("viewSub").textContent=SUBS.scan;syncSegs();renderAll();
 if(lastScan&&lastScan.btc)renderBtc(lastScan.btc);
 if(active().length)updateJournal().then(renderAll).catch(()=>{});
+if(karne.some(k=>k.status!=="closed"))updateKarne().then(renderKarne).catch(()=>{});
 </script>
 </body>
 </html>
