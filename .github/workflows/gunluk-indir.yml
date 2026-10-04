@@ -14,7 +14,7 @@ jobs:
       - name: İndir
         env:
           SONUC_DIR: ${{ github.workspace }}/gunluk
-        run: node bot/gunluk-indir.js | tee gunluk/log.txt
+        run: mkdir -p gunluk && node bot/gunluk-indir.js | tee gunluk/log.txt
       - name: Kaydet
         run: |
           git config --global user.name "github-actions[bot]"
