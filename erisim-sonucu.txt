@@ -1,0 +1,15 @@
+zaman: Sun Oct  4 20:07:32 UTC 2026
+v22.23.3
+200 https://data-api.binance.vision/api/v3/ping {}
+200 https://data-api.binance.vision/api/v3/klines?symbol=BTCTRY&interval=4h&limit=2 [[1791129600000,"4187001.00000000","4204169.00000000","4183961.00000000","4196345.00000000","12.23658000",1791143999999,"51320686.04006000",3371,"6.61219000","2
+200 https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=2 [[1791129600000,"85256.01000000","85574.01000000","85178.49000000","85428.00000000","747.96464000",1791143999999,"63851191.36610270",147850,"354.77327000","3028
+451 https://api.binance.com/api/v3/ping {
+  "code": 0,
+  "msg": "Service unavailable from a restricted location according to 'b. Eligibility' in https://www.binance.com/en/terms. Please contact custom
+302 https://api.telegram.org/ <html>
+<head><title>302 Found</title></head>
+<body>
+<center><h1>302 Found</h1></center>
+<hr><center>nginx/1.30.1</center>
+</body>
+</html>
