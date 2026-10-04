@@ -58,7 +58,7 @@ async function sohbetiKaydet(){
   for(const u of (j&&j.result)||[]){
     durum.tgOffset=u.update_id+1;
     const m=u.message;if(!m||!m.chat||m.chat.type!=="private")continue;
-    if(!durum.chatId&&/^\/start/.test(m.text||"")){
+    if(!durum.chatId){                              // henüz kimse kayıtlı değilse ilk yazan kişi (ör. /start, merhaba) kaydedilir
       durum.chatId=m.chat.id;
       yaz(`✅ <b>Bağlandı!</b>\n\nBundan sonra her 4 saatlik mum kapanışından birkaç dakika sonra ${AYAR.piyasalar.map(p=>C.MKT[p].name).join(" ve ")} taranacak.\n\n• BTC ve ETH ana trendi (50 günlük ortalama) değişince haber vereceğim. Testte işe yarayan kural bu.\n• Gözlem sinyallerini giriş, stop ve hedefleriyle yazacağım (kanıtlanmamış, işlem için değil).\n• Sinyaller hedefe ya da stopa gidince sonucunu bildireceğim.\n• Her sabah kısa bir karne özeti göndereceğim.\n\nSiteden de Karne → Bot sekmesinden tüm sonuçları görebilirsin.`);
     }
