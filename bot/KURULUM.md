@@ -40,3 +40,6 @@ Strateji kuralları sitedeki `index.html` ile ortaktır; site güncellenince bot
 - GitHub zamanlanmış görevleri yoğunlukta birkaç dakika gecikebilir.
 - Repo 60 gün boyunca hiç güncellenmezse GitHub zamanlanmış görevi durdurabilir. Böyle olursa Actions sekmesinden yeniden etkinleştir.
 - Bot sadece sinyal verir; emir vermez, Binance hesabına erişmez.
+
+## Botu hemen çalıştırmak
+4 saati beklemek istemezsen: repoda **Actions → Sinyal botu → Run workflow**.
