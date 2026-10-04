@@ -1,0 +1,23 @@
+name: Gunluk veri indir
+on:
+  workflow_dispatch:
+  push:
+    branches: [gunluk-indir-calistir]
+permissions:
+  contents: write
+jobs:
+  indir:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: İndir
+        env:
+          SONUC_DIR: ${{ github.workspace }}/gunluk
+        run: node bot/gunluk-indir.js | tee gunluk/log.txt
+      - name: Kaydet
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898+github-actions[bot]@users.noreply.github.com"
+          cd gunluk && git init -q -b arastirma-gunluk && git add -A && git commit -q -m "Günlük veri $(date -u +%Y-%m-%d)"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" arastirma-gunluk
