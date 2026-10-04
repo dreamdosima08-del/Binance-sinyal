@@ -15,9 +15,10 @@ const SABIT_CHAT=(process.env.TELEGRAM_CHAT_ID||"").trim();
 const bekle=ms=>new Promise(r=>setTimeout(r,ms));
 
 /* ── durum ── */
-let durum={surum:1,chatId:null,tgOffset:0,sonCalisma:0,sonOzet:"",sonHata:"",karne:[],piyasalar:{}};
+let durum={surum:1,telegram:"",chatId:null,tgOffset:0,sonCalisma:0,sonOzet:"",sonHata:"",karne:[],piyasalar:{}};
 if(fs.existsSync(DURUM))durum=Object.assign(durum,JSON.parse(fs.readFileSync(DURUM,"utf8")));
 if(SABIT_CHAT)durum.chatId=SABIT_CHAT;
+durum.telegram="";
 
 /* ── sitenin kodunu bot ayarlarıyla yükle ── */
 const mk={},varsayilan={TRY:{minVol:5,feePct:0.1},USDT:{minVol:2,feePct:0.1}};
@@ -44,11 +45,16 @@ function yaz(metin){giden.push(metin);}
 async function gonder(){
   if(!TOKEN){console.log(`[Telegram ayarlı değil — ${giden.length} mesaj gönderilmedi]`);giden.forEach(m=>console.log("---\n"+m));return;}
   if(!durum.chatId){console.log("[Telegram: henüz kimse /start yazmadı, mesajlar gönderilmedi]");return;}
-  for(const m of giden){await tg("sendMessage",{chat_id:durum.chatId,text:m,parse_mode:"HTML",disable_web_page_preview:true});await bekle(350);}
+  for(const m of giden){const j=await tg("sendMessage",{chat_id:durum.chatId,text:m,parse_mode:"HTML",disable_web_page_preview:true});
+    if(j&&!j.ok)durum.telegram="mesaj gönderilemedi: "+j.description;await bekle(350);}
 }
 async function sohbetiKaydet(){
-  if(!TOKEN)return;
+  if(!TOKEN){durum.telegram="token yok: GitHub'da TELEGRAM_TOKEN tanımlı değil";return;}
+  const ben=await tg("getMe",{});
+  if(!ben||!ben.ok){durum.telegram="token geçersiz: "+((ben&&ben.description)||"Telegram'a bağlanılamadı");return;}
+  durum.botAdi=ben.result.username;
   const j=await tg("getUpdates",{offset:durum.tgOffset||0,timeout:0,allowed_updates:["message"]});
+  if(j&&!j.ok){durum.telegram="mesajlar okunamadı: "+j.description;return;}
   for(const u of (j&&j.result)||[]){
     durum.tgOffset=u.update_id+1;
     const m=u.message;if(!m||!m.chat||m.chat.type!=="private")continue;
@@ -160,6 +166,7 @@ function anaDegisim(ad,x){
   const ozetSaati=AYAR.gunlukOzetSaati??9;
   if(trSaat>=ozetSaati&&durum.sonOzet!==bugun&&durum.chatId){yaz(ozetMesaji());durum.sonOzet=bugun;}
 
+  if(TOKEN&&!durum.telegram)durum.telegram=durum.chatId?"bağlı":"token doğru, /start bekleniyor";
   await gonder();
   durum.sonCalisma=Date.now();durum.sure=Math.round((Date.now()-baslangic)/1000);
   fs.mkdirSync(VERI,{recursive:true});
