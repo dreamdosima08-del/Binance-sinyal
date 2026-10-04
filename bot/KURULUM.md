@@ -43,3 +43,5 @@ Strateji kuralları sitedeki `index.html` ile ortaktır; site güncellenince bot
 
 ## Botu hemen çalıştırmak
 4 saati beklemek istemezsen: repoda **Actions → Sinyal botu → Run workflow**.
+
+Not: Bot ilk mesaj atan kişiyi kaydeder (/start ya da herhangi bir mesaj).
