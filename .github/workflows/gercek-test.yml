@@ -1,0 +1,41 @@
+name: Gercek veri testi
+# 1 yıllık gerçek Binance verisiyle tüm stratejileri test eder; sonuçları test-sonuclari dalına yazar.
+on:
+  workflow_dispatch:
+  push:
+    branches: [gercek-test-calistir]
+permissions:
+  contents: write
+concurrency:
+  group: gercek-test
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sonuç dalını hazırla
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin test-sonuclari >/dev/null 2>&1; then
+            git fetch --depth=1 origin test-sonuclari:test-sonuclari
+            git worktree add sonuc test-sonuclari
+          else
+            git worktree add --orphan -b test-sonuclari sonuc || { git worktree add --detach sonuc && cd sonuc && git checkout --orphan test-sonuclari && git rm -rfq . ; }
+          fi
+      - name: Gerçek veriyle backtest
+        env:
+          SONUC_DIR: ${{ github.workspace }}/sonuc
+        run: node bot/gercek-test.js 2>&1 | tee sonuc/test-log.txt
+      - name: Botu deneme modunda çalıştır (Telegram'sız)
+        env:
+          VERI_DIR: ${{ github.workspace }}/sonuc/bot-deneme
+        run: node bot/bot.js 2>&1 | tee sonuc/bot-deneme-log.txt
+      - name: Sonuçları kaydet
+        run: |
+          cd sonuc
+          git add -A
+          git commit -q -m "Gerçek veri testi $(date -u +%Y-%m-%dT%H:%MZ)" || exit 0
+          git push origin test-sonuclari

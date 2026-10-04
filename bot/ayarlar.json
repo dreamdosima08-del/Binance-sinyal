@@ -1,0 +1,8 @@
+{
+  "piyasalar": ["TRY", "USDT"],
+  "sermaye": { "TRY": 1000, "USDT": 100 },
+  "riskYuzde": 2,
+  "enDusukPuan": 50,
+  "stratejiler": { "dip": true, "trend": true, "brk": true, "rt": true },
+  "gunlukOzetSaati": 7
+}

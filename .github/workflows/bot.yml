@@ -1,0 +1,42 @@
+name: Sinyal botu
+# Her 4 saatlik mum kapanışından 3 dakika sonra (Türkiye saatiyle 03, 07, 11, 15, 19, 23 civarı) çalışır.
+on:
+  schedule:
+    - cron: "3 0,4,8,12,16,20 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["bot/**", ".github/workflows/bot.yml"]
+permissions:
+  contents: write
+concurrency:
+  group: sinyal-botu
+  cancel-in-progress: false
+jobs:
+  tara:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bot verisini hazırla
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin bot-veri >/dev/null 2>&1; then
+            git fetch --depth=1 origin bot-veri:bot-veri
+            git worktree add veri bot-veri
+          else
+            git worktree add --orphan -b bot-veri veri || { git worktree add --detach veri && cd veri && git checkout --orphan bot-veri && git rm -rfq . ; }
+          fi
+      - name: Tara ve bildir
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          VERI_DIR: ${{ github.workspace }}/veri
+        run: node bot/bot.js
+      - name: Veriyi kaydet
+        run: |
+          cd veri
+          git add -A
+          git commit -q -m "Bot taraması $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "Değişiklik yok"; exit 0; }
+          git push origin bot-veri

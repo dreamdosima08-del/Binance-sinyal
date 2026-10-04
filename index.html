@@ -46,10 +46,10 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .btc b{display:block;font-size:13px}
 .btc.up b{color:var(--gain)} .btc.down b{color:var(--loss)} .btc.flat b{color:var(--amber)}
 
-.mkt{display:flex;gap:4px;margin:16px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
-.mkt button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
-.mkt button small{font-weight:600;opacity:.75;margin-left:4px}
-.mkt button[aria-pressed="true"]{background:var(--sonar);color:var(--onSonar)}
+.mkt,.srcsw{display:flex;gap:4px;margin:16px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
+.mkt button,.srcsw button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
+.mkt button small,.srcsw button small{font-weight:600;opacity:.75;margin-left:4px}
+.mkt button[aria-pressed="true"],.srcsw button[aria-pressed="true"]{background:var(--sonar);color:var(--onSonar)}
 .scan{margin:18px 0 14px;display:flex;flex-direction:column;align-items:center}
 .radar{position:relative;width:164px;height:164px;border-radius:50%;border:0;cursor:pointer;
   background:radial-gradient(circle,transparent 0 31%,var(--line) 31% 31.6%,transparent 31.6% 58%,var(--line) 58% 58.6%,transparent 58.6%),var(--surface);
@@ -259,6 +259,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 
   <!-- ═════════ KARNE ═════════ -->
   <main id="v-karne" hidden>
+    <div class="srcsw" role="group" aria-label="Karne kaynağı" style="margin-bottom:12px"><button data-src="bot">Bot<small>7/24</small></button><button data-src="tel">Bu telefon</button></div>
     <div id="kAlerts"></div>
     <div class="hero"><div class="big" id="kHead">—</div><div class="cap" id="kSub"></div></div>
     <div class="stats" id="kStats"></div>
@@ -268,8 +269,8 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <div id="kOpen"></div>
     <div class="sect">Sonuçlanan sinyaller</div>
     <div id="kClosed"></div>
-    <p class="note">Tarama yaptığında çıkan her sinyal, işleme girsen de girmesen de buraya kaydedilir ve sonucu saatlik mumlardan hesaplanır: giriş tarama anındaki fiyat, aynı mumda hem hedef hem stop varsa stop sayılır, komisyon ve kayma düşülür. Sadece tarama yaptığın anlarda çıkan sinyaller kaydedilebilir. Bu, geçmiş veriye değil geleceğe bakan gerçek bir testtir.</p>
-    <div class="actions"><button class="btn danger" id="kWipe">Bu piyasanın karnesini sıfırla</button></div>
+    <p class="note" id="kNote">Tarama yaptığında çıkan her sinyal, işleme girsen de girmesen de buraya kaydedilir ve sonucu saatlik mumlardan hesaplanır: giriş tarama anındaki fiyat, aynı mumda hem hedef hem stop varsa stop sayılır, komisyon ve kayma düşülür. Sadece tarama yaptığın anlarda çıkan sinyaller kaydedilebilir. Bu, geçmiş veriye değil geleceğe bakan gerçek bir testtir.</p>
+    <div class="actions" id="kWipeBox"><button class="btn danger" id="kWipe">Bu piyasanın karnesini sıfırla</button></div>
   </main>
 
   <!-- ═════════ AYARLAR ═════════ -->
@@ -294,6 +295,10 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
       <button class="btn" id="sStratReset" style="flex:none;padding:8px 12px">Varsayılan</button></div></div>
     <div class="field"><label for="sProxy">Worker adresi (sadece bağlantı sorunu olursa)</label><input id="sProxy" type="url" inputmode="url" autocomplete="off" placeholder="https://dip-proxy.kullanici.workers.dev"></div>
     <button class="btn primary" id="sSave">Ayarları kaydet</button>
+    <span class="grp">Yedek</span>
+    <p class="sub" style="margin:-4px 0 0">Günlük, karne ve ayarlar sadece bu telefonun tarayıcısında durur. Tarayıcı verilerini silersen ya da telefon değiştirirsen kaybolur; ara sıra yedek indir.</p>
+    <div class="actions"><button class="btn" id="bDown">Yedeği indir</button><button class="btn" id="bUp">Yedeği yükle</button></div>
+    <input type="file" id="bFile" accept="application/json,.json" hidden>
     <div class="actions"><button class="btn danger" id="sWipe">Günlüğü sıfırla</button></div>
   </main>
 </div>
@@ -789,46 +794,52 @@ function dipWatch(cs,price){
     const dist=(price-z.high)/z.high*100;if(dist<=K.NEAR_SUPPORT&&(!best||dist<best.dist))best={...z,dist};}
   return best?{kind:"dip",drop:d.drop,zone:best,dist:best.dist}:null;
 }
+/* Ekrandan bağımsız tarama çekirdeği: site ve Telegram botu aynı kodu kullanır */
+async function scanCore(hooks={}){
+  const now=Date.now(),r={time:now,signals:[],watch:[],rejected:[],total:0,btc:null,breadth:null,regime:"mixed"};
+  const kinds=enabledKinds();let above=0,counted=0;
+  if(!kinds.length)throw new Error("Ayarlar'da en az bir strateji açık olmalı");
+  const u=await marketUniverse();r.total=u.syms.length;
+  const ctx=btcContext(closedOnly((await api(`/api/v3/klines?symbol=${C.BTC}&interval=4h&limit=100`)).map(parseK),now));
+  r.btc=ctx.last();if(hooks.btc)hooks.btc(r.btc);if(hooks.start)hooks.start(u.liquid.length);
+  const found=[];
+  await pool(u.liquid,6,async sym=>{
+    const cs=closedOnly((await api(`/api/v3/klines?symbol=${sym}&interval=4h&limit=250`)).map(parseK),now);
+    if(cs.length<K.MIN_HISTORY)return;
+    const I=prep(cs),n=cs.length,bk=u.bookMap.get(sym),mid=(bk.bid+bk.ask)/2;
+    if(I.e50[n-1]!=null){counted++;if(cs[n-1].c>I.e50[n-1])above++;}
+    const spread=(bk.ask-bk.bid)/mid*100;let best=null;
+    for(const kind of kinds){
+      for(const s of [n-1,n-2]){
+        const st=SETUP[kind](cs,s,I);if(!st)continue;
+        if(spread>K.MAX_SPREAD){r.rejected.push({sym,kind,reason:`alış-satış farkı yüksek (%${pc(spread,2)})`,vm:st.volMult});break;}
+        const sig=SIGNAL[kind](st,bk.ask,ctx.state(st.t),relStrength(cs,s,ctx));
+        if(sig.err){r.rejected.push({sym,kind,reason:sig.err+(sig.x?(sig.err.startsWith("R/R")?` (${pc(sig.x,2)})`:` (%${pc(sig.x)})`):""),vm:st.volMult});break;}
+        if(sig.score<minScore(kind)){r.rejected.push({sym,kind,reason:`puan düşük (${sig.score})`,vm:st.volMult});break;}
+        if(!best||sig.score>best.sig.score)best={sym,kind,st:{ct:st.ct,volMult:st.volMult},sig};
+        break;
+      }
+    }
+    if(best){found.push(best);return;}
+    if(settings.kinds.rt){const w=rtWatch(cs,I,mid);if(w){r.watch.push({sym,price:mid,...w});return;}}
+    if(settings.kinds.brk){const w=brkWatch(cs,I,mid);if(w){r.watch.push({sym,price:mid,...w});return;}}
+    if(settings.kinds.dip){const w=dipWatch(cs,mid);if(w)r.watch.push({sym,price:mid,...w});}
+  },d=>{if(hooks.progress)hooks.progress(d,u.liquid.length);});
+  r.breadth=counted>=5?above/counted:null;r.regime=regimeOf(r.breadth,r.btc);
+  r.signals=found.sort((a,b)=>b.sig.score-a.sig.score);r.watch.sort((a,b)=>a.dist-b.dist);
+  r.mkt=Q();
+  return r;
+}
 async function scan(){
   if(scanBusy)return;scanBusy=true;
   const btn=$("scanBtn"),bar=$("scanBar");
   btn.disabled=true;btn.classList.add("busy");btn.querySelector("span").textContent="…";
   bar.classList.add("on");bar.firstElementChild.style.width="0%";setAlerts("scanAlerts","");
   $("status").innerHTML="Coin listesi alınıyor…";
-  const now=Date.now(),r={time:now,signals:[],watch:[],rejected:[],total:0,btc:null,breadth:null,regime:"mixed"};
-  const kinds=enabledKinds();let above=0,counted=0;
   try{
-    if(!kinds.length)throw new Error("Ayarlar'da en az bir strateji açık olmalı");
-    const u=await marketUniverse();r.total=u.syms.length;
-    const ctx=btcContext(closedOnly((await api(`/api/v3/klines?symbol=${C.BTC}&interval=4h&limit=100`)).map(parseK),now));
-    r.btc=ctx.last();renderBtc(r.btc);
-    $("status").innerHTML=`<strong>${u.liquid.length}</strong> likit coin taranıyor…`;
-    const found=[];
-    await pool(u.liquid,6,async sym=>{
-      const cs=closedOnly((await api(`/api/v3/klines?symbol=${sym}&interval=4h&limit=250`)).map(parseK),now);
-      if(cs.length<K.MIN_HISTORY)return;
-      const I=prep(cs),n=cs.length,bk=u.bookMap.get(sym),mid=(bk.bid+bk.ask)/2;
-      if(I.e50[n-1]!=null){counted++;if(cs[n-1].c>I.e50[n-1])above++;}
-      const spread=(bk.ask-bk.bid)/mid*100;let best=null;
-      for(const kind of kinds){
-        for(const s of [n-1,n-2]){
-          const st=SETUP[kind](cs,s,I);if(!st)continue;
-          if(spread>K.MAX_SPREAD){r.rejected.push({sym,kind,reason:`alış-satış farkı yüksek (%${pc(spread,2)})`,vm:st.volMult});break;}
-          const sig=SIGNAL[kind](st,bk.ask,ctx.state(st.t),relStrength(cs,s,ctx));
-          if(sig.err){r.rejected.push({sym,kind,reason:sig.err+(sig.x?(sig.err.startsWith("R/R")?` (${pc(sig.x,2)})`:` (%${pc(sig.x)})`):""),vm:st.volMult});break;}
-          if(sig.score<minScore(kind)){r.rejected.push({sym,kind,reason:`puan düşük (${sig.score})`,vm:st.volMult});break;}
-          if(!best||sig.score>best.sig.score)best={sym,kind,st:{ct:st.ct,volMult:st.volMult},sig};
-          break;
-        }
-      }
-      if(best){found.push(best);return;}
-      if(settings.kinds.rt){const w=rtWatch(cs,I,mid);if(w){r.watch.push({sym,price:mid,...w});return;}}
-      if(settings.kinds.brk){const w=brkWatch(cs,I,mid);if(w){r.watch.push({sym,price:mid,...w});return;}}
-      if(settings.kinds.dip){const w=dipWatch(cs,mid);if(w)r.watch.push({sym,price:mid,...w});}
-    },d=>{bar.firstElementChild.style.width=`${Math.round(d/u.liquid.length*100)}%`;});
-    r.breadth=counted>=5?above/counted:null;r.regime=regimeOf(r.breadth,r.btc);
-    r.signals=found.sort((a,b)=>b.sig.score-a.sig.score);r.watch.sort((a,b)=>a.dist-b.dist);
-    r.mkt=Q();lastScan=r;store.set(MKT[r.mkt].lastKey,r);renderScan();
+    const r=await scanCore({btc:renderBtc,start:n=>{$("status").innerHTML=`<strong>${n}</strong> likit coin taranıyor…`;},
+      progress:(d,n)=>{bar.firstElementChild.style.width=`${Math.round(d/n*100)}%`;}});
+    lastScan=r;store.set(MKT[r.mkt].lastKey,r);renderScan();
     if(recordSignals(r))renderKarne();
     if(active().length)updateJournal().then(renderAll).catch(()=>{});
   }catch(e){showErr("scanAlerts",e);$("status").textContent="Tarama tamamlanamadı.";}
@@ -1272,6 +1283,17 @@ function saveSettings(){
 let karne=store.get("ddt_karne",[]);
 const saveKarne=()=>store.set("ddt_karne",karne);
 const kMine=()=>karne.filter(k=>k.mkt===Q());
+/* Botun 7/24 karnesi: GitHub'daki bot-veri dalından okunur */
+let botData=null,kSrc=store.get("ddt_ksrc","bot");
+function botUrl(){
+  const h=typeof location!=="undefined"?location.hostname:"";
+  if(h.endsWith(".github.io")){const repo=location.pathname.split("/").filter(Boolean)[0]||"";return `https://raw.githubusercontent.com/${h.split(".")[0]}/${repo}/bot-veri/durum.json`;}
+  return "https://raw.githubusercontent.com/dreamdosima08-del/Binance-sinyal/bot-veri/durum.json";
+}
+async function loadBot(){
+  try{const r=await fetch(botUrl()+"?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);botData=await r.json();}
+  catch(e){if(!botData)botData=false;}
+}
 function recordSignals(r){
   const now=Date.now();let added=0;
   for(const x of r.signals){
@@ -1320,11 +1342,21 @@ function kGroupTable(title,groups,nameOf,clsOf){
     </tbody></table>`;
 }
 function renderKarne(){
-  const mine=kMine(),closed=mine.filter(k=>k.status==="closed").sort((a,b)=>b.closedAt-a.closedAt),open=mine.filter(k=>k.status!=="closed").sort((a,b)=>b.at-a.at);
+  const bot=kSrc==="bot";
+  document.querySelectorAll(".srcsw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===kSrc)));
+  $("kWipeBox").hidden=bot;
+  $("kNote").textContent=bot?"Bot GitHub'da her 4 saatlik mum kapanışından birkaç dakika sonra iki piyasayı da kendi kendine tarar, çıkan her sinyali kaydeder ve sonucunu saatlik mumlardan hesaplar. Telefonun kapalı olsa da çalışır. Hesap kuralları test ekranıyla aynıdır: aynı mumda hedef ve stop varsa stop sayılır, komisyon ve kayma düşülür."
+    :"Tarama yaptığında çıkan her sinyal, işleme girsen de girmesen de buraya kaydedilir ve sonucu saatlik mumlardan hesaplanır: giriş tarama anındaki fiyat, aynı mumda hem hedef hem stop varsa stop sayılır, komisyon ve kayma düşülür. Sadece tarama yaptığın anlarda çıkan sinyaller kaydedilebilir.";
+  if(bot&&!botData){
+    $("kHead").textContent=botData===false?"Bot verisi bulunamadı":"Bot verisi yükleniyor…";
+    $("kSub").textContent=botData===false?"Bot henüz kurulmadı ya da ilk taramasını yapmadı. Kurulunca burada 7/24 karne görünecek.":"";
+    ["kStats","kTables","kOpen","kClosed"].forEach(id=>$(id).innerHTML="");return;
+  }
+  const mine=bot?(botData.karne||[]).filter(k=>k.mkt===Q()):kMine(),closed=mine.filter(k=>k.status==="closed").sort((a,b)=>b.closedAt-a.closedAt),open=mine.filter(k=>k.status!=="closed").sort((a,b)=>b.at-a.at);
   const m=MKT[Q()];
   if(!closed.length){
     $("kHead").textContent=open.length?`${open.length} sinyal takipte`:"Henüz sinyal yok";
-    $("kSub").textContent=open.length?`${m.name}: sonuçlandıkça burada karne oluşacak.`:`${m.name}: tarama yaptıkça çıkan her sinyal buraya kaydedilir.`;
+    $("kSub").textContent=(open.length?`${m.name}: sonuçlandıkça burada karne oluşacak.`:`${m.name}: ${bot?"bot":"sen"} tarama yaptıkça çıkan her sinyal buraya kaydedilir.`)+(bot&&botData.sonCalisma?` Bot son tarama: ${ago(Date.now()-botData.sonCalisma)}.`:"");
     $("kStats").innerHTML="";$("kTables").innerHTML="";
   }else{
     const wins=closed.filter(k=>k.pnl>0),losses=closed.filter(k=>k.pnl<=0);
@@ -1333,7 +1365,7 @@ function renderKarne(){
     let run=0,maxRun=0;[...closed].reverse().forEach(k=>{if(k.pnl<=0){run++;maxRun=Math.max(maxRun,run);}else run=0;});
     const hyp=sumR*settings.riskPct;
     $("kHead").innerHTML=`<span class="${hyp>=0?"pos":"neg"}">${sgn(hyp)}</span> <small>varsayımsal getiri</small>`;
-    $("kSub").textContent=`${m.name}: her sinyale %${pc(settings.riskPct)} riskle girseydin (bileşik değil, aynı anda işlem sınırı yok). ${closed.length} sonuçlanan, ${open.length} takipte sinyal.`;
+    $("kSub").textContent=`${m.name}: her sinyale %${pc(settings.riskPct)} riskle girseydin (bileşik değil, aynı anda işlem sınırı yok). ${closed.length} sonuçlanan, ${open.length} takipte sinyal.${bot&&botData.sonCalisma?` Bot son tarama: ${ago(Date.now()-botData.sonCalisma)}.`:""}`;
     $("kStats").innerHTML=`<div>Sonuçlanan<b>${closed.length}</b></div><div>Kazanan / kaybeden<b>${wins.length} / ${losses.length}</b></div>
       <div>Kazanma oranı<b>%${pc(wins.length/closed.length*100,0)}</b></div><div>Ortalama R<b class="${avgR>=0?"pos":"neg"}">${rStr(avgR)}</b></div>
       <div>Kâr faktörü<b>${gl>0?pc(gw/gl,2):"∞"}</b></div><div>En uzun kayıp serisi<b>${maxRun} sinyal</b></div>`;
@@ -1357,7 +1389,8 @@ function renderKarne(){
 }
 async function refreshKarne(manual){
   const b=$("kRefresh");if(manual){b.disabled=true;b.textContent="Güncelleniyor…";}
-  try{await updateKarne();setAlerts("kAlerts","");renderKarne();if(manual)toast("Karne güncellendi");}
+  try{if(kSrc==="bot"){await loadBot();renderKarne();if(manual)toast("Karne güncellendi");return;}
+    await updateKarne();setAlerts("kAlerts","");renderKarne();if(manual)toast("Karne güncellendi");}
   catch(e){showErr("kAlerts",e);}
   finally{if(manual){b.disabled=false;b.textContent="Sonuçları güncelle";}}
 }
@@ -1434,7 +1467,30 @@ $("tResult").addEventListener("click",e=>{
 $("sSave").addEventListener("click",saveSettings);
 $("sStratReset").addEventListener("click",()=>{settings.strat={};saveS();rebuildK();fillSettings();toast("Varsayılana dönüldü");});
 $("kRefresh").addEventListener("click",()=>refreshKarne(true));
+document.querySelectorAll(".srcsw button").forEach(b=>b.addEventListener("click",()=>{kSrc=b.dataset.src;store.set("ddt_ksrc",kSrc);renderKarne();refreshKarne(false);}));
 $("kWipe").addEventListener("click",()=>{if(confirm(`${MKT[Q()].name} karnesi silinsin mi? Bu geri alınamaz.`)){karne=karne.filter(k=>k.mkt!==Q());saveKarne();renderKarne();toast("Karne sıfırlandı");}});
+function backupDownload(){
+  settings.mk[Q()]={capital:settings.capital,minVol:settings.minVol,feePct:settings.feePct};saveS();
+  const data={uygulama:"dipten-donus",surum:1,tarih:new Date().toISOString(),settings,journal,karne,
+    son:{TRY:store.get(MKT.TRY.lastKey,null),USDT:store.get(MKT.USDT.lastKey,null)}};
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}));
+  a.download=`dipten-donus-yedek-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);toast("Yedek indirildi");
+}
+function backupUpload(file){
+  const fr=new FileReader();
+  fr.onload=()=>{
+    let d;try{d=JSON.parse(fr.result);if(d.uygulama!=="dipten-donus"||!d.settings)throw 0;}catch(e){toast("Bu dosya geçerli bir yedek değil");return;}
+    if(!confirm(`${new Date(d.tarih).toLocaleString("tr-TR")} tarihli yedek yüklensin mi? Bu telefondaki günlük, karne ve ayarların yerini alır.`))return;
+    store.set("ddt_settings",d.settings);store.set("ddt_journal",d.journal||[]);store.set("ddt_karne",d.karne||[]);
+    if(d.son){if(d.son.TRY)store.set(MKT.TRY.lastKey,d.son.TRY);if(d.son.USDT)store.set(MKT.USDT.lastKey,d.son.USDT);}
+    location.reload();
+  };
+  fr.readAsText(file);
+}
+$("bDown").addEventListener("click",backupDownload);
+$("bUp").addEventListener("click",()=>$("bFile").click());
+$("bFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)backupUpload(f);e.target.value="";});
 $("sWipe").addEventListener("click",()=>{if(confirm("Tüm işlem günlüğü silinsin mi? Bu geri alınamaz.")){journal=[];saveJ();renderAll();toast("Günlük sıfırlandı");}});
 
 renderMkt();$("viewSub").textContent=SUBS.scan;syncSegs();renderAll();
