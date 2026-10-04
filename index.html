@@ -208,6 +208,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     </section>
     <div id="scanAlerts"></div>
     <div id="compass"></div>
+    <div class="alert warn" id="honest" style="font-size:13.5px">Bu sinyaller 2 yıllık gerçek veri testinde kâr göstermedi. Gerçek parayla işlem için değil, gözlem içindir. Sonuçları Karne ekranından takip et.</div>
     <div class="wallet" id="wallet"></div>
     <nav class="tabs" role="tablist">
       <button role="tab" aria-selected="true" data-tab="signals">Sinyaller<em id="cSig"></em></button>
@@ -276,10 +277,10 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
   <!-- ═════════ AYARLAR ═════════ -->
   <main id="v-settings" hidden>
     <span class="grp">Stratejiler</span>
-    <label class="check s-dip"><input type="checkbox" id="sDip"><div><b>Dipten Dönüş</b><span>Sert düşmüş, destekte hacimle dönen coinler. Düşen ve yatay piyasada çalışır.</span></div></label>
+    <label class="check s-dip"><input type="checkbox" id="sDip"><div><b>Dipten Dönüş</b><span>Sert düşmüş, destekte hacimle dönen coinler. 2 yıllık testte iki piyasada da zararda çıktığı için varsayılan kapalı.</span></div></label>
     <label class="check s-trend"><input type="checkbox" id="sTrend"><div><b>Trend Dalgası</b><span>Yükselen trenddeki coinin kısa düzeltmeden sonra tekrar yukarı döndüğü an. Yükselen piyasada çalışır.</span></div></label>
     <label class="check s-brk"><input type="checkbox" id="sBrk"><div><b>Güçlü Kırılım</b><span>Sıkışmış coinin hacim patlamasıyla yukarı kırması. Hızlı yükselişleri hedefler; daha riskli olduğu için alım tutarı %25 küçük tutulur.</span></div></label>
-    <label class="check s-rt"><input type="checkbox" id="sRt"><div><b>Kırılım Retest</b><span>Dirençten hacimle kırılan coinin geri gelip kırdığı seviyeyi destek olarak test etmesi ve oradan dönmesi. Az ama seçici sinyal verir, sahte kırılımları eler.</span></div></label>
+    <label class="check s-rt"><input type="checkbox" id="sRt"><div><b>Kırılım Retest</b><span>Dirençten hacimle kırılan coinin geri gelip kırdığı seviyeyi destek olarak test etmesi ve oradan dönmesi. 2 yıllık testte iki piyasada da zararda çıktığı için varsayılan kapalı.</span></div></label>
     <span class="grp" id="sMktHead">Sermaye ve risk</span>
     <p class="sub" id="sMktNote" style="margin:-4px 0 0"></p>
     <div class="field"><label for="sCap" id="sCapL">Başlangıç sermayesi (TL)</label><input id="sCap" inputmode="decimal">
@@ -370,9 +371,11 @@ const store={
   get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v);}catch(e){return d;}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 };
-const DEFAULTS={market:"TRY",mk:null,capital:1000,riskPct:2,maxOpen:3,feePct:0.1,minVol:5,proxy:"",strat:{},kinds:{dip:true,trend:true,brk:true,rt:true},autoRisk:true};
+const DEFAULTS={market:"TRY",mk:null,capital:1000,riskPct:2,maxOpen:3,feePct:0.1,minVol:5,proxy:"",strat:{},kinds:{dip:false,trend:true,brk:true,rt:false},autoRisk:true,v:2};
 let settings=Object.assign({},DEFAULTS,store.get("ddt_settings",{}));
 settings.kinds=Object.assign({},DEFAULTS.kinds,settings.kinds||{});
+/* Ekim 2026 testi: Dip ve Retest iki piyasada da zararda çıktı → bir kereliğine kapatılır (kullanıcı yeniden açabilir) */
+if((store.get("ddt_settings",{}).v||0)<2){settings.kinds.dip=false;settings.kinds.rt=false;settings.v=2;try{localStorage.setItem("ddt_settings",JSON.stringify(settings));}catch(e){}}
 if(!MKT[settings.market])settings.market="TRY";
 settings.mk=Object.assign({},settings.mk||{});
 if(!settings.mk.TRY)settings.mk.TRY={capital:settings.capital,minVol:settings.minVol,feePct:settings.feePct};
@@ -885,9 +888,9 @@ function signalCard(x,i,now,regime){
   const tp1p=(sig.tp1/sig.entry-1)*100,tp2p=(sig.tp2/sig.entry-1)*100;
   const sizeHtml=z.full?`<div class="size">${z.note}</div>`
     :`<div class="size">Önerilen alım <b>${money(z.size)} ${U()}</b><br>Stop olursa kayıp yaklaşık ${money(z.risk)} ${U()}.${z.note}</div>`;
-  return `<article class="card s-${kind} ${strong?"strong":""}">
+  return `<article class="card s-${kind}">
     <span class="tag">${STR[kind].name}</span>
-    <div class="head"><div class="pair">${pair(sym)}</div><div class="chip ${strong?"strong":"watch"}">${sig.label}<b>${sig.score}</b></div></div>
+    <div class="head"><div class="pair">${pair(sym)}</div><div class="chip open">Puan <b>${sig.score}</b></div></div>
     <div class="meta">Mum ${ago(now-st.ct)} kapandı, hacim ${pc(st.volMult)}×</div>
     ${ladder({...sig,stop0:sig.stop})}
     <div class="grid">
@@ -902,7 +905,7 @@ function signalCard(x,i,now,regime){
     <p class="why">${sig.why}</p>
     ${sig.trail?`<p class="why">TP1'den sonra kalan yarının stop'u, görülen en yüksek fiyatın %${pc(sig.trail)} altından takip eder. Yükseliş sürerse TP2'ye kadar taşır, dönerse kârı korur.</p>`:""}
     ${sizeHtml}
-    <details class="more"><summary>Puan dökümü</summary><ul class="parts">
+    <details class="more"><summary>Puan dökümü</summary><p class="why" style="margin-top:6px">Testlerde puan, sinyalin sonucunu öngörmedi; yüksek puan daha iyi sonuç demek değil.</p><ul class="parts">
       ${sig.parts.map(([k,v])=>`<li><span>${k}</span><b>${v>0?"+":""}${v}</b></li>`).join("")}
       <li><span>BTC durumu</span><b>${btc}</b></li></ul></details>
     <div class="actions"><a class="btn" href="${tvLink(sym)}" target="_blank" rel="noopener">Grafik</a>

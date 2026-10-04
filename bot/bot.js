@@ -63,7 +63,7 @@ async function sohbetiKaydet(){
 function sinyalMesaji(x,r,m){
   const s=x.sig,u=C.MKT[m].unit,z=C.sizing(s.stopPct,x.kind,r.regime);
   const tp1=(s.tp1/s.entry-1)*100,tp2=(s.tp2/s.entry-1)*100;
-  return `${s.label==="GÜÇLÜ"?"🟢":"🟡"} <b>${s.label} ${s.score} · ${C.STR[x.kind].name}</b>\n`+
+  return `🔎 <b>Gözlem sinyali · ${C.STR[x.kind].name}</b> (puan ${s.score})\n`+
     `<b>${C.plain(x.sym)}</b> · ${C.MKT[m].name}\n\n`+
     `Giriş: <b>${C.tl(s.entry)} ${u}</b>\n`+
     `Stop: ${C.tl(s.stop)} (−%${C.pc(s.stopPct)})\n`+
@@ -71,7 +71,7 @@ function sinyalMesaji(x,r,m){
     `TP2: ${C.tl(s.tp2)} (+%${C.pc(tp2)})${s.trail?" · kalan yarı iz süren stopla":""}\n`+
     `R/R: 1 : ${C.pc(s.rr,2)}\n`+
     `Önerilen alım: ${C.money(z.size)} ${u} (${C.money(C.settings.capital)} ${u} sermaye, %${String(C.settings.riskPct).replace(".",",")} risk)${z.note?`\n<i>${C.esc(z.note.trim())}</i>`:""}\n\n`+
-    `${C.esc(s.why)}\n\n<a href="${C.tvLink(x.sym)}">Grafiği aç</a>`;
+    `${C.esc(s.why)}\n\n<a href="${C.tvLink(x.sym)}">Grafiği aç</a>\n\n<i>Kanıtlanmamış: bu kurallar 2 yıllık testte kâr göstermedi. İşlem için değil, gözlem içindir.</i>`;
 }
 function sonucMesaji(k){
   const ikon=k.pnl>0?"✅":"❌";
