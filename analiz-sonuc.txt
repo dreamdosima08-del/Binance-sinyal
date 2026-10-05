@@ -1,0 +1,79 @@
+DOĞRULAMA BTC 2018-03-06→: uygulama kural 2259.44% dd 58.47% | al-tut 639.88% dd 76.63%
+DOĞRULAMA BTC bağımsız:            kural 2259.44% dd 58.47% | al-tut 639.88% dd 76.63%
+(araştırma sonucu: kural +2253% dd 58%, al-tut +637% dd 77%)
+
+══ BTC → BTCUSDT Bitcoin fiyat 86300.72 risk Orta gün 3336 CG:true
+KARAR: Kurala göre: ALIM BÖLGESİNDE | seviye 79047.217600 uzak 9.47% | Ne zaman çıkılır: Günlük kapanış 79.047,22 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+NE KADAR: Çıkış seviyesi şu anki fiyatın %8,4 altında. İşlem başı %2 risk için en fazla sermayenin %24 kadarıyla gir.
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 69): alıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %2,5 hareket ediyor. Görece sakin.
+  T: Getiri: 7 gün +%2, 30 gün +%9, 90 gün +%35, 1 yıl −%29.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%17.
+  T: Yakın seviyeler (son 6 ay): destek 82.563,00, 79.181,48 (2 kez); direnç 87.395,67 USDT.
+  F: Proje: Bitcoin (Smart Contract Platform, Layer 1 (L1), Proof of Work (PoW)), başlangıç yılı 2009.
+  F: Büyüklük: Piyasa değeri $1,73 trilyon, tüm kriptolar arasında 1. sırada. Büyük ve yerleşik bir proje.
+  F: Arz: Arzın büyük kısmı dolaşımda (%96); yeni token baskısı düşük.
+  F: Tüm zamanların zirvesi: $126.080,00 (Ekim 2025); şu an %32 altında.
+  F: Likidite: 24 saatlik işlem hacmi $17,74 milyar (piyasa değerine oranı %1,0). Yeterli.
+  GEÇMİŞ (3285 gün, 177 işlem): kural 7462% dd 64% | al-tut 1862% dd 83%
+
+══ ETH → ETHUSDT Ethereum fiyat 2720 risk Orta gün 3336 CG:true
+KARAR: Kurala göre: ALIM BÖLGESİNDE | seviye 2501.548800 uzak 9.01% | Ne zaman çıkılır: Günlük kapanış 2.501,55 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+NE KADAR: Çıkış seviyesi şu anki fiyatın %8,0 altında. İşlem başı %2 risk için en fazla sermayenin %25 kadarıyla gir.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 64): alıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %3,1 hareket ediyor (BTC'nin yaklaşık 1,2 katı). Görece sakin.
+  T: Getiri: 7 gün +%1, 30 gün +%11, 90 gün +%52, 1 yıl −%39.
+  T: BTC'ye göre: son 30 günde BTC'den 2 puan daha iyi, son 90 günde 16 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%37: ilgi artıyor.
+  T: Yakın seviyeler (son 6 ay): destek 2.635,69 (2 kez), 2.405,85 (3 kez); direnç 2.807,34 USDT.
+  F: Proje: Ethereum (Smart Contract Platform, Layer 1 (L1), Ethereum Ecosystem), başlangıç yılı 2015.
+  F: Büyüklük: Piyasa değeri $332,50 milyar, tüm kriptolar arasında 2. sırada. Büyük ve yerleşik bir proje.
+  F: Arz: Üst sınırı belirlenmiş bir arz yok; ağ yeni token basmaya devam edebilir (yıllık artış oranı projeye göre değişir).
+  F: Tüm zamanların zirvesi: $4.946,05 (Ağustos 2025); şu an %45 altında.
+  F: Likidite: 24 saatlik işlem hacmi $6,27 milyar (piyasa değerine oranı %1,9). Yeterli.
+  GEÇMİŞ (3285 gün, 173 işlem): kural 5966% dd 65% | al-tut 812% dd 94%
+
+══ SOL → SOLUSDT Solana fiyat 121.06 risk Orta gün 2246 CG:true
+KARAR: Kurala göre: ALIM BÖLGESİNDE | seviye 104.723000 uzak 16.12% | Ne zaman çıkılır: Günlük kapanış 104,72 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+NE KADAR: Çıkış seviyesi şu anki fiyatın %13,5 altında. İşlem başı %2 risk için en fazla sermayenin %15 kadarıyla gir.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 66): alıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %4,0 hareket ediyor (BTC'nin yaklaşık 1,6 katı). Görece sakin.
+  T: Getiri: 7 gün %0, 30 gün +%19, 90 gün +%48, 1 yıl −%47.
+  T: BTC'ye göre: son 30 günde BTC'den 11 puan daha iyi, son 90 günde 13 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%61: ilgi artıyor.
+  T: Yakın seviyeler (son 6 ay): destek 116,32, 98,00 (3 kez); direnç 124,95 USDT.
+  F: Proje: Solana (Smart Contract Platform, Solana Ecosystem, Layer 1 (L1)).
+  F: Büyüklük: Piyasa değeri $71,30 milyar, tüm kriptolar arasında 7. sırada. Büyük ve yerleşik bir proje.
+  F: Arz: Üst sınırı belirlenmiş bir arz yok; ağ yeni token basmaya devam edebilir (yıllık artış oranı projeye göre değişir).
+  F: Tüm zamanların zirvesi: $293,31 (Ocak 2025); şu an %59 altında.
+  F: Likidite: 24 saatlik işlem hacmi $2,10 milyar (piyasa değerine oranı %2,9). Yeterli.
+  GEÇMİŞ (2195 gün, 125 işlem): kural 13708% dd 69% | al-tut 3962% dd 96%
+
+══ AVAX → AVAXUSDT Avalanche fiyat 11.011 risk Orta-yüksek gün 2204 CG:true
+KARAR: Kurala göre: ALIM BÖLGESİNDE | seviye 8.501700 uzak 30.60% | Ne zaman çıkılır: Günlük kapanış 8,50 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+NE KADAR: Çıkış seviyesi şu anki fiyatın %22,8 altında. İşlem başı %2 risk için en fazla sermayenin %9 kadarıyla gir.
+  not: Fiyat ortalamadan çok uzaklaşmış (%31). Şimdi girersen çıkış seviyesi uzakta kalır ve geri çekilmede kâr hızla erir. Acele etmeden ortalamaya doğru bir geri çekilme beklemek daha temkinli olur.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 65): alıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %6,2 hareket ediyor (BTC'nin yaklaşık 2,4 katı). Oynak.
+  T: Getiri: 7 gün +%2, 30 gün +%50, 90 gün +%60, 1 yıl −%63.
+  T: BTC'ye göre: son 30 günde BTC'den 42 puan daha iyi, son 90 günde 25 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%265: ilgi artıyor.
+  T: Yakın seviyeler (son 6 ay): destek 9,97, 8,97 (5 kez); direnç 11,80 (2 kez) USDT.
+  F: Proje: Avalanche (Smart Contract Platform, Layer 1 (L1), Avalanche Ecosystem).
+  F: Büyüklük: Piyasa değeri $4,89 milyar, tüm kriptolar arasında 28. sırada. Orta büyüklükte.
+  F: Arz: Dolaşımda olan: toplam arzın %62 kadarı. Kalan %38 zamanla piyasaya çıkabilir; bu, fiyat üzerinde satış baskısı yaratabilir.
+  F: Tüm zamanların zirvesi: $144,96 (Kasım 2021); şu an %92 altında.
+  F: Likidite: 24 saatlik işlem hacmi $217,2 milyon (piyasa değerine oranı %4,4). Yeterli.
+  ⚠ Zirvesinin %92 altında. Bu kadar düşmüş projelerin çoğu eski seviyelerine hiç dönemiyor.
+  GEÇMİŞ (2153 gün, 149 işlem): kural 2507% dd 78% | al-tut 211% dd 96%
