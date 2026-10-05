@@ -76,6 +76,24 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .ana .row2 b{font-size:16px}
 .ana .row2 span{font-size:12.5px;color:var(--muted);text-align:right}
 .ana .st{font-weight:800}
+.aform{display:flex;gap:8px;margin-top:14px}
+.aform input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:700;text-transform:uppercase}
+.aform .btn{flex:none;padding:12px 16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.verdict{border-radius:16px;padding:16px;margin:12px 0;border:1px solid var(--line);background:var(--surface)}
+.verdict.al{border-color:color-mix(in srgb,var(--gain) 55%,var(--line));background:color-mix(in srgb,var(--gain) 8%,var(--surface))}
+.verdict.bekle{border-color:color-mix(in srgb,var(--amber) 55%,var(--line));background:color-mix(in srgb,var(--amber) 8%,var(--surface))}
+.verdict h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
+.verdict.al h3{color:var(--gain)} .verdict.bekle h3{color:var(--amber)}
+.verdict p{margin:8px 0 0;font-size:14px}
+.verdict .lvl{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface2);font-size:14px}
+.verdict .lvl b{display:block;font-size:13px;color:var(--muted);margin-bottom:2px}
+.blist{list-style:none;padding:0;margin:0}
+.blist li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px;line-height:1.5}
+.blist li:last-child{border:0}
+.blist.warn li{color:var(--text)}
+.blist.warn li::before{content:"⚠ ";color:var(--amber)}
 .compass{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px}
 .compass .h{display:flex;justify-content:space-between;align-items:center;gap:10px}
 .compass .h b{font-size:15px}
@@ -227,6 +245,14 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <p class="note" id="scanNote"></p>
   </main>
 
+  <!-- ═════════ ANALİZ ═════════ -->
+  <main id="v-analiz" hidden>
+    <form class="aform" id="aForm" autocomplete="off"><input id="aIn" placeholder="Coin yaz, örn. SOL" list="aList" autocapitalize="characters" spellcheck="false" enterkeyhint="search"><button class="btn primary" id="aBtn" type="submit">Analiz et</button></form>
+    <datalist id="aList"></datalist>
+    <div class="chips" id="aSon"></div>
+    <div id="aSonuc"><div class="empty">Bir coinin kısaltmasını yaz (SOL, AVAX, PEPE gibi). Teknik ve temel durumu sade bir dille, test ettiğimiz kurala göre ne zaman alınıp ne zaman çıkılacağıyla birlikte göstereceğim.</div></div>
+  </main>
+
   <!-- ═════════ GÜNLÜK ═════════ -->
   <main id="v-journal" hidden>
     <div id="jAlerts"></div>
@@ -312,6 +338,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 
 <nav class="nav" aria-label="Bölümler"><div>
   <button data-view="scan" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-4"/></svg>Tara</button>
+  <button data-view="analiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Analiz</button>
   <button data-view="journal"><span class="dot" id="navJ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h6M9 15h6"/></svg></span>Günlük</button>
   <button data-view="test"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16"/><path d="M5 16l4-5 3 3 6-8"/></svg>Test</button>
   <button data-view="karne"><span class="dot" id="navK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9z"/><path d="M15 5h3v15H6V5h3"/><path d="M9 13l2 2 4-4"/></svg></span>Karne</button>
@@ -1437,6 +1464,152 @@ function renderAna(){
 }
 async function loadAna(){try{ana=await anaTrend();store.set("ddt_ana",ana);}catch(e){}renderAna();}
 
+/* ═══════════ COIN ANALİZİ (hesap; ekrandan bağımsız) ═══════════
+   Veri: Binance günlük mumlar (fiyat, teknik), CoinGecko (temel). Karar kısmı yalnızca test edilmiş
+   50 günlük ortalama kuralına dayanır; diğer her şey bilgi amaçlıdır. */
+const CG="https://api.coingecko.com/api/v3";
+async function cgGet(path){
+  const r=await fetch(CG+path,{cache:"no-store"});
+  if(r.status===429)throw new Error("CoinGecko şu an yoğun, 1 dakika sonra tekrar dene");
+  if(!r.ok)throw new Error("CoinGecko "+r.status);
+  return r.json();
+}
+async function gunlukTum(sym){
+  let out=[],st=0;
+  for(let g=0;g<6;g++){const b=(await api(`/api/v3/klines?symbol=${sym}&interval=1d&limit=1000&startTime=${st}`)).map(parseK);
+    out.push(...b);if(b.length<1000)break;st=b[b.length-1].t+1;}
+  return closedOnly(out,Date.now());
+}
+function smaDizi(v,n){const o=new Array(v.length).fill(null);let s=0;for(let i=0;i<v.length;i++){s+=v[i];if(i>=n)s-=v[i-n];if(i>=n-1)o[i]=s/n;}return o;}
+/* 50 günlük ortalama kuralının bu coindeki geçmişi: karar i. gün kapanışında, işlem i+1. gün açılışında, işlem başı %0,15 maliyet */
+function kuralGecmisi(cs,from){
+  const c=cs.map(x=>x.c),m=smaDizi(c,50);
+  let eq=1,bh=1,pk=1,bpk=1,dd=0,bdd=0,pos=false,tr=0,gun=0,bas=null;
+  for(let i=50;i<cs.length-1;i++){
+    if(from&&cs[i].t<from)continue;
+    if(bas==null)bas=cs[i].t;
+    const ist=m[i-1]!=null&&c[i-1]>m[i-1];
+    if(ist!==pos){eq*=1-0.0015;pos=ist;tr++;}
+    const r=cs[i+1].o/cs[i].o;if(pos)eq*=r;bh*=r;gun++;
+    pk=Math.max(pk,eq);dd=Math.max(dd,1-eq/pk);bpk=Math.max(bpk,bh);bdd=Math.max(bdd,1-bh/bpk);
+  }
+  return {gun,bas,kural:{ret:eq-1,dd,islem:tr},altut:{ret:bh-1,dd:bdd}};
+}
+function seviyeBul(cs,fiyat){
+  const L=3,from=Math.max(L,cs.length-180),lows=[],highs=[];
+  for(let i=from;i<cs.length-L;i++){let lo=true,hi=true;
+    for(let j=i-L;j<=i+L;j++){if(j===i)continue;if(cs[j].l<=cs[i].l)lo=false;if(cs[j].h>=cs[i].h)hi=false;}
+    if(lo)lows.push(cs[i].l);if(hi)highs.push(cs[i].h);}
+  const grupla=(arr,alt)=>{const c=arr.filter(x=>alt?x<fiyat*0.995:x>fiyat*1.005).sort((a,b)=>alt?b-a:a-b),out=[];
+    for(const x of c){if(out.some(y=>Math.abs(y.fiyat-x)/x<0.03))continue;out.push({fiyat:x,temas:arr.filter(z=>Math.abs(z-x)/x<0.03).length});if(out.length>=2)break;}return out;};
+  return {destek:grupla(lows,true),direnc:grupla(highs,false)};
+}
+const kisaPara=(v,u)=>{if(v==null||!isFinite(v))return "—";const a=Math.abs(v);
+  const s=a>=1e12?pc(v/1e12,2)+" trilyon":a>=1e9?pc(v/1e9,2)+" milyar":a>=1e6?pc(v/1e6,1)+" milyon":money(v);return u==="$"?"$"+s:s+" "+u;};
+const isaret=(v,d=1)=>(v>=0?"+":"−")+"%"+pc(Math.abs(v),d);
+async function coinAnaliz(girdi){
+  let base=String(girdi||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(base.length>4&&/(USDT|TRY)$/.test(base))base=base.replace(/(USDT|TRY)$/,"");
+  if(!base)throw new Error("Bir coin adı yaz, örneğin SOL");
+  if(EXCL.has(base))throw new Error(`${base} bir stabil coin ya da para birimi; fiyat hareketi analizi anlamlı değil`);
+  let sym=base+"USDT",cs;
+  try{cs=await gunlukTum(sym);}catch(e){if(e instanceof NetErr)throw e;sym=base+"TRY";
+    try{cs=await gunlukTum(sym);}catch(e2){if(e2 instanceof NetErr)throw e2;throw new Error(`${base} Binance'te bulunamadı. Kısaltmayı kontrol et (örn. SOL, AVAX, PEPE)`);}}
+  if(cs.length<60)throw new Error(`${base} çok yeni listelenmiş (${cs.length} gün). Güvenilir analiz için en az 60 günlük veri gerekiyor`);
+  const unit=sym.endsWith("TRY")?"TL":"USDT";
+  const [btc,tk]=await Promise.all([
+    base==="BTC"?Promise.resolve(null):api(`/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=400`).then(a=>closedOnly(a.map(parseK),Date.now())),
+    api(`/api/v3/ticker/24hr?symbol=${sym}`)]);
+  let cg=null,cgHata=null;
+  try{
+    const s=await cgGet(`/search?query=${encodeURIComponent(base)}`);
+    const ad=(s.coins||[]).filter(c=>String(c.symbol).toUpperCase()===base).sort((a,b)=>(a.market_cap_rank||1e9)-(b.market_cap_rank||1e9))[0];
+    if(ad)cg=await cgGet(`/coins/${ad.id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);
+    else cgHata="CoinGecko'da bu kısaltmayla eşleşen proje bulunamadı";
+  }catch(e){cgHata=e.message;}
+
+  /* ── teknik hesaplar ── */
+  const c=cs.map(x=>x.c),n=c.length-1,fiyat=+tk.lastPrice||c[n];
+  const m50=smaDizi(c,50),m200=smaDizi(c,200),rv=rsi(c),at=atr(cs);
+  const ic=c[n]>m50[n];let bas=n;while(bas>0&&m50[bas-1]!=null&&(c[bas-1]>m50[bas-1])===ic)bas--;
+  const uzak=(c[n]/m50[n]-1)*100,atrY=at[n]?at[n]/c[n]*100:null;
+  const getiri=g=>n>=g?(c[n]/c[n-g]-1)*100:null;
+  const bG=g=>btc&&btc.length>g?(btc[btc.length-1].c/btc[btc.length-1-g].c-1)*100:null;
+  const btcM50=btc?smaDizi(btc.map(x=>x.c),50):null,btcIc=btc?btc[btc.length-1].c>btcM50[btcM50.length-1]:ic;
+  const btcAtr=btc?(()=>{const a=atr(btc);return a[a.length-1]/btc[btc.length-1].c*100;})():null;
+  const zirve=Math.max(...c),zirveUzak=(c[n]/zirve-1)*100;
+  const v30=cs.slice(-30).reduce((a,x)=>a+x.qv,0)/30,v90=cs.length>=90?cs.slice(-90,-30).reduce((a,x)=>a+x.qv,0)/60:null;
+  const sev=seviyeBul(cs,fiyat),gec=kuralGecmisi(cs);
+  const md=cg&&cg.market_data||{};
+  const usd=x=>x&&typeof x==="object"?x.usd:x;
+  const mcap=usd(md.market_cap),fdv=usd(md.fully_diluted_valuation),rank=cg?cg.market_cap_rank:null,hacimUsd=usd(md.total_volume);
+  const dolasim=md.circulating_supply,toplam=md.max_supply||md.total_supply,maxYok=cg&&!md.max_supply;
+  const ath=usd(md.ath),athUzak=usd(md.ath_change_percentage),athTarih=md.ath_date&&md.ath_date.usd;
+
+  /* ── karar: sadece test edilmiş kural ── */
+  const karar={ic,seviye:m50[n],uzak,bas:cs[bas].t,gun:n-bas+1,birim:unit,notlar:[]};
+  if(ic){
+    karar.baslik="Kurala göre: ALIM BÖLGESİNDE";
+    karar.ana=`Günlük kapanış 50 günlük ortalamanın %${pc(uzak)} üstünde (${dShort(cs[bas].t)} itibarıyla, ${n-bas+1} gündür). Test ettiğimiz kural bu durumda coini tutmayı söylüyor.`;
+    karar.ne="Ne zaman çıkılır";
+    karar.neMetin=`Günlük kapanış ${tl(m50[n])} ${unit} altına inerse ertesi gün sat${unit==="TL"?" (TL'ye değil USDT'ye geç)":""}. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.`;
+    const dist=Math.max(0.5,(fiyat-m50[n])/fiyat*100);
+    karar.boyut=Math.min(100,settings.riskPct/dist*100);
+    karar.boyutMetin=`Çıkış seviyesi şu anki fiyatın %${pc(dist)} altında. İşlem başı %${String(settings.riskPct).replace(".",",")} risk için en fazla sermayenin %${pc(karar.boyut,0)} kadarıyla gir.`;
+    if(uzak>25)karar.notlar.push(`Fiyat ortalamadan çok uzaklaşmış (%${pc(uzak,0)}). Şimdi girersen çıkış seviyesi uzakta kalır ve geri çekilmede kâr hızla erir. Acele etmeden ortalamaya doğru bir geri çekilme beklemek daha temkinli olur.`);
+  }else{
+    karar.baslik="Kurala göre: BEKLE";
+    karar.ana=`Günlük kapanış 50 günlük ortalamanın %${pc(Math.abs(uzak))} altında (${dShort(cs[bas].t)} itibarıyla, ${n-bas+1} gündür). Test ettiğimiz kural bu durumda nakitte beklemeyi söylüyor.`;
+    karar.ne="Ne zaman alınır";
+    karar.neMetin=`Günlük kapanış ${tl(m50[n])} ${unit} üstüne çıkarsa (şu an %${pc(Math.abs(uzak))} uzakta) ertesi gün alım sinyali olur. Bu seviye her gün biraz değişir.`;
+  }
+  if(base!=="BTC")karar.notlar.push(btcIc?"BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.":"BTC kendi ortalamasının altında: piyasa genelinde zayıflık var, altcoinlerde risk daha yüksek.");
+  if(rv[n]!=null&&rv[n]>=75)karar.notlar.push(`RSI ${pc(rv[n],0)}: kısa vadede aşırı alınmış. Hızlı yükselişlerden sonra soluklanma sık görülür.`);
+  if(rv[n]!=null&&rv[n]<=25)karar.notlar.push(`RSI ${pc(rv[n],0)}: kısa vadede aşırı satılmış. Tepki yükselişi olabilir ama trend dönmeden bu tek başına alım sebebi değildir.`);
+
+  /* ── teknik görünüm (sade dil) ── */
+  const teknik=[];
+  teknik.push(`<b>Trend:</b> ${ic?"Kısa-orta vadede yükselişte.":"Kısa-orta vadede düşüşte ya da zayıf."} Fiyat 50 günlük ortalamanın ${ic?"üstünde":"altında"}.`);
+  if(m200[n]!=null)teknik.push(`<b>Uzun vade:</b> 200 günlük ortalamanın ${c[n]>m200[n]?"üstünde, uzun vadeli görünüm olumlu":"altında, uzun vadeli görünüm zayıf"}${m50[n]>m200[n]?"; 50 günlük ortalama 200 günlüğün üstünde.":"; 50 günlük ortalama 200 günlüğün altında."}`);
+  else teknik.push(`<b>Uzun vade:</b> 200 günlük veri yok, coin görece yeni.`);
+  if(rv[n]!=null)teknik.push(`<b>Alış-satış dengesi (RSI ${pc(rv[n],0)}):</b> ${rv[n]>=70?"aşırı alınmış bölgede":rv[n]<=30?"aşırı satılmış bölgede":rv[n]>=55?"alıcılar biraz daha baskın":rv[n]<=45?"satıcılar biraz daha baskın":"dengede"}.`);
+  if(atrY!=null)teknik.push(`<b>Oynaklık:</b> Günde ortalama %${pc(atrY)} hareket ediyor${btcAtr&&base!=="BTC"?` (BTC'nin yaklaşık ${pc(atrY/btcAtr)} katı)`:""}. ${atrY>=8?"Çok oynak; küçük tutarla çalış.":atrY>=5?"Oynak.":"Görece sakin."}`);
+  const g30=getiri(30),g90=getiri(90),g365=getiri(365);
+  const perf=[[7,getiri(7)],[30,g30],[90,g90],[365,g365]].filter(x=>x[1]!=null).map(([g,v])=>`${g===365?"1 yıl":g+" gün"} ${isaret(v,0)}`).join(", ");
+  teknik.push(`<b>Getiri:</b> ${perf}.`);
+  if(base!=="BTC"&&g30!=null&&bG(30)!=null){const d30=g30-bG(30),d90=g90!=null&&bG(90)!=null?g90-bG(90):null;
+    teknik.push(`<b>BTC'ye göre:</b> son 30 günde BTC'den ${pc(Math.abs(d30),0)} puan ${d30>=0?"daha iyi":"daha kötü"}${d90!=null?`, son 90 günde ${pc(Math.abs(d90),0)} puan ${d90>=0?"daha iyi":"daha kötü"}`:""}.`);}
+  teknik.push(`<b>Zirveden uzaklık:</b> Binance'teki en yüksek kapanışının %${pc(Math.abs(zirveUzak),0)} ${zirveUzak<-0.5?"altında":"seviyesinde"}.`);
+  if(v90)teknik.push(`<b>İlgi (hacim):</b> Son 30 günün işlem hacmi önceki 60 güne göre ${isaret((v30/v90-1)*100,0)}${v30>v90*1.2?": ilgi artıyor.":v30<v90*0.8?": ilgi azalıyor.":"."}`);
+  const sv=x=>x.map(s=>`${tl(s.fiyat)}${s.temas>1?` (${s.temas} kez)`:""}`).join(", ");
+  teknik.push(`<b>Yakın seviyeler (son 6 ay):</b> ${sev.destek.length?`destek ${sv(sev.destek)}`:"altta yakın destek görünmüyor"}; ${sev.direnc.length?`direnç ${sv(sev.direnc)}`:"üstte yakın direnç görünmüyor"} ${unit}.`);
+
+  /* ── temel görünüm ── */
+  const temel=[],uyarilar=[];
+  if(cg){
+    temel.push(`<b>Proje:</b> ${esc(cg.name)}${cg.categories&&cg.categories.length?` (${esc(cg.categories.slice(0,3).join(", "))})`:""}${cg.genesis_date?`, başlangıç yılı ${cg.genesis_date.slice(0,4)}`:""}.`);
+    if(mcap)temel.push(`<b>Büyüklük:</b> Piyasa değeri ${kisaPara(mcap,"$")}${rank?`, tüm kriptolar arasında ${rank}. sırada`:""}. ${rank&&rank<=20?"Büyük ve yerleşik bir proje.":rank&&rank<=100?"Orta büyüklükte.":"Küçük ölçekli; fiyatı sert hareket edebilir."}`);
+    if(dolasim&&toplam){const o=dolasim/toplam*100;
+      temel.push(`<b>Arz:</b> ${o>=99?"Arzın neredeyse tamamı dolaşımda; yeni token baskısı düşük.":`Dolaşımda olan: toplam arzın %${pc(o,0)} kadarı. Kalan %${pc(100-o,0)} zamanla piyasaya çıkabilir; bu, fiyat üzerinde satış baskısı yaratabilir.`}${maxYok?" Üst sınırı belirlenmiş bir arz yok, yani yeni token basılmaya devam edebilir.":""}`);
+      if(o<50)uyarilar.push("Arzın yarısından azı dolaşımda: ileride açılacak tokenlar fiyata baskı yapabilir.");}
+    else if(maxYok)temel.push(`<b>Arz:</b> Üst sınırı belirlenmiş bir arz yok; yeni token basılmaya devam edebilir.`);
+    if(mcap&&fdv&&fdv/mcap>=1.3){temel.push(`<b>Tam seyreltilmiş değer:</b> Bütün tokenlar piyasaya çıksa değer ${kisaPara(fdv,"$")} olur (bugünkünün ${pc(fdv/mcap)} katı).`);if(fdv/mcap>=2)uyarilar.push(`Tam seyreltilmiş değer bugünkü piyasa değerinin ${pc(fdv/mcap)} katı: yüksek seyrelme riski.`);}
+    if(ath)temel.push(`<b>Tüm zamanların zirvesi:</b> $${tl(ath)}${athTarih?` (${new Date(athTarih).toLocaleDateString("tr-TR",{month:"long",year:"numeric"})})`:""}; şu an %${pc(Math.abs(athUzak||0),0)} altında.`);
+    if(athUzak!=null&&athUzak<=-90)uyarilar.push(`Zirvesinin %${pc(Math.abs(athUzak),0)} altında. Bu kadar düşmüş projelerin çoğu eski seviyelerine hiç dönemiyor.`);
+    if(mcap&&hacimUsd){const d=hacimUsd/mcap*100;temel.push(`<b>Likidite:</b> 24 saatlik işlem hacmi ${kisaPara(hacimUsd,"$")} (piyasa değerine oranı %${pc(d)}). ${hacimUsd<5e6?"Hacim düşük; alım-satımda fiyat kayabilir.":d>50?"Hacim piyasa değerine göre çok yüksek; spekülatif ilgi olabilir.":"Yeterli."}`);}
+  }else temel.push(`Temel veriler alınamadı (${esc(cgHata||"bilinmeyen hata")}). Teknik analiz ve kural kararı yine de geçerli.`);
+
+  /* ── risk ── */
+  if(rank==null||rank>300)uyarilar.push(rank?`Küçük ölçekli proje (${rank}. sırada).`:"Piyasa değeri sıralaması bilinmiyor.");
+  if(atrY!=null&&atrY>=7)uyarilar.push(`Çok oynak: günde ortalama %${pc(atrY)} hareket ediyor.`);
+  if(hacimUsd!=null&&hacimUsd<5e6)uyarilar.push("Düşük işlem hacmi: büyük emirlerde fiyat kayabilir.");
+  if(cs.length<365)uyarilar.push(`Binance'teki geçmişi kısa (${cs.length} gün): kuralın bu coindeki geçmişi az veriye dayanıyor.`);
+  const riskSayi=uyarilar.length;
+  const risk=rank&&rank<=10&&riskSayi===0?"Orta":riskSayi<=1?"Orta-yüksek":riskSayi<=3?"Yüksek":"Çok yüksek";
+
+  return {base,sym,unit,ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
+}
+
 /* ═══════════ PİYASA SEÇİMİ ═══════════ */
 const SCAN_EMPTY={signals:"Taramak için yukarıdaki düğmeye bas.",watch:"Retest bekleyen, desteğe yaklaşan ya da kırılıma hazırlanan coinler burada görünür.",rejected:"Kurulumu olup stop mesafesi veya puan yüzünden elenen coinler burada görünür."};
 function renderMkt(){
@@ -1466,15 +1639,65 @@ function switchMarket(m){
 }
 document.querySelectorAll(".mkt button").forEach(b=>b.addEventListener("click",()=>switchMarket(b.dataset.m)));
 
+/* ═══════════ ANALİZ EKRANI ═══════════ */
+let aBusy=false,aListeDolu=false;const aCache=new Map();
+function aSonlar(){return store.get("ddt_ason",[]);}
+function renderASon(){const l=aSonlar();$("aSon").innerHTML=l.map(x=>`<button type="button" data-a="${esc(x)}">${esc(x)}</button>`).join("");}
+async function aListeDoldur(){
+  if(aListeDolu)return;aListeDolu=true;
+  try{const t=await api("/api/v3/ticker/price");const set=new Set();
+    for(const r of t){const s=r.symbol;if(s.endsWith("USDT")&&!EXCL.has(s.slice(0,-4)))set.add(s.slice(0,-4));}
+    $("aList").innerHTML=[...set].sort().map(b=>`<option value="${b}">`).join("");}catch(e){aListeDolu=false;}
+}
+function renderAnaliz(a){
+  const k=a.karar,g=a.gecmis,u=a.unit,yil=g.gun/365;
+  const gecmisMetin=yil<1?`Bu coinin geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
+    :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?"Bu coinde kural hem düşüşü azalttı hem getiriyi artırdı."
+    :(g.kural.dd<g.altut.dd)?"Bu coinde kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı."
+    :(g.kural.ret>g.altut.ret)?"Bu coinde kural getiriyi artırdı ama düşüşleri azaltamadı."
+    :"Bu coinde kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi. Karara daha temkinli yaklaş.";
+  $("aSonuc").innerHTML=`
+    <div class="card" style="margin-top:12px"><div class="head"><div class="pair">${esc(a.base)}<small>/${a.unit==="TL"?"TRY":"USDT"}</small></div>
+      <div class="chip ${a.risk==="Orta"?"watch":"bad"}">Risk: ${a.risk}</div></div>
+      <div class="meta" style="margin-bottom:0">${esc(a.ad)} · ${tl(a.fiyat)} ${u} · 24 sa ${isaret(a.degisim)}</div></div>
+    <div class="verdict ${k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
+      <div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>
+      ${k.boyutMetin?`<div class="lvl"><b>Ne kadar</b>${k.boyutMetin}</div>`:""}
+      ${k.notlar.map(x=>`<p>${x}</p>`).join("")}</div>
+    <div class="sect">Teknik görünüm</div><ul class="blist">${a.teknik.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <div class="sect">Temel görünüm</div><ul class="blist">${a.temel.map(x=>`<li>${x}</li>`).join("")}</ul>
+    <div class="sect">Bu kural bu coinde geçmişte nasıl çalıştı<small>${dShort(g.bas)} ${new Date(g.bas).getFullYear()} – bugün (${pc(yil,1)} yıl), işlem başı %0,15 maliyet dahil</small></div>
+    <table class="table"><thead><tr><th></th><th>Toplam getiri</th><th>En büyük düşüş</th></tr></thead><tbody>
+      <tr><td>Kural (50 gün)</td><td class="${g.kural.ret>=0?"pos":"neg"}">${isaret(g.kural.ret*100,0)}</td><td class="neg">−%${pc(g.kural.dd*100,0)}</td></tr>
+      <tr><td>Al-tut</td><td class="${g.altut.ret>=0?"pos":"neg"}">${isaret(g.altut.ret*100,0)}</td><td class="neg">−%${pc(g.altut.dd*100,0)}</td></tr></tbody></table>
+    <p class="note" style="margin-top:8px">${gecmisMetin} Kural bu sürede ${g.kural.islem} kez al-sat yaptı.</p>
+    ${a.uyarilar.length?`<div class="sect">Dikkat</div><ul class="blist warn">${a.uyarilar.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
+    <p class="note">Veriler: fiyat ve teknik Binance (günlük kapanışlar), temel CoinGecko. ${new Date(a.zaman).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})} itibarıyla. Karar kısmı yalnızca 2018'den beri test ettiğimiz 50 günlük ortalama kuralına dayanır; diğer bilgiler karar vermene yardım etsin diye var. Hiçbir analiz geleceği kesin bilemez; bu bir yatırım tavsiyesi değildir.</p>`;
+}
+async function analizEt(girdi){
+  const q=String(girdi||"").trim().toUpperCase();if(!q||aBusy)return;
+  aBusy=true;const btn=$("aBtn");btn.disabled=true;btn.textContent="Analiz…";
+  $("aSonuc").innerHTML=`<div class="empty">${esc(q)} analiz ediliyor: fiyat geçmişi, teknik göstergeler ve temel veriler alınıyor…</div>`;
+  try{
+    let a=aCache.get(q);if(!a||Date.now()-a.zaman>10*60e3){a=await coinAnaliz(q);aCache.set(q,a);}
+    renderAnaliz(a);
+    const l=[a.base,...aSonlar().filter(x=>x!==a.base)].slice(0,8);store.set("ddt_ason",l);renderASon();
+  }catch(e){$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
+  finally{aBusy=false;btn.disabled=false;btn.textContent="Analiz et";}
+}
+$("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
+$("aSon").addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b){$("aIn").value=b.dataset.a;analizEt(b.dataset.a);}});
+
 /* ═══════════ görünüm ═══════════ */
-const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu"};
+const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Bir coini sade bir dille incele"};
 function show(v){
-  ["scan","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
+  ["scan","analiz","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
   document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
   $("viewSub").textContent=SUBS[v];window.scrollTo(0,0);
   if(v==="journal"){renderJournal();if(active().length)updateJournal().then(renderJournal).catch(e=>showErr("jAlerts",e));}
   if(v==="settings")fillSettings();
   if(v==="karne"){renderKarne();refreshKarne(false);}
+  if(v==="analiz"){renderASon();aListeDoldur();}
 }
 function renderAll(){renderScan();renderJournal();renderKarne();}
 function syncSegs(){document.querySelectorAll(".seg").forEach(seg=>{const k=seg.dataset.key;
