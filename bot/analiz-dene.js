@@ -25,7 +25,12 @@ function bagimsiz(k,from){
   p(`DOĞRULAMA BTC bağımsız:            kural ${(b.kural*100).toFixed(2)}% dd ${(b.dd*100).toFixed(2)}% | al-tut ${(b.altut*100).toFixed(2)}% dd ${(b.bdd*100).toFixed(2)}%`);
   p(`(araştırma sonucu: kural +2253% dd 58%, al-tut +637% dd 77%)`);
   // 2) örnek analizler
-  for(const q of ["BTC","ETH","SOL","PEPE","AVAX","OM","XYZQ","USDT","solusdt"]){
+  const SEC=(process.env.COINLER||"BTC,ETH,SOL,AVAX").split(",");
+  const kayit={};
+  for(const sym of ["SOL","BTC"]){try{const r=await fetch(`https://api.coingecko.com/api/v3/search?query=${sym}`);kayit["search_"+sym]=await r.json();await bekle(3000);
+    const id=sym==="SOL"?"solana":"bitcoin";const r2=await fetch(`https://api.coingecko.com/api/v3/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);kayit["coin_"+id]=await r2.json();await bekle(3000);}catch(e){p("kayıt hatası",e.message);}}
+  fs.writeFileSync(path.join(OUT,"cg-kayit.json"),JSON.stringify(kayit));
+  for(const q of SEC){
     try{const r=await C.coinAnaliz(q);
       p(`\n══ ${q} → ${r.sym} ${r.ad} fiyat ${r.fiyat} risk ${r.risk} gün ${r.gunSayisi} CG:${r.cgVar}`);
       p(`KARAR: ${r.karar.baslik} | seviye ${r.karar.seviye.toFixed(6)} uzak ${r.karar.uzak.toFixed(2)}% | ${r.karar.ne}: ${r.karar.neMetin}`);
