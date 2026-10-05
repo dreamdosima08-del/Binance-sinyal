@@ -1,0 +1,25 @@
+name: CORS testi
+on:
+  push:
+    branches: [cors-testi]
+permissions:
+  contents: write
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          O="Origin: https://dreamdosima08-del.github.io"
+          {
+          for u in "https://api.coingecko.com/api/v3/search?query=sol" \
+                   "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=solana,bitcoin" \
+                   "https://api.coingecko.com/api/v3/coins/solana?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false" \
+                   "https://data-api.binance.vision/api/v3/klines?symbol=SOLUSDT&interval=1d&limit=2"; do
+            echo "=== $u"
+            curl -s -D /tmp/h -o /tmp/b -H "$O" -m 20 "$u"; head -1 /tmp/h; grep -i "access-control-allow-origin\|x-ratelimit\|retry-after" /tmp/h
+            head -c 1500 /tmp/b; echo
+          done
+          } > cors-sonuc.txt 2>&1
+          git config user.name "github-actions[bot]"; git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          git add cors-sonuc.txt; git commit -qm "cors sonuc [skip ci]"; git push
