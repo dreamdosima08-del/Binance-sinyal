@@ -16,32 +16,32 @@ function bagimsiz(k,from){
 }
 (async()=>{
   const log=[];const p=(...a)=>{const s=a.join(" ");console.log(s);log.push(s);};
-  // 1) kural geçmişi doğrulaması: BTC, 2018-03-06'dan (araştırmadaki dönem)
-  let k=[],st=0;for(let g=0;g<6;g++){const b=await C.api(`/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1000&startTime=${st}`);k.push(...b);if(b.length<1000)break;st=b[b.length-1][0]+1;}
-  k=k.filter(x=>x[6]<Date.now());
-  const cs=k.map(C.parseK),from=Date.UTC(2018,2,6);
-  const a=C.kuralGecmisi(cs,from),b=bagimsiz(k,from);
-  p(`DOĞRULAMA BTC 2018-03-06→: uygulama kural ${(a.kural.ret*100).toFixed(2)}% dd ${(a.kural.dd*100).toFixed(2)}% | al-tut ${(a.altut.ret*100).toFixed(2)}% dd ${(a.altut.dd*100).toFixed(2)}%`);
-  p(`DOĞRULAMA BTC bağımsız:            kural ${(b.kural*100).toFixed(2)}% dd ${(b.dd*100).toFixed(2)}% | al-tut ${(b.altut*100).toFixed(2)}% dd ${(b.bdd*100).toFixed(2)}%`);
-  p(`(araştırma sonucu: kural +2253% dd 58%, al-tut +637% dd 77%)`);
-  // 2) örnek analizler
-  const SEC=(process.env.COINLER||"BTC,ETH,SOL,AVAX").split(",");
+  const SEC=(process.env.COINLER||"PEPE:USDT,SOL:TRY").split(",");
   const kayit={};
-  for(const sym of ["SOL","BTC"]){try{const r=await fetch(`https://api.coingecko.com/api/v3/search?query=${sym}`);kayit["search_"+sym]=await r.json();await bekle(3000);
-    const id=sym==="SOL"?"solana":"bitcoin";const r2=await fetch(`https://api.coingecko.com/api/v3/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false&sparkline=false`);kayit["coin_"+id]=await r2.json();await bekle(3000);}catch(e){p("kayıt hatası",e.message);}}
-  fs.writeFileSync(path.join(OUT,"cg-kayit.json"),JSON.stringify(kayit));
-  for(const q of SEC){
-    try{const r=await C.coinAnaliz(q);
-      p(`\n══ ${q} → ${r.sym} ${r.ad} fiyat ${r.fiyat} risk ${r.risk} gün ${r.gunSayisi} CG:${r.cgVar}`);
-      p(`KARAR: ${r.karar.baslik} | seviye ${r.karar.seviye.toFixed(6)} uzak ${r.karar.uzak.toFixed(2)}% | ${r.karar.ne}: ${r.karar.neMetin}`);
-      if(r.karar.boyutMetin)p(`NE KADAR: ${r.karar.boyutMetin}`);
-      r.karar.notlar.forEach(x=>p("  not: "+x));
-      r.teknik.forEach(x=>p("  T: "+x.replace(/<[^>]+>/g,"")));
-      r.temel.forEach(x=>p("  F: "+x.replace(/<[^>]+>/g,"")));
-      r.uyarilar.forEach(x=>p("  ⚠ "+x));
-      p(`  GEÇMİŞ (${r.gecmis.gun} gün, ${r.gecmis.kural.islem} işlem): kural ${(r.gecmis.kural.ret*100).toFixed(0)}% dd ${(r.gecmis.kural.dd*100).toFixed(0)}% | al-tut ${(r.gecmis.altut.ret*100).toFixed(0)}% dd ${(r.gecmis.altut.dd*100).toFixed(0)}%`);
-    }catch(e){p(`\n══ ${q} → HATA: ${e.message}`);}
-    await bekle(7000); // CoinGecko hız sınırı
+  try{const r=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=artificial-intelligence&order=market_cap_desc&per_page=3&page=1&price_change_percentage=24h,7d,30d");kayit.markets=await r.json();}catch(e){p("kayıt hatası",e.message);}
+  fs.writeFileSync(path.join(OUT,"cg-kayit.json"),JSON.stringify(kayit,null,1));
+  await bekle(5000);
+  for(const x of ["AVAX","ETH","DOGE","FET"]){try{
+    const g=async q=>C.closedOnly((await C.api(`/api/v3/klines?symbol=${q}USDT&interval=1d&limit=92`)).map(C.parseK),Date.now());
+    const [a,b]=await Promise.all([g(x),g("BTC")]);const ra=[],rb=[];for(let i=1;i<a.length;i++){ra.push(a[i].c/a[i-1].c-1);rb.push(b[i].c/b[i-1].c-1);}
+    p(`KOR ${x}-BTC pearson ${C.korelasyon(ra,rb).toFixed(2)} spearman ${C.benzerlik(ra,rb).toFixed(2)} maxabs ${Math.max(...ra.map(Math.abs)).toFixed(3)} n ${ra.length} t ${a[1].t===b[1].t}`);}catch(e){p("KOR hata "+e.message);}}
+  const ornek={};
+  const t=x=>String(x).replace(/<[^>]+>/g,"");
+  for(const q of SEC){const [coin,pz]=q.split(":");
+    try{const r=await C.coinAnaliz(coin,pz);ornek[coin]=r;
+      p(`\n══ ${coin} (${pz}) → ${r.sym} ${r.unit} fiyat ${r.fiyat} 24s ${r.degisim} | ${r.karar.baslik}`);
+      if(r.piyasaNot)p("  PİYASA NOTU: "+r.piyasaNot);
+      p("  kural: "+t(r.karar.neMetin));r.karar.notlar.forEach(x=>p("  not: "+t(x)));
+      const h=r.hedef;if(h){p(`  HEDEF (n=${h.n}, kisa=${h.kisa}) stop ${h.stop.fiyat} (${h.stop.yuzde.toFixed(1)}%) önce-stop %${h.stop.olas.toFixed(0)} [kendi ${h.kendi.ilkStop.toFixed(0)}]`);
+        h.tps.forEach((x,i)=>p(`   TP${i+1} ${x.fiyat} (+${x.yuzde.toFixed(1)}%) ${x.kaynak} kat ${x.kat.toFixed(2)} rr ${x.rr.toFixed(2)} olas %${x.olas.toFixed(0)} [kendi ${h.kendi.tp[i].toFixed(0)}]`));}
+      const s=r.sektor;if(s&&s.hata)p("  SEKTÖR HATA: "+s.hata);else if(s){p(`  SEKTÖR ${s.ad} (${s.id}) → ${s.adTR} yön ${s.yon} rS ${s.rS} rB ${s.rB} ust ${s.ustS}/${s.genisN}`);
+        p(`   coin 24/7/30: ${[s.coin.d24,s.coin.d7,s.coin.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")} | tipik ${[s.med.d24,s.med.d7,s.med.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")}`);
+        s.esler.forEach(e=>p(`   ${e.sym.padEnd(8)} ${[e.d24,e.d7,e.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")} r=${e.r==null?"-":e.r.toFixed(2)} ust=${e.ust}`));
+        s.yorum.forEach(y=>p("   » "+t(y)));}
+      r.teknik.forEach(x=>p("  T: "+t(x)));
+    }catch(e){p(`\n══ ${q} → HATA: ${e.stack||e.message}`);}
+    await bekle(25000); // CoinGecko hız sınırı
   }
+  fs.writeFileSync(path.join(OUT,"cg-kayit.json"),JSON.stringify(ornek));
   fs.writeFileSync(path.join(OUT,"analiz-sonuc.txt"),log.join("\n"));
 })().catch(e=>{console.error(e);process.exit(1);});
