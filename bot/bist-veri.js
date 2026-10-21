@@ -123,7 +123,8 @@ const log=(...a)=>console.log(...a);
     if(!seriler[k]){log("BIST30 verisi yok:",k);continue;}
     try{const a=C.hisseHesap(k,seriler[k],on),hd=a.hedef;
       liste.push({kod:k,ad:a.ad,fiyat:a.fiyat,d1:yuv(a.degisim),ic:a.karar.ic,uzak:yuv(a.karar.uzak),risk:a.risk,gun:a.veriGunu,
-        tps:hd.tps.map(t=>({f:yuv(t.fiyat),y:yuv(t.yuzde),o:Math.round(t.olas)})),stop:{f:yuv(hd.stop.fiyat),y:yuv(hd.stop.yuzde),o:Math.round(hd.stop.olas)}});
+        tps:hd.tps.map(t=>({f:yuv(t.fiyat),y:yuv(t.yuzde),o:Math.round(t.olas)})),stop:{f:yuv(hd.stop.fiyat),y:yuv(hd.stop.yuzde),o:Math.round(hd.stop.olas)},
+        ds:(hd.destekler||[]).map(d=>({f:yuv(d.fiyat),y:yuv(d.yuzde),o:Math.round(d.olas)}))});
     }catch(e){log("BIST30 hesap hatası",k,e.message);}
   }
   fs.writeFileSync(path.join(VD,"bist30.json"),JSON.stringify({zaman:Date.now(),sonGun,donem:BIST30.donem,liste}));
@@ -142,11 +143,11 @@ const log=(...a)=>console.log(...a);
     const tr=x=>C.tl(x),yz=x=>x==null?"—":(x>=0?"+":"−")+"%"+C.pc(Math.abs(x),1);
     const sirali=[...liste].sort((a,b)=>(b.ic-a.ic)||a.kod.localeCompare(b.kod));
     const xu=ozetObj.xu;
-    const satirlar=sirali.map(x=>`${x.ic?"🟢":"🟠"} <b>${x.kod}</b> ${tr(x.fiyat)} TL (${yz(x.d1)})\n    TP1 ${tr(x.tps[0].f)} <i>%${x.tps[0].o}</i> · TP2 ${tr(x.tps[1].f)} <i>%${x.tps[1].o}</i> · TP3 ${tr(x.tps[2].f)} <i>%${x.tps[2].o}</i> · Stop ${tr(x.stop.f)}`);
+    const satirlar=sirali.map(x=>`${x.ic?"🟢":"🟠"} <b>${x.kod}</b> ${tr(x.fiyat)} TL (${yz(x.d1)})\n    TP1 ${tr(x.tps[0].f)} <i>%${x.tps[0].o}</i> · TP2 ${tr(x.tps[1].f)} <i>%${x.tps[1].o}</i> · TP3 ${tr(x.tps[2].f)} <i>%${x.tps[2].o}</i> · Stop ${tr(x.stop.f)}${x.ds&&x.ds.length?`\n    `+x.ds.map((d,i)=>`S${i+1} ${tr(d.f)}`).join(" · "):""}`);
     const tarih=new Date(sonGun*864e5).toLocaleDateString("tr-TR",{day:"numeric",month:"long"});
     const metin=`📋 <b>BIST 30 hedef listesi</b> · ${tarih} kapanışı\n`
       +`BIST 100 dolar bazında ${xu.ust?"yükselişte 🟢":"zayıf 🟠"}${xu.u&&xu.u.d21!=null?`, son 1 ay ${yz(xu.u.d21)}`:""}.\n`
-      +`🟢 trend yükselişte · 🟠 trend zayıf (dolar bazında). Yüzdeler: 1 ay içinde stopa değmeden ulaşma olasılığı, üç aşağı beş yukarı.\n\n`
+      +`🟢 trend yükselişte · 🟠 trend zayıf (dolar bazında). Yüzdeler: 1 ay içinde stopa değmeden ulaşma olasılığı, üç aşağı beş yukarı. S1–S3: destekler.\n\n`
       +satirlar.join("\n")
       +`\n\n<i>Al tavsiyesi değil: hisseler için testten geçmiş bir al kuralımız yok. Ayrıntı: site → Analiz → Hisse → BIST 30 listesi.</i>`;
     // Telegram mesaj sınırı 4096 karakter: gerekirse satır sınırından bölünür

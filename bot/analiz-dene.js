@@ -16,7 +16,7 @@ function bagimsiz(k,from){
 }
 (async()=>{
   const log=[];const p=(...a)=>{const s=a.join(" ");console.log(s);log.push(s);};
-  const SEC=(process.env.COINLER||"PEPE:USDT,SOL:TRY").split(",");
+  const SEC=(process.env.COINLER||"SOL:TRY,PEPE:USDT,AVAX:USDT").split(",");
   const kayit={};
   try{const r=await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=artificial-intelligence&order=market_cap_desc&per_page=3&page=1&price_change_percentage=24h,7d,30d");kayit.markets=await r.json();}catch(e){p("kayıt hatası",e.message);}
   fs.writeFileSync(path.join(OUT,"cg-kayit.json"),JSON.stringify(kayit,null,1));
@@ -33,7 +33,9 @@ function bagimsiz(k,from){
       if(r.piyasaNot)p("  PİYASA NOTU: "+r.piyasaNot);
       p("  kural: "+t(r.karar.neMetin));r.karar.notlar.forEach(x=>p("  not: "+t(x)));
       const h=r.hedef;if(h){p(`  HEDEF (n=${h.n}, kisa=${h.kisa}) stop ${h.stop.fiyat} (${h.stop.yuzde.toFixed(1)}%) önce-stop %${h.stop.olas.toFixed(0)} [kendi ${h.kendi.ilkStop.toFixed(0)}]`);
-        h.tps.forEach((x,i)=>p(`   TP${i+1} ${x.fiyat} (+${x.yuzde.toFixed(1)}%) ${x.kaynak} kat ${x.kat.toFixed(2)} rr ${x.rr.toFixed(2)} olas %${x.olas.toFixed(0)} [kendi ${h.kendi.tp[i].toFixed(0)}]`));}
+        h.tps.forEach((x,i)=>p(`   TP${i+1} ${x.fiyat} (+${x.yuzde.toFixed(1)}%) ${x.kaynak} kat ${x.kat.toFixed(2)} rr ${x.rr.toFixed(2)} olas %${x.olas.toFixed(0)} [kendi ${h.kendi.tp[i].toFixed(0)}]`));
+        h.destekler.forEach((d,i)=>p(`   S${i+1} ${d.fiyat} (${d.yuzde.toFixed(1)}%) ${d.kaynak}/${d.temas} kat ${d.kat.toFixed(2)} inme %${d.olas.toFixed(0)}`));
+        p("   ikinci: "+JSON.stringify(r.ikinci));}
       const s=r.sektor;if(s&&s.hata)p("  SEKTÖR HATA: "+s.hata);else if(s){p(`  SEKTÖR ${s.ad} (${s.id}) → ${s.adTR} yön ${s.yon} rS ${s.rS} rB ${s.rB} ust ${s.ustS}/${s.genisN}`);
         p(`   coin 24/7/30: ${[s.coin.d24,s.coin.d7,s.coin.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")} | tipik ${[s.med.d24,s.med.d7,s.med.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")}`);
         s.esler.forEach(e=>p(`   ${e.sym.padEnd(8)} ${[e.d24,e.d7,e.d30].map(v=>v==null?"-":v.toFixed(1)).join(" ")} r=${e.r==null?"-":e.r.toFixed(2)} ust=${e.ust}`));

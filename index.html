@@ -95,6 +95,7 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .b30h{display:flex;align-items:center;gap:10px;font-size:14px}.b30h b{font-size:15px;min-width:58px}.b30h>span:nth-child(2){flex:1;color:var(--muted)}
 .b30t{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px}.b30t.yuk{color:var(--gain);background:color-mix(in srgb,var(--gain) 14%,transparent)}.b30t.zay{color:var(--amber);background:color-mix(in srgb,var(--amber) 14%,transparent)}
 .b30l{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-top:7px;font-size:13px;font-variant-numeric:tabular-nums}
+.b30d{grid-template-columns:1fr 1fr 1fr;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
 .b30o{color:var(--muted);font-weight:700;font-size:12px}
 .aklab{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:2px}
 .chips button small{font-weight:600;opacity:.7;margin-left:4px;font-size:11px}
@@ -110,6 +111,7 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .tpt .ad{font-weight:800;width:44px}
 .tpt .fy{font-weight:700}
 .tpt .fy small{display:block;font-weight:600;color:var(--muted);font-size:12px;margin-top:2px}
+.tpt .fy small.ik{color:var(--text);opacity:.75;font-weight:600}
 .tpt .ol{text-align:right;width:46%}
 .tpt .ol b{font-size:15px}
 .tpt .ol small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
@@ -1549,7 +1551,7 @@ const isaret=(v,d=1)=>Math.abs(v)<(d?0.05:0.5)?"%0":(v>=0?"+":"−")+"%"+pc(Math
    30 gün içinde hedefe stoptan önce kaç kez ulaşılırdı. Geçmiş kısa ise 7 büyük coinin
    (2017–2026, aynı yöntem) ortalamasına doğru çekilir. 2022–2025 sınamasında tahminler
    gerçekleşenden yıllık ortalama ~8 puan saptı; bu yüzden ±10 puanlık aralıkla gösterilir. */
-const TP_HAVUZ={ust:[51,32,20,44],alt:[43,23,10,43]};   // [2 ATR, 4 ATR, 7 ATR, TP1'den önce stop]
+const TP_HAVUZ={ust:[51,32,20,44],alt:[43,23,10,43],dus:{ust:[53,22.5,5.5],alt:[48,20,6]}};   // [2 ATR, 4 ATR, 7 ATR, TP1'den önce stop]
 const TP_UFUK=30,TP_STOP=2,TP_KAT=[2,4,7];
 function direncler(cs,fiyat,gun=365){
   const L=3,from=Math.max(L,cs.length-gun),hs=[];
@@ -1558,6 +1560,27 @@ function direncler(cs,fiyat,gun=365){
     if(hi&&cs[i].h>fiyat)hs.push(cs[i].h);}
   return hs.sort((a,b)=>a-b);
 }
+/* S1–S3 destekleri: son 1 yılın dipleri (her iki yanında 3 gün daha yüksek), %3 içindekiler tek seviye sayılır.
+   Az bulunursa günlük oynaklığın (ATR) 2, 4, 7 katı aşağısı kullanılır. Olasılık: ufuk içinde o seviyeye inme sıklığı. */
+function destekBul(cs,fiyat,A,gun=365){
+  const L=3,from=Math.max(L,cs.length-gun),ls=[];
+  for(let i=from;i<cs.length-L;i++){let lo=true;for(let j=i-L;j<=i+L;j++){if(j!==i&&cs[j].l<=cs[i].l){lo=false;break;}}if(lo&&cs[i].l<fiyat*0.995&&cs[i].l<fiyat-0.4*A)ls.push(cs[i].l);}   // 0,4 ATR'den yakın dip zaten bugünkü fiyat sayılır
+  const ad=ls.sort((a,b)=>b-a),out=[];
+  for(const x of ad){if(out.some(y=>Math.abs(y.fiyat-x)/x<0.03))continue;
+    if(out.length&&(out[out.length-1].fiyat-x)<0.75*A)continue;
+    out.push({fiyat:x,temas:ls.filter(z=>Math.abs(z-x)/x<0.03).length,kaynak:"dip"});if(out.length>=3)break;}
+  for(const m of [2,4,7]){if(out.length>=3)break;const x=fiyat-m*A,son=out.length?out[out.length-1].fiyat:fiyat;
+    if(x>0&&son-x>=0.75*A)out.push({fiyat:x,temas:0,kaynak:"atr"});}
+  return out.slice(0,3).map(d=>({...d,kat:(fiyat-d.fiyat)/A,yuzde:(d.fiyat/fiyat-1)*100}));
+}
+function dusSiklik(cs,M,H,ic){
+  const c=cs.map(x=>x.c),a=atr(cs),m=smaDizi(c,50);let n=0;const hit=M.map(()=>0);
+  for(let i=50;i<cs.length-H;i++){if(!a[i]||m[i]==null||(c[i]>m[i])!==ic)continue;n++;
+    let mn=Infinity;for(let j=i+1;j<=i+H;j++)mn=Math.min(mn,cs[j].l);M.forEach((k,q)=>{if(mn<=c[i]-k*a[i])hit[q]++;});}
+  return {n,p:hit.map(v=>n?v/n*100:0)};
+}
+function havuzDus(kat,ic,hv){const b=hv.dus[ic?"ust":"alt"],p=[[0,100],[2,b[0]],[4,b[1]],[7,b[2]],[12,b[2]/4]];
+  if(kat>=12)return b[2]/4;for(let i=1;i<p.length;i++)if(kat<=p[i][0]){const [x0,y0]=p[i-1],[x1,y1]=p[i];return y0+(y1-y0)*(kat-x0)/(x1-x0);}}
 function tpSiklik(cs,S,M,H,ic){
   const c=cs.map(x=>x.c),a=atr(cs),m=smaDizi(c,50);let n=0,ilkStop=0;const hit=M.map(()=>0);
   for(let i=50;i<cs.length-H;i++){
@@ -1589,7 +1612,9 @@ function hedefHesap(cs,fiyat,ic,opt={}){
   const f=tpSiklik(cs,TP_STOP,tps.map(t=>t.kat),UFUK,ic),w=f.n/(f.n+150);
   tps.forEach((t,i)=>{t.olas=w*f.tp[i]+(1-w)*havuzTp(t.kat,ic,HV);t.rr=t.kat/TP_STOP;});
   const stop=fiyat-TP_STOP*A;
-  return {A,stop:{fiyat:stop,yuzde:(stop/fiyat-1)*100,olas:w*f.ilkStop+(1-w)*HV[ic?"ust":"alt"][3]},tps,n:f.n,kendi:f,ufuk:UFUK,kisa:f.n<300,
+  const destekler=destekBul(cs,fiyat,A),ds=dusSiklik(cs,destekler.map(d=>d.kat),UFUK,ic),wd=ds.n/(ds.n+150);
+  destekler.forEach((d,i)=>{d.olas=wd*ds.p[i]+(1-wd)*havuzDus(d.kat,ic,HV);});
+  return {A,destekler,stop:{fiyat:stop,yuzde:(stop/fiyat-1)*100,olas:w*f.ilkStop+(1-w)*HV[ic?"ust":"alt"][3]},tps,n:f.n,kendi:f,ufuk:UFUK,kisa:f.n<300,
     ufukMetin:opt.ufukMetin||`${UFUK} gün`,sinama:opt.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."};
 }
 
@@ -1731,7 +1756,7 @@ async function coinAnaliz(girdi,piyasa){
   const zirve=Math.max(...c),zirveUzak=(c[n]/zirve-1)*100;
   const v30=cs.slice(-30).reduce((a,x)=>a+x.qv,0)/30,v90=cs.length>=90?cs.slice(-90,-30).reduce((a,x)=>a+x.qv,0)/60:null;
   const sev=seviyeBul(cs,fiyatV),gec=kuralGecmisi(cs),hedef=hedefHesap(cs,fiyatV,ic);
-  if(hedef){hedef.stop.fiyat*=kur;hedef.tps.forEach(t=>t.fiyat*=kur);}
+  if(hedef){hedef.stop.fiyat*=kur;hedef.tps.forEach(t=>t.fiyat*=kur);hedef.destekler.forEach(d=>d.fiyat*=kur);}
   sev.destek.forEach(x=>x.fiyat*=kur);sev.direnc.forEach(x=>x.fiyat*=kur);
   const kSev=cevir?`USDT grafiğinde ${tl(m50[n])} USDT (bugünkü kurla yaklaşık ${tl(m50[n]*kur)} TL)`:`${tl(m50[n])} ${unit}`;
   const md=cg&&cg.market_data||{};
@@ -1778,7 +1803,7 @@ async function coinAnaliz(girdi,piyasa){
   if(!(cg&&cg.market_data&&cg.market_data.ath))teknik.push(`<b>Zirveden uzaklık:</b> Binance'teki en yüksek kapanışının %${pc(Math.abs(zirveUzak),0)} ${zirveUzak<-0.5?"altında":"seviyesinde"}.`);
   if(v90)teknik.push(`<b>İlgi (hacim):</b> Son 30 günün işlem hacmi önceki 60 güne göre ${isaret((v30/v90-1)*100,0)}${v30>v90*1.2?": ilgi artıyor.":v30<v90*0.8?": ilgi azalıyor.":"."}`);
   const sv=x=>x.map(s=>`${tl(s.fiyat)}${s.temas>1?` (${s.temas} kez)`:""}`).join(", ");
-  teknik.push(`<b>Yakın seviyeler (son 6 ay):</b> ${sev.destek.length?`destek ${sv(sev.destek)}`:"altta yakın destek görünmüyor"}; ${sev.direnc.length?`direnç ${sv(sev.direnc)}`:"üstte yakın direnç görünmüyor"} ${unit}.`);
+  teknik.push(`<b>Yakın dirençler (son 6 ay):</b> ${sev.direnc.length?`${sv(sev.direnc)} ${unit}`:"üstte yakın direnç görünmüyor"}. Destekler için yukarıdaki S1–S3'e bak.`);
 
   /* ── temel görünüm ── */
   const temel=[],uyarilar=[];
@@ -1810,7 +1835,12 @@ async function coinAnaliz(girdi,piyasa){
   if(cg){try{sektor=await sektorAnaliz(cg,base,veriBirim==="USDT"?cs:[],btc);}catch(e){if(e instanceof NetErr)throw e;sektor={hata:e.message};}}
   else sektor={hata:"Temel veriler alınamadığı için sektör karşılaştırması yapılamadı."};
 
-  return {base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
+  /* seviyelerin diğer para birimindeki karşılığı (TRY seçiliyse USDT, USDT seçiliyse TL) */
+  let ikinci=null;
+  try{if(unit==="TL"&&cevir)ikinci={birim:"USDT",carpan:1/kur};
+    else{const u=+(await api(`/api/v3/ticker/price?symbol=USDTTRY`)).price;if(u>0)ikinci=unit==="TL"?{birim:"USDT",carpan:1/u}:{birim:"TL",carpan:u};}}
+  catch(e){if(e instanceof NetErr)throw e;}
+  return {base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,ikinci,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
 }
 
 
@@ -1820,7 +1850,7 @@ async function coinAnaliz(girdi,piyasa){
    BIST 100'de düşüşü azalttı ama büyük hisselerin 18'inden yalnızca 4'ünde al-tut'tan iyiydi.
    Bu yüzden hisselerde al/bekle kararı verilmez; trend yalnızca bilgi olarak gösterilir. */
 const BIST_RAW="https://raw.githubusercontent.com/dreamdosima08-del/Binance-sinyal/bist-veri/bist/";
-const BIST_HAVUZ={ust:[52,28,10,41],alt:[47,22,7,42]};   // 18 büyük hisse, 2006–2026, dolar bazında, 21 işlem günü
+const BIST_HAVUZ={ust:[52,28,10,41],alt:[47,22,7,42],dus:{ust:[49,22,5],alt:[48,21,6]}};   // 18 büyük hisse, 2006–2026, dolar bazında, 21 işlem günü
 let bistOn=null;
 async function bistGet(f){
   let r;try{r=await fetch(BIST_RAW+f,{cache:"no-store"});}catch(e){throw new Error("Borsa İstanbul verisine ulaşılamadı. İnternetini kontrol et");}
@@ -1866,7 +1896,11 @@ function hisseHesap(kod,gHam,on){
   const gec=kuralGecmisi(cs),eski=g[n][0]<oz.sonGun-5;
   const hedef=hedefHesap(cs,fiyatV,ic,{ufuk:21,havuz:BIST_HAVUZ,ufukMetin:"1 ay (21 işlem günü)",
     sinama:"Bu yöntemi 18 büyük hissede 2018–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 10 puan saptı."});
-  if(hedef){hedef.stop.fiyat*=kurSon;hedef.tps.forEach(t=>t.fiyat*=kurSon);}
+  if(hedef){hedef.stop.fiyat*=kurSon;hedef.tps.forEach(t=>t.fiyat*=kurSon);
+    // destekler: yatırımcının baktığı TL grafiğinin dipleri; inme olasılığı yine dolar serisinden (aynı ATR katı)
+    const A=at[n];hedef.destekler=destekBul(csTL,fiyat,A);
+    const ds=dusSiklik(cs,hedef.destekler.map(d=>d.kat),21,ic),wd=ds.n/(ds.n+150);
+    hedef.destekler.forEach((d,i)=>{d.olas=wd*ds.p[i]+(1-wd)*havuzDus(d.kat,ic,BIST_HAVUZ);});hedef.destekTL=true;}
   const sev=seviyeBul(csTL,fiyat);
 
   /* ── trend bilgisi (karar değil) ── */
@@ -1896,7 +1930,7 @@ function hisseHesap(kod,gHam,on){
   const v20=csTL.slice(-20).reduce((a,x)=>a+x.qv,0)/20,v60=csTL.length>=80?csTL.slice(-80,-20).reduce((a,x)=>a+x.qv,0)/60:null;
   teknik.push(`<b>İşlem hacmi:</b> Son 20 günde günlük ortalama ${kisaPara(v20*1e6,"TL")}${v60?`; önceki 3 aya göre ${isaret((v20/v60-1)*100,0)}${v20>v60*1.2?": ilgi artıyor.":v20<v60*0.8?": ilgi azalıyor.":"."}`:"."}`);
   const sv=x=>x.map(s=>`${tl(s.fiyat)}${s.temas>1?` (${s.temas} kez)`:""}`).join(", ");
-  teknik.push(`<b>Yakın seviyeler (TL grafiği, son 6 ay):</b> ${sev.destek.length?`destek ${sv(sev.destek)}`:"altta yakın destek görünmüyor"}; ${sev.direnc.length?`direnç ${sv(sev.direnc)}`:"üstte yakın direnç görünmüyor"} TL.`);
+  teknik.push(`<b>Yakın dirençler (TL grafiği, son 6 ay):</b> ${sev.direnc.length?`${sv(sev.direnc)} TL`:"üstte yakın direnç görünmüyor"}. Destekler için yukarıdaki S1–S3'e bak.`);
 
   /* ── temel ── */
   const temel=[],uyarilar=[];
@@ -2089,14 +2123,24 @@ function olasHtml(p,stop){const o=yuv5(p),lo=Math.max(0,o-10),hi=Math.min(100,o+
 function hedefHtml(a){
   const h=a.hedef,u=a.unit;if(!h)return "";
   const kay=t=>t.kaynak==="zirve"?"zirvenin hemen altı":t.kaynak==="direnc"?"direncin hemen altı":"oynaklığa göre";
-  const satir=(ad,t,i)=>`<tr><td class="ad">${ad}</td><td class="fy">${tl(t.fiyat)} ${u}<small>${isaret(t.yuzde)} · ${kay(t)} · risk/ödül 1:${pc(t.rr,1)}</small></td><td class="ol">${olasHtml(t.olas)}</td></tr>`;
+  const ik=a.ikinci,ikf=x=>ik?`<small class="ik">≈ ${tl(x*ik.carpan)} ${ik.birim}</small>`:"";
+  const satir=(ad,t,i)=>`<tr><td class="ad">${ad}</td><td class="fy">${tl(t.fiyat)} ${u}${ikf(t.fiyat)}<small>${isaret(t.yuzde)} · ${kay(t)} · risk/ödül 1:${pc(t.rr,1)}</small></td><td class="ol">${olasHtml(t.olas)}</td></tr>`;
   return `<div class="sect">Hedefler: şimdi alınırsa<small>${a.karar.bilgi?"Bu bir al tavsiyesi değil; şimdi girersen geçerli seviyeler.":a.karar.ic?"Kural alım bölgesinde.":"Kural şu an BEKLE diyor; bu seviyeler yine de şimdi girersen geçerli olanlar."} Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde stopa değmeden ulaşma.</small></div>
     <div class="sekt"><table class="tpt"><tbody>
-      <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}<small>${a.tur==="hisse"?"son kapanış":"şu anki fiyat"}</small></td><td class="ol"></td></tr>
+      <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}${ikf(a.fiyat)}<small>${a.tur==="hisse"?"son kapanış":"şu anki fiyat"}</small></td><td class="ol"></td></tr>
       ${h.tps.map((t,i)=>satir("TP"+(i+1),t,i)).join("")}
-      <tr><td class="ad">Stop</td><td class="fy">${tl(h.stop.fiyat)} ${u}<small>${isaret(h.stop.yuzde)} · günlük oynaklığın 2 katı</small></td><td class="ol">${olasHtml(h.stop.olas,true)}<small>TP1'den önce stopa değme</small></td></tr>
+      <tr><td class="ad">Stop</td><td class="fy">${tl(h.stop.fiyat)} ${u}${ikf(h.stop.fiyat)}<small>${isaret(h.stop.yuzde)} · günlük oynaklığın 2 katı</small></td><td class="ol">${olasHtml(h.stop.olas,true)}<small>TP1'den önce stopa değme</small></td></tr>
     </tbody></table>
-    <p class="note" style="margin-top:10px">TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak. Olasılıklar bir tahmin değil, bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık: ${a.karar.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi hedefe kaç kez ulaşılırdı${a.tur==="hisse"?" (dolar bazında hesaplanıp bugünkü kurla TL'ye çevrildi)":""}. ${h.kisa?`Geçmişi kısa olduğu için sonuç büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasına doğru düzeltildi. `:""}${h.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."} O yüzden "üç aşağı beş yukarı" olarak oku.</p></div>`;
+    <p class="note" style="margin-top:10px">TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak. Olasılıklar bir tahmin değil, bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık: ${a.karar.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi hedefe kaç kez ulaşılırdı${a.tur==="hisse"?" (dolar bazında hesaplanıp bugünkü kurla TL'ye çevrildi)":""}. ${h.kisa?`Geçmişi kısa olduğu için sonuç büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasına doğru düzeltildi. `:""}${h.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."} O yüzden "üç aşağı beş yukarı" olarak oku.</p></div>${destekHtml(a)}`;
+}
+function destekHtml(a){
+  const h=a.hedef,u=a.unit,ik=a.ikinci;if(!h||!h.destekler||!h.destekler.length)return "";
+  const st=h.stop.fiyat;
+  return `<div class="sect">Destekler: S1 – S2 – S3<small>Düşüşte fiyatın tutunabileceği seviyeler. Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde o seviyeye inme.</small></div>
+    <div class="sekt"><table class="tpt"><tbody>
+      ${h.destekler.map((d,i)=>`<tr><td class="ad">S${i+1}</td><td class="fy">${tl(d.fiyat)} ${u}${ik?`<small class="ik">≈ ${tl(d.fiyat*ik.carpan)} ${ik.birim}</small>`:""}<small>${isaret(d.yuzde)} · ${d.kaynak==="dip"?(d.temas>1?`${d.temas} kez dönülmüş dip`:"son 1 yılın dibi"):"oynaklığa göre (yakında dip yok)"}${d.fiyat<st?" · stopun altında":""}</small></td><td class="ol">${olasHtml(d.olas,true)}<small>bu seviyeye inme</small></td></tr>`).join("")}
+    </tbody></table>
+    <p class="note" style="margin-top:10px">Destekler ${h.destekTL?"TL grafiğinde ":a.ikinci&&a.unit==="TL"?"USDT grafiğinde (TL'ye bugünkü kurla çevrildi) ":""}son 1 yılın dip noktalarından bulunur; birbirine %3'ten yakın dipler tek seviye sayılır. Destek kırılırsa fiyat genelde bir sonraki desteğe kadar inebilir. İnme olasılıkları da hedeflerdeki gibi bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık; 2022–2025 sınamasında ortalama 6–12 puan saptı.</p></div>`;
 }
 function sektorHtml(a){
   const s=a.sektor;if(!s)return "";
@@ -2143,8 +2187,8 @@ async function bist30Goster(){
       <div class="chips b30s">${[["ad","A–Z"],["trend","Trende göre"],["tp1","TP1 olasılığına göre"]].map(([k,a])=>`<button type="button" data-s="${k}"${sir===k?' aria-pressed="true"':""}>${a}</button>`).join("")}</div>
       <div class="b30">${l.map(x=>`<button type="button" class="b30r" data-h="${esc(x.kod)}">
         <div class="b30h"><b>${esc(x.kod)}</b><span>${tl(x.fiyat)} TL <span class="${x.d1>=0?"pos":"neg"}">${isaret(x.d1)}</span></span><span class="b30t ${x.ic?"yuk":"zay"}">${x.ic?"Yükselişte":"Zayıf"}</span></div>
-        <div class="b30l"><span>TP1 ${tl(x.tps[0].f)} ${ol(x.tps[0].o)}</span><span>TP2 ${tl(x.tps[1].f)} ${ol(x.tps[1].o)}</span><span>TP3 ${tl(x.tps[2].f)} ${ol(x.tps[2].o)}</span><span class="neg">Stop ${tl(x.stop.f)}</span></div></button>`).join("")}</div>
-      <p class="note">Yüzdeler: 1 ay (21 işlem günü) içinde stopa değmeden o hedefe ulaşma olasılığı, hissenin kendi geçmişinden; üç aşağı beş yukarı. Trend dolar bazında 50 günlük ortalamaya göre. Bir hisseye dokununca tam analizi açılır. Bu liste al tavsiyesi değildir: hisseler için testten geçmiş bir al kuralımız yok. Aynı liste her akşam Telegram'a da gelir.</p>`;
+        <div class="b30l"><span>TP1 ${tl(x.tps[0].f)} ${ol(x.tps[0].o)}</span><span>TP2 ${tl(x.tps[1].f)} ${ol(x.tps[1].o)}</span><span>TP3 ${tl(x.tps[2].f)} ${ol(x.tps[2].o)}</span><span class="neg">Stop ${tl(x.stop.f)}</span></div>${x.ds&&x.ds.length?`<div class="b30l b30d">${x.ds.map((d,i)=>`<span>S${i+1} ${tl(d.f)} <span class="b30o">%${d.o}</span></span>`).join("")}</div>`:""}</button>`).join("")}</div>
+      <p class="note">TP yüzdeleri: 1 ay (21 işlem günü) içinde stopa değmeden o hedefe ulaşma olasılığı; S1–S3 yüzdeleri: aynı sürede o desteğe inme olasılığı, hissenin kendi geçmişinden; üç aşağı beş yukarı. Trend dolar bazında 50 günlük ortalamaya göre. Bir hisseye dokununca tam analizi açılır. Bu liste al tavsiyesi değildir: hisseler için testten geçmiş bir al kuralımız yok. Aynı liste her akşam Telegram'a da gelir.</p>`;
   }catch(e){if(aGosterilen==="bist30")$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
 }
 $("aSonuc").addEventListener("click",e=>{
