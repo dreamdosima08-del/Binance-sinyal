@@ -84,9 +84,12 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .verdict{border-radius:16px;padding:16px;margin:12px 0;border:1px solid var(--line);background:var(--surface)}
 .verdict.al{border-color:color-mix(in srgb,var(--gain) 55%,var(--line));background:color-mix(in srgb,var(--gain) 8%,var(--surface))}
 .verdict.bekle{border-color:color-mix(in srgb,var(--amber) 55%,var(--line));background:color-mix(in srgb,var(--amber) 8%,var(--surface))}
+.verdict.bilgi{border-color:color-mix(in srgb,var(--sonar) 45%,var(--line));background:color-mix(in srgb,var(--sonar) 6%,var(--surface))}
+.verdict.bilgi.yuk h3{color:var(--gain)} .verdict.bilgi.zay h3{color:var(--amber)}
 .verdict h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
 .verdict.al h3{color:var(--gain)} .verdict.bekle h3{color:var(--amber)}
 .verdict p{margin:8px 0 0;font-size:14px}
+#aMkt button small{display:block;margin:2px 0 0;font-size:11px}
 .aklab{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:2px}
 .chips button small{font-weight:600;opacity:.7;margin-left:4px;font-size:11px}
 .chips button[aria-pressed="true"]{border-color:var(--sonar);color:var(--text)}
@@ -273,7 +276,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 
   <!-- ═════════ ANALİZ ═════════ -->
   <main id="v-analiz" hidden>
-    <div class="srcsw" id="aMkt" style="margin:0 0 12px"><button type="button" data-m="USDT" aria-pressed="true">USDT<small>Global</small></button><button type="button" data-m="TRY" aria-pressed="false">TRY<small>Binance TR</small></button></div>
+    <div class="srcsw" id="aMkt" style="margin:0 0 12px"><button type="button" data-m="USDT" aria-pressed="true">USDT<small>Global</small></button><button type="button" data-m="TRY" aria-pressed="false">TRY<small>Binance TR</small></button><button type="button" data-m="BIST" aria-pressed="false">Hisse<small>BIST</small></button></div>
     <form class="aform" id="aForm" autocomplete="off"><input id="aIn" placeholder="Coin yaz, örn. SOL" list="aList" autocapitalize="characters" spellcheck="false" enterkeyhint="search"><button class="btn primary" id="aBtn" type="submit">Analiz et</button></form>
     <datalist id="aList"></datalist>
     <div class="chips" id="aSon"></div>
@@ -1562,12 +1565,13 @@ function tpSiklik(cs,S,M,H,ic){
   }
   return {n,tp:hit.map(v=>n?v/n*100:0),ilkStop:n?ilkStop/n*100:0};
 }
-function havuzTp(kat,ic){
-  const b=TP_HAVUZ[ic?"ust":"alt"],p=[[0,100],[2,b[0]],[4,b[1]],[7,b[2]],[12,b[2]/3]];
+function havuzTp(kat,ic,hv=TP_HAVUZ){
+  const b=hv[ic?"ust":"alt"],p=[[0,100],[2,b[0]],[4,b[1]],[7,b[2]],[12,b[2]/3]];
   if(kat>=12)return b[2]/3;
   for(let i=1;i<p.length;i++)if(kat<=p[i][0]){const [x0,y0]=p[i-1],[x1,y1]=p[i];return y0+(y1-y0)*(kat-x0)/(x1-x0);}
 }
-function hedefHesap(cs,fiyat,ic){
+function hedefHesap(cs,fiyat,ic,opt={}){
+  const UFUK=opt.ufuk||TP_UFUK,HV=opt.havuz||TP_HAVUZ;
   const a=atr(cs),A=a[a.length-1];if(!(A>0))return null;
   const ust=direncler(cs,fiyat),tumZirve=Math.max(...cs.map(x=>x.h));
   let son=0;
@@ -1576,10 +1580,11 @@ function hedefHesap(cs,fiyat,ic){
     const hedef=r?r*0.995:fiyat+m*A,kat=(hedef-fiyat)/A;son=kat;
     return {fiyat:hedef,kat,yuzde:(hedef/fiyat-1)*100,kaynak:r?(r===tumZirve?"zirve":"direnc"):"atr",direnc:r||null};
   });
-  const f=tpSiklik(cs,TP_STOP,tps.map(t=>t.kat),TP_UFUK,ic),w=f.n/(f.n+150);
-  tps.forEach((t,i)=>{t.olas=w*f.tp[i]+(1-w)*havuzTp(t.kat,ic);t.rr=t.kat/TP_STOP;});
+  const f=tpSiklik(cs,TP_STOP,tps.map(t=>t.kat),UFUK,ic),w=f.n/(f.n+150);
+  tps.forEach((t,i)=>{t.olas=w*f.tp[i]+(1-w)*havuzTp(t.kat,ic,HV);t.rr=t.kat/TP_STOP;});
   const stop=fiyat-TP_STOP*A;
-  return {A,stop:{fiyat:stop,yuzde:(stop/fiyat-1)*100,olas:w*f.ilkStop+(1-w)*TP_HAVUZ[ic?"ust":"alt"][3]},tps,n:f.n,kendi:f,ufuk:TP_UFUK,kisa:f.n<300};
+  return {A,stop:{fiyat:stop,yuzde:(stop/fiyat-1)*100,olas:w*f.ilkStop+(1-w)*HV[ic?"ust":"alt"][3]},tps,n:f.n,kendi:f,ufuk:UFUK,kisa:f.n<300,
+    ufukMetin:opt.ufukMetin||`${UFUK} gün`,sinama:opt.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."};
 }
 
 /* ── Sektör: CoinGecko kategorisindeki diğer büyük coinler, son 90 günde birlikte hareket ── */
@@ -1802,6 +1807,131 @@ async function coinAnaliz(girdi,piyasa){
   return {base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
 }
 
+
+/* ═══════════ HİSSE ANALİZİ (Borsa İstanbul; hesap) ═══════════
+   Veri: İş Yatırım gün sonu verisi, GitHub Actions ile bist-veri dalına indirilir (bot/bist-veri.js).
+   50 günlük kural Borsa İstanbul'da önceden belirlenmiş testten GEÇMEDİ (2006–2026, dolar bazında):
+   BIST 100'de düşüşü azalttı ama büyük hisselerin 18'inden yalnızca 4'ünde al-tut'tan iyiydi.
+   Bu yüzden hisselerde al/bekle kararı verilmez; trend yalnızca bilgi olarak gösterilir. */
+const BIST_RAW="https://raw.githubusercontent.com/dreamdosima08-del/Binance-sinyal/bist-veri/bist/";
+const BIST_HAVUZ={ust:[52,28,10,41],alt:[47,22,7,42]};   // 18 büyük hisse, 2006–2026, dolar bazında, 21 işlem günü
+let bistOn=null;
+async function bistGet(f){
+  let r;try{r=await fetch(BIST_RAW+f,{cache:"no-store"});}catch(e){throw new Error("Borsa İstanbul verisine ulaşılamadı. İnternetini kontrol et");}
+  if(r.status===404)throw new Error(f.startsWith("g/")?"Bu hissenin verisi henüz yok":"Borsa İstanbul verisi henüz hazır değil; ilk indirme bitince (yaklaşık 1 saat) çalışacak");
+  if(!r.ok)throw new Error("Borsa İstanbul verisi alınamadı ("+r.status+")");
+  return r.json();
+}
+async function bistOnYukle(){
+  if(bistOn&&Date.now()-bistOn.t<10*60e3)return bistOn;
+  const [oz,kur]=await Promise.all([bistGet("ozet.json"),bistGet("kur.json")]);
+  bistOn={t:Date.now(),oz,kur:new Map(kur.d.map(r=>[r[0],r[1]])),xu:kur.d};return bistOn;
+}
+function finDeger(oz,h,re){
+  const b=(oz.finBaslik||[]).filter(x=>x&&!/^Kod$/i.test(x)&&!/Kapanış/i.test(x)),i=b.findIndex(x=>re.test(x));
+  return i<0||!h.f?null:sayiTR(h.f[i]);
+}
+const sayiTR=v=>{if(v==null)return null;const t=String(v).trim();if(!t||t==="-"||/A\/D/i.test(t))return null;const x=parseFloat(t.replace(/\./g,"").replace(",","."));return isFinite(x)?x:null;};
+const gunTarih=g=>new Date(g*864e5).toLocaleDateString("tr-TR",{day:"numeric",month:"long"});
+async function hisseAnaliz(girdi){
+  const kod=String(girdi||"").toUpperCase().replace(/\.(IS|E)$/,"").replace(/[^A-Z0-9ÇĞİÖŞÜ]/g,"");
+  if(!kod)throw new Error("Bir hisse kodu yaz, örneğin THYAO");
+  const on=await bistOnYukle(),oz=on.oz,h=oz.hisseler[kod];
+  if(!h)throw new Error(`${kod} Borsa İstanbul listesinde bulunamadı. Hisse kodunu kontrol et (örn. THYAO, ASELS, GARAN)`);
+  const g=(await bistGet(`g/${kod}.json`)).d.filter(r=>on.kur.get(r[0])>0);
+  if(g.length<60)throw new Error(`${kod} çok yeni (${g.length} işlem günü). Güvenilir analiz için en az 60 gün gerekiyor`);
+  const kurSon=on.kur.get(g[g.length-1][0]);
+  // dolar bazlı seri: işlem fiyatı olarak günün ağırlıklı ortalaması (o) kullanılır
+  const cs=g.map(r=>{const k=on.kur.get(r[0]);return {t:r[0]*864e5,o:r[4]/k,h:r[3]/k,l:r[2]/k,c:r[1]/k,qv:r[5]};});
+  const csTL=g.map(r=>({t:r[0]*864e5,o:r[4],h:r[3],l:r[2],c:r[1],qv:r[5]}));
+  const c=cs.map(x=>x.c),n=c.length-1,fiyat=g[n][1],fiyatV=c[n];
+  const m50=smaDizi(c,50),m200=smaDizi(c,200),rv=rsi(csTL.map(x=>x.c)),at=atr(csTL);
+  const ic=c[n]>m50[n];let bas=n;while(bas>0&&m50[bas-1]!=null&&(c[bas-1]>m50[bas-1])===ic)bas--;
+  const uzak=(c[n]/m50[n]-1)*100,atrY=at[n]?at[n]/csTL[n].c*100:null;
+  const gec=kuralGecmisi(cs),eski=g[n][0]<oz.sonGun-5;
+  const hedef=hedefHesap(cs,fiyatV,ic,{ufuk:21,havuz:BIST_HAVUZ,ufukMetin:"1 ay (21 işlem günü)",
+    sinama:"Bu yöntemi 18 büyük hissede 2018–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 10 puan saptı."});
+  if(hedef){hedef.stop.fiyat*=kurSon;hedef.tps.forEach(t=>t.fiyat*=kurSon);}
+  const sev=seviyeBul(csTL,fiyat);
+
+  /* ── trend bilgisi (karar değil) ── */
+  const xuUsd=on.xu.filter(r=>r[2]>0).map(r=>r[2]/r[1]),xuM=smaDizi(xuUsd,50),xuIc=xuUsd[xuUsd.length-1]>xuM[xuM.length-1];
+  const karar={ic,bilgi:true,seviye:m50[n]*kurSon,uzak,bas:cs[bas].t,gun:n-bas+1,birim:"TL",notlar:[]};
+  karar.baslik=ic?"Trend: YÜKSELİŞTE":"Trend: ZAYIF";
+  karar.ana=`Dolar bazında kapanış, 50 günlük ortalamanın %${pc(Math.abs(uzak))} ${ic?"üstünde":"altında"} (${dShort(cs[bas].t)} itibarıyla, ${n-bas+1} işlem günüdür). Hisseyi dolar bazında inceliyorum çünkü TL'nin değer kaybı TL grafiğini olduğundan güçlü gösterir.`;
+  karar.ne="Neden al/bekle demiyorum";
+  karar.neMetin="Kriptoda işe yarayan 50 günlük ortalama kuralını Borsa İstanbul'da 2006'dan bu yana dolar bazında test ettik. BIST 100'de düşüşleri azalttı (en büyük düşüş %55'e karşı %77) ama en büyük 18 hissenin yalnızca 4'ünde al-tut'tan iyi sonuç verdi. Bu yüzden hisselerde al ya da bekle demiyorum; trendi sadece bilgi olarak gösteriyorum.";
+  karar.notlar.push(`Dolar bazında 50 günlük ortalama bugün yaklaşık ${tl(m50[n]*kurSon)} TL (bugünkü kurla).`);
+  karar.notlar.push(xuIc?"BIST 100 de dolar bazında kendi ortalamasının üstünde: piyasa genel olarak destekliyor.":"BIST 100 dolar bazında kendi ortalamasının altında: piyasa genelinde zayıflık var.");
+  if(rv[n]!=null&&rv[n]>=75)karar.notlar.push(`RSI ${pc(rv[n],0)}: kısa vadede aşırı alınmış.`);
+  if(rv[n]!=null&&rv[n]<=25)karar.notlar.push(`RSI ${pc(rv[n],0)}: kısa vadede aşırı satılmış; bu tek başına alım sebebi değildir.`);
+
+  /* ── teknik ── */
+  const teknik=[],getTL=k=>h.g[k],getU=k=>h.u[k];
+  teknik.push(`<b>Trend (dolar bazında):</b> ${ic?"Kısa-orta vadede yükselişte.":"Kısa-orta vadede düşüşte ya da zayıf."}`);
+  if(m200[n]!=null)teknik.push(`<b>Uzun vade:</b> 200 günlük ortalamanın ${c[n]>m200[n]?"üstünde, uzun vadeli görünüm olumlu":"altında, uzun vadeli görünüm zayıf"} (dolar bazında).`);
+  if(rv[n]!=null)teknik.push(`<b>Alış-satış dengesi (RSI ${pc(rv[n],0)}):</b> ${rv[n]>=70?"aşırı alınmış bölgede":rv[n]<=30?"aşırı satılmış bölgede":rv[n]>=55?"alıcılar biraz daha baskın":rv[n]<=45?"satıcılar biraz daha baskın":"dengede"}.`);
+  if(atrY!=null)teknik.push(`<b>Oynaklık:</b> Günde ortalama %${pc(atrY)} hareket ediyor. ${atrY>=6?"Çok oynak; küçük tutarla çalış.":atrY>=3.5?"Oynak.":"Görece sakin."}`);
+  const per=[["1 hafta","d5"],["1 ay","d21"],["3 ay","d63"],["1 yıl","d252"]].filter(([,k])=>getTL(k)!=null)
+    .map(([a,k])=>`${a} ${isaret(getTL(k),0)}${getU(k)!=null?` (dolar ${isaret(getU(k),0)})`:""}`).join(", ");
+  if(per)teknik.push(`<b>Getiri (TL):</b> ${per}.`);
+  const xuG=oz.xu&&oz.xu.u;
+  if(xuG&&xuG.d21!=null&&getU("d21")!=null){const d=getU("d21")-xuG.d21,d3=xuG.d63!=null&&getU("d63")!=null?getU("d63")-xuG.d63:null;
+    teknik.push(`<b>BIST 100'e göre:</b> son 1 ayda endeksten ${pc(Math.abs(d),0)} puan ${d>=0?"daha iyi":"daha kötü"}${d3!=null?`, son 3 ayda ${pc(Math.abs(d3),0)} puan ${d3>=0?"daha iyi":"daha kötü"}`:""}.`);}
+  const v20=csTL.slice(-20).reduce((a,x)=>a+x.qv,0)/20,v60=csTL.length>=80?csTL.slice(-80,-20).reduce((a,x)=>a+x.qv,0)/60:null;
+  teknik.push(`<b>İşlem hacmi:</b> Son 20 günde günlük ortalama ${kisaPara(v20*1e6,"TL")}${v60?`; önceki 3 aya göre ${isaret((v20/v60-1)*100,0)}${v20>v60*1.2?": ilgi artıyor.":v20<v60*0.8?": ilgi azalıyor.":"."}`:"."}`);
+  const sv=x=>x.map(s=>`${tl(s.fiyat)}${s.temas>1?` (${s.temas} kez)`:""}`).join(", ");
+  teknik.push(`<b>Yakın seviyeler (TL grafiği, son 6 ay):</b> ${sev.destek.length?`destek ${sv(sev.destek)}`:"altta yakın destek görünmüyor"}; ${sev.direnc.length?`direnç ${sv(sev.direnc)}`:"üstte yakın direnç görünmüyor"} TL.`);
+
+  /* ── temel ── */
+  const temel=[],uyarilar=[];
+  const es=Object.entries(oz.hisseler).filter(([k,x])=>x.sektor===h.sektor&&k!==kod);
+  const ort=(re,poz)=>medyan(es.map(([,x])=>finDeger(oz,x,re)).filter(v=>v!=null&&(!poz||v>0)));
+  temel.push(`<b>Şirket:</b> ${esc(h.ad)} · Sektör: ${esc(h.sektor)}.`);
+  if(h.pdTL)temel.push(`<b>Büyüklük:</b> Piyasa değeri ${kisaPara(h.pdTL*1e6,"TL")}${h.pdUsd?` (yaklaşık ${kisaPara(h.pdUsd*1e6,"$")})`:""}. ${h.pdUsd>=5000?"Borsanın en büyükleri arasında.":h.pdUsd>=1000?"Büyük şirket.":h.pdUsd>=200?"Orta büyüklükte.":"Küçük şirket; fiyatı sert hareket edebilir."}`);
+  if(h.hao!=null){temel.push(`<b>Halka açıklık:</b> Hisselerin %${pc(h.hao,1)} kadarı borsada işlem görüyor. ${h.hao<20?"Düşük: az parayla fiyat oynayabilir.":h.hao<35?"Orta.":"Yeterli."}`);if(h.hao<20)uyarilar.push(`Halka açıklık düşük (%${pc(h.hao,0)}): fiyat az parayla sert oynayabilir.`);}
+  const oran=(ad,re,poz,aciklama)=>{const v=finDeger(oz,h,re);if(v==null)return;const m=ort(re,poz);
+    temel.push(`<b>${ad}:</b> ${pc(v,1)}${m!=null&&es.length>=3?`; sektördeki tipik şirket ${pc(m,1)}. ${v<=0?"":v<m*0.75?"Sektörüne göre düşük.":v>m*1.33?"Sektörüne göre yüksek.":"Sektörüyle benzer."}`:"."} ${aciklama}`);};
+  oran("F/K (fiyat / kâr)",/^F\/K$/i,true,"Düşük olması ucuzluk gibi görünür ama kârın düşeceği beklentisini de gösterebilir.");
+  oran("PD/DD (piyasa değeri / defter değeri)",/^PD\/DD$/i,true,"");
+  oran("FD/FAVÖK",/^FD\/FAVÖK$/i,true,"");
+  if(finDeger(oz,h,/^F\/K$/i)!=null&&finDeger(oz,h,/^F\/K$/i)<=0)uyarilar.push("F/K negatif ya da yok: şirket son dönemde zarar etmiş olabilir.");
+
+  /* ── sektör ── */
+  let sektor=null;
+  {const esler=es.sort((a,b)=>(b[1].pdUsd||0)-(a[1].pdUsd||0)).filter(([,x])=>!x.eski).slice(0,10)
+      .map(([k,x])=>({sym:k,ad:x.ad,d24:x.g.d1,d7:x.g.d5,d30:x.g.d21,u30:x.u.d21,r:h.es&&h.es[k]!=null?h.es[k]:null,ust:x.ust}));
+    if(esler.length<3)sektor={hata:`${h.sektor} sektöründe karşılaştırılacak yeterli hisse yok.`};
+    else{
+      const med={d24:medyan(esler.map(e=>e.d24)),d7:medyan(esler.map(e=>e.d7)),d30:medyan(esler.map(e=>e.d30))},u30=medyan(esler.map(e=>e.u30));
+      const genis=esler.filter(e=>e.ust!=null),ustS=genis.filter(e=>e.ust).length,orn=genis.length?ustS/genis.length:null;
+      const yon=orn!=null&&orn>=0.6&&u30>0?"yukari":orn!=null&&orn<=0.4&&u30<0?"asagi":"karisik";
+      const coin={d24:h.g.d1,d7:h.g.d5,d30:h.g.d21},yorum=[];
+      yorum.push(`<b>Sektörün gidişatı:</b> ${esc(h.sektor)} sektöründeki en büyük ${esler.length} hisse (bu hisse hariç) için tipik hareket son 1 haftada ${isaret(med.d7,0)}, son 1 ayda ${isaret(med.d30,0)} (TL)${u30!=null?`, dolar bazında ${isaret(u30,0)}`:""}`
+        +(genis.length?`; ${genis.length} hissenin ${ustS} tanesi dolar bazında 50 günlük ortalamasının üstünde.`:".")+(yon==="yukari"?" Sektör genel olarak yükselişte.":yon==="asagi"?" Sektör genel olarak düşüşte.":" Sektörde net bir yön yok."));
+      if(h.rS!=null){let t=`<b>Birlikte hareket:</b> Son 3 ayda ${kod}, sektörünün geri kalanıyla <b>${korKelime(h.rS).toLocaleLowerCase("tr-TR")}</b> bir benzerlikle hareket etti (benzerlik ${pc(h.rS,2)}; 1 = tamamen aynı).`;
+        if(h.rX!=null){if(h.rS>=h.rX+0.1)t+=` BIST 100 ile benzerliği ${pc(h.rX,2)}; yani bu hisse genel piyasadan çok kendi sektörüyle birlikte hareket ediyor.`;
+          else if(h.rX>=h.rS+0.1)t+=` BIST 100 ile benzerliği daha yüksek (${pc(h.rX,2)}): bu hisseyi sektöründen çok genel piyasa yönlendiriyor.`;
+          else t+=` BIST 100 ile benzerliği de yakın (${pc(h.rX,2)}): hem sektörüyle hem genel piyasayla birlikte hareket ediyor.`;}
+        yorum.push(t);}
+      if(coin.d30!=null&&med.d30!=null){const f=coin.d30-med.d30;
+        yorum.push(`<b>Sektör içindeki yeri:</b> ${kod} son 1 ayda ${isaret(coin.d30,0)}, sektördeki tipik hisse ${isaret(med.d30,0)}. `
+          +(f>=10?`Sektörünün <b>önünde</b> gidiyor (${pc(f,0)} puan daha iyi).`:f<=-10?`Sektörünün <b>gerisinde</b> kaldı (${pc(-f,0)} puan daha kötü). Geride kalanın sonradan yetişeceği garanti değil.`:"Sektörüyle aşağı yukarı aynı hizada."));}
+      sektor={ad:h.sektor,adTR:h.sektor,esler:esler.map(({u30,...e})=>e),coin,med,ustS,genisN:genis.length,rS:h.rS,rB:h.rX,yon,yorum,hisse:true};
+    }}
+
+  /* ── risk ── */
+  if(h.pdUsd!=null&&h.pdUsd<100)uyarilar.push("Çok küçük şirket (piyasa değeri 100 milyon doların altında).");
+  if(v20<20)uyarilar.push("İşlem hacmi düşük: alım-satımda fiyat kayabilir.");
+  if(atrY!=null&&atrY>=6)uyarilar.push(`Çok oynak: günde ortalama %${pc(atrY)} hareket ediyor.`);
+  if(g.length<500)uyarilar.push(`Geçmişi kısa (${g.length} işlem günü): hesaplar az veriye dayanıyor.`);
+  if(eski)uyarilar.push("Bu hissede son günlerde işlem görünmüyor (işlem yasağı, tedbir ya da kotasyon değişikliği olabilir).");
+  const risk=h.pdUsd>=5000&&uyarilar.length===0?"Orta":uyarilar.length<=1?"Orta-yüksek":uyarilar.length<=3?"Yüksek":"Çok yüksek";
+  const piyasaNot=`Fiyatlar ${gunTarih(g[n][0])} kapanışıdır (gün sonu verisi, anlık değil). İşlem yapmadan önce güncel fiyatı aracı kurumunda kontrol et.`;
+  return {tur:"hisse",base:kod,sym:kod,unit:"TL",piyasa:"BIST",ad:h.ad,fiyat,degisim:h.g.d1||0,karar,hedef,sektor,piyasaNot,teknik,temel,uyarilar,risk,
+    gecmis:gec,gunSayisi:g.length,zaman:Date.now(),veriGunu:g[n][0],cgVar:true};
+}
+
 /* ═══════════ PİYASA SEÇİMİ ═══════════ */
 const SCAN_EMPTY={signals:"Taramak için yukarıdaki düğmeye bas.",watch:"Retest bekleyen, desteğe yaklaşan ya da kırılıma hazırlanan coinler burada görünür.",rejected:"Kurulumu olup stop mesafesi veya puan yüzünden elenen coinler burada görünür."};
 function renderMkt(){
@@ -1832,7 +1962,7 @@ function switchMarket(m){
 document.querySelectorAll(".mkt button").forEach(b=>b.addEventListener("click",()=>switchMarket(b.dataset.m)));
 
 /* ═══════════ ANALİZ EKRANI ═══════════ */
-let aBusy=false,aListeDolu=false,aListe={USDT:[],TRY:[]},aGosterilen=null;
+let aBusy=false,aListeDolu=false,aListe={USDT:[],TRY:[],BIST:[]},aGosterilen=null;
 /* Kayıtlı analizler: her analiz bu telefonda saklanır (en fazla 20); tekrar açınca veri çekmeden gösterilir,
    sadece analizden bu yana fiyatın hedeflere ve stopa değip değmediği kontrol edilir. */
 const AK_MAX=20,akAnahtar=a=>a.base+"|"+a.piyasa;
@@ -1845,13 +1975,16 @@ function aKaydet(a){
 function aKayitSil(k){store.set("ddt_akayit",aKayitlar().filter(x=>akAnahtar(x)!==k));}
 const sureMetin=ms=>{const dk=Math.round(ms/60e3);return dk<1?"az önce":dk<60?dk+" dk önce":dk<48*60?Math.round(dk/60)+" saat önce":Math.round(dk/1440)+" gün önce";};
 const zamanMetin=t=>new Date(t).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-const aPiyasa=()=>store.get("ddt_apiyasa","USDT")==="TRY"?"TRY":"USDT";
-function aListeGoster(){$("aList").innerHTML=aListe[aPiyasa()].map(b=>`<option value="${b}">`).join("");}
+const aPiyasa=()=>{const v=store.get("ddt_apiyasa","USDT");return v==="TRY"||v==="BIST"?v:"USDT";};
+function aListeGoster(){
+  const pz=aPiyasa();$("aIn").placeholder=pz==="BIST"?"Hisse kodu yaz, örn. THYAO":"Coin yaz, örn. SOL";
+  if(pz==="BIST"&&!aListe.BIST.length)bistOnYukle().then(o=>{aListe.BIST=Object.keys(o.oz.hisseler).sort();if(aPiyasa()==="BIST")aListeGoster();}).catch(()=>{});
+  $("aList").innerHTML=aListe[pz].map(b=>`<option value="${b}">`).join("");}
 function aMktGoster(){document.querySelectorAll("#aMkt button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===aPiyasa())));aListeGoster();}
 function renderASon(){
   const l=aKayitlar();
   $("aSon").innerHTML=l.length?`<span class="aklab">Kayıtlı analizler</span>`+l.map(x=>{const k=akAnahtar(x);
-    return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"";
+    return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="BIST"?"BIST":x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"";
 }
 function aGoster(a,kayitli){
   aGosterilen=akAnahtar(a);renderAnaliz(a,kayitli);renderASon();
@@ -1863,23 +1996,32 @@ async function aTakip(a){
   const yas=Date.now()-a.zaman,aralik=yas<40*864e5?["1h",36e5]:yas<160*864e5?["4h",144e5]:["1d",864e5];
   kutu.innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Fiyat hareketi kontrol ediliyor…</p></div>`;
   try{
-    const bas=Math.floor(a.zaman/aralik[1])*aralik[1];
-    const cs=(await api(`/api/v3/klines?symbol=${a.sym}&interval=${aralik[0]}&startTime=${bas}&limit=1000`)).map(parseK);
-    if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
-    if(!cs.length)throw new Error("veri yok");
+    let cs;
+    if(a.tur==="hisse"){
+      cs=(await bistGet(`g/${a.base}.json`)).d.filter(r=>r[0]>a.veriGunu).map(r=>({t:r[0]*864e5+15*36e5,h:r[3],l:r[2],c:r[1]}));
+      if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
+      if(!cs.length){$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Analizden sonra henüz yeni bir gün sonu verisi yok (son veri ${gunTarih(a.veriGunu)} kapanışı). Bir sonraki seans kapanışından sonra burada hedeflere değip değmediğini göreceksin.</p></div>`;return;}
+    }else{
+      const bas=Math.floor(a.zaman/aralik[1])*aralik[1];
+      cs=(await api(`/api/v3/klines?symbol=${a.sym}&interval=${aralik[0]}&startTime=${bas}&limit=1000`)).map(parseK);
+      if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
+      if(!cs.length)throw new Error("veri yok");
+    }
     const son=cs[cs.length-1].c,h=a.hedef,sev=[...h.tps.map((t,i)=>({ad:"TP"+(i+1),fiyat:t.fiyat,yukari:true})),{ad:"Stop",fiyat:h.stop.fiyat,yukari:false}];
     let yuk=-Infinity,dus=Infinity;
     for(const c of cs){yuk=Math.max(yuk,c.h);dus=Math.min(dus,c.l);
       for(const s of sev)if(!s.t&&(s.yukari?c.h>=s.fiyat:c.l<=s.fiyat))s.t=c.t;}
     const u=a.unit,deg=(son/a.fiyat-1)*100,stop=sev[3],tp1=sev[0];
-    const satir=s=>s.t?`<li class="${s.yukari?"ok":"no"}">${s.yukari?"✓":"✗"} <b>${s.ad}</b> ${tl(s.fiyat)} ${u}: ${s.yukari?"ulaştı":"değdi"} (${zamanMetin(s.t)} civarı)</li>`
+    const ne=t=>a.tur==="hisse"?new Date(t).toLocaleDateString("tr-TR",{day:"numeric",month:"short"})+" seansında":zamanMetin(t)+" civarı";
+    const satir=s=>s.t?`<li class="${s.yukari?"ok":"no"}">${s.yukari?"✓":"✗"} <b>${s.ad}</b> ${tl(s.fiyat)} ${u}: ${s.yukari?"ulaştı":"değdi"} (${ne(s.t)})</li>`
       :`<li>○ <b>${s.ad}</b> ${tl(s.fiyat)} ${u}: henüz değmedi, şu anki fiyattan ${isaret((s.fiyat/son-1)*100)} uzakta</li>`;
     let ozet="";
-    if(stop.t&&(!tp1.t||stop.t<tp1.t))ozet=`<p class="tkn">Stop, TP1'den önce geldi: plana uyulsaydı bu işlem zararla kapanmış olurdu.</p>`;
+    if(stop.t&&tp1.t&&stop.t===tp1.t)ozet=`<p class="tkn">Aynı ${a.tur==="hisse"?"seansta":"saatte"} hem TP1'e hem stopa değdi; hangisinin önce geldiği bu veriden anlaşılamıyor.</p>`;
+    else if(stop.t&&(!tp1.t||stop.t<tp1.t))ozet=`<p class="tkn">Stop, TP1'den önce geldi: plana uyulsaydı bu işlem zararla kapanmış olurdu.</p>`;
     else if(tp1.t&&stop.t)ozet=`<p class="tkn">Önce TP1 geldi, sonra fiyat stop seviyesine indi. Plana göre TP1'de yarısı satılıp stop girişe çekildiği için kalan yarı başa baş kapanırdı.</p>`;
     else if(tp1.t)ozet=`<p class="tkn">TP1 geldi. Plana göre yarısı satılır ve stop giriş fiyatına (${tl(a.fiyat)} ${u}) çekilir.</p>`;
     kutu.innerHTML=`<div class="tkp"><b>Analizden bu yana</b> <span style="color:var(--muted)">(${sureMetin(yas)})</span>
-      <p>Analizdeki fiyat ${tl(a.fiyat)} ${u}, şu an ${tl(son)} ${u} (<span class="${deg>=0?"pos":"neg"}">${isaret(deg)}</span>). Bu sürede en yüksek ${tl(yuk)}, en düşük ${tl(dus)}.</p>
+      <p>Analizdeki fiyat ${tl(a.fiyat)} ${u}, ${a.tur==="hisse"?"son kapanış":"şu an"} ${tl(son)} ${u} (<span class="${deg>=0?"pos":"neg"}">${isaret(deg)}</span>). Bu sürede en yüksek ${tl(yuk)}, en düşük ${tl(dus)}.</p>
       <ul>${sev.map(satir).join("")}</ul>${ozet}
       <p class="tkn" style="color:var(--muted)">Seviyeler analiz anındaki hesaptır. Al/bekle kararı günlük kapanışla değişebileceği için birkaç günde bir yeniden analiz et.</p></div>`;
   }catch(e){if($("aTakip"))$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Güncel fiyat alınamadı (${esc(errText(e))}). Kayıtlı seviyeler aşağıda.</p></div>`;}
@@ -1891,20 +2033,20 @@ async function aListeDoldur(){
     aListe={USDT:[...u].sort(),TRY:[...y].sort()};aListeGoster();}catch(e){aListeDolu=false;}
 }
 function renderAnaliz(a,kayitli){
-  const k=a.karar,g=a.gecmis,u=a.unit,yil=g.gun/365;
-  const gecmisMetin=yil<1?`Bu coinin geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
-    :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?"Bu coinde kural hem düşüşü azalttı hem getiriyi artırdı."
-    :(g.kural.dd<g.altut.dd)?"Bu coinde kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı."
-    :(g.kural.ret>g.altut.ret)?"Bu coinde kural getiriyi artırdı ama düşüşleri azaltamadı."
-    :"Bu coinde kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi. Karara daha temkinli yaklaş.";
+  const k=a.karar,g=a.gecmis,u=a.unit,yil=g.gun/(a.tur==="hisse"?252:365),yer=a.tur==="hisse"?"hissede":"coinde";
+  const gecmisMetin=yil<1?`Bu ${a.tur==="hisse"?"hissenin":"coinin"} geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
+    :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?`Bu ${yer} kural hem düşüşü azalttı hem getiriyi artırdı.`
+    :(g.kural.dd<g.altut.dd)?`Bu ${yer} kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı.`
+    :(g.kural.ret>g.altut.ret)?`Bu ${yer} kural getiriyi artırdı ama düşüşleri azaltamadı.`
+    :`Bu ${yer} kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi.${a.tur==="hisse"?"":" Karara daha temkinli yaklaş."}`;
   const kb=kayitli?`<div class="kbar"><span>📌 Kayıtlı analiz · ${zamanMetin(a.zaman)} (${sureMetin(Date.now()-a.zaman)})</span><span><button type="button" class="btn" id="aYenile">Yeniden analiz et</button> <button type="button" class="btn" id="aSil">Sil</button></span></div>`
     :`<div class="kbar"><span>✓ Kaydedildi. Üstteki listeden tekrar açabilirsin; açınca fiyatın hedeflere değip değmediğini de gösteririm.</span></div>`;
   $("aSonuc").innerHTML=kb+`
-    <div class="card" style="margin-top:12px"><div class="head"><div class="pair">${esc(a.base)}<small>/${a.unit==="TL"?"TRY":"USDT"}</small></div>
+    <div class="card" style="margin-top:12px"><div class="head"><div class="pair">${esc(a.base)}<small>${a.tur==="hisse"?" · BIST":"/"+(a.unit==="TL"?"TRY":"USDT")}</small></div>
       <div class="chip ${a.risk==="Orta"?"watch":"bad"}">Risk: ${a.risk}</div></div>
-      <div class="meta" style="margin-bottom:0">${esc(a.ad)} · ${tl(a.fiyat)} ${u} · 24 sa ${isaret(a.degisim)}</div></div>
+      <div class="meta" style="margin-bottom:0">${esc(a.ad)} · ${tl(a.fiyat)} ${u} · ${a.tur==="hisse"?"günlük":"24 sa"} ${isaret(a.degisim)}</div></div>
     <div id="aTakip"></div>
-    <div class="verdict ${k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
+    <div class="verdict ${k.bilgi?"bilgi "+(k.ic?"yuk":"zay"):k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
       <div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>
       ${k.boyutMetin?`<div class="lvl"><b>Ne kadar</b>${k.boyutMetin}</div>`:""}
       ${k.notlar.map(x=>`<p>${x}</p>`).join("")}</div>
@@ -1913,13 +2055,14 @@ function renderAnaliz(a,kayitli){
     ${sektorHtml(a)}
     <div class="sect">Teknik görünüm</div><ul class="blist">${a.teknik.map(x=>`<li>${x}</li>`).join("")}</ul>
     <div class="sect">Temel görünüm</div><ul class="blist">${a.temel.map(x=>`<li>${x}</li>`).join("")}</ul>
-    <div class="sect">Bu kural bu coinde geçmişte nasıl çalıştı<small>${dShort(g.bas)} ${new Date(g.bas).getFullYear()} – bugün (${pc(yil,1)} yıl), işlem başı %0,15 maliyet dahil</small></div>
+    <div class="sect">50 günlük kural bu ${a.tur==="hisse"?"hissede (dolar bazında)":"coinde"} geçmişte nasıl çalıştı<small>${dShort(g.bas)} ${new Date(g.bas).getFullYear()} – bugün (${pc(yil,1)} yıl), işlem başı %0,15 maliyet dahil</small></div>
     <table class="table"><thead><tr><th></th><th>Toplam getiri</th><th>En büyük düşüş</th></tr></thead><tbody>
       <tr><td>Kural (50 gün)</td><td class="${g.kural.ret>=0?"pos":"neg"}">${isaret(g.kural.ret*100,0)}</td><td class="neg">−%${pc(g.kural.dd*100,0)}</td></tr>
       <tr><td>Al-tut</td><td class="${g.altut.ret>=0?"pos":"neg"}">${isaret(g.altut.ret*100,0)}</td><td class="neg">−%${pc(g.altut.dd*100,0)}</td></tr></tbody></table>
     <p class="note" style="margin-top:8px">${gecmisMetin} Kural bu sürede ${g.kural.islem} kez al-sat yaptı.</p>
     ${a.uyarilar.length?`<div class="sect">Dikkat</div><ul class="blist warn">${a.uyarilar.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
-    <p class="note">Veriler: fiyat ve teknik Binance (günlük kapanışlar), temel CoinGecko. ${new Date(a.zaman).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})} itibarıyla. Karar kısmı yalnızca 2018'den beri test ettiğimiz 50 günlük ortalama kuralına dayanır; diğer bilgiler karar vermene yardım etsin diye var. Hiçbir analiz geleceği kesin bilemez; bu bir yatırım tavsiyesi değildir.</p>`;
+    <p class="note">${a.tur==="hisse"?`Veriler: İş Yatırım'ın herkese açık gün sonu verileri (bölünme ve bedelsizlere göre düzeltilmiş), ${gunTarih(a.veriGunu)} kapanışı. Hisselerde al/bekle kararı verilmez çünkü 50 günlük kural Borsa İstanbul'da testten geçmedi; buradaki her şey bilgi amaçlıdır.`
+      :`Veriler: fiyat ve teknik Binance (günlük kapanışlar), temel CoinGecko. ${new Date(a.zaman).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})} itibarıyla. Karar kısmı yalnızca 2018'den beri test ettiğimiz 50 günlük ortalama kuralına dayanır; diğer bilgiler karar vermene yardım etsin diye var.`} Hiçbir analiz geleceği kesin bilemez; bu bir yatırım tavsiyesi değildir.</p>`;
 }
 const olasKelime=p=>p>=60?"Yüksek":p>=40?"Orta":p>=20?"Düşük":"Çok düşük";
 const yuv5=p=>Math.max(0,Math.min(100,Math.round(p/5)*5));
@@ -1929,43 +2072,44 @@ function hedefHtml(a){
   const h=a.hedef,u=a.unit;if(!h)return "";
   const kay=t=>t.kaynak==="zirve"?"zirvenin hemen altı":t.kaynak==="direnc"?"direncin hemen altı":"oynaklığa göre";
   const satir=(ad,t,i)=>`<tr><td class="ad">${ad}</td><td class="fy">${tl(t.fiyat)} ${u}<small>${isaret(t.yuzde)} · ${kay(t)} · risk/ödül 1:${pc(t.rr,1)}</small></td><td class="ol">${olasHtml(t.olas)}</td></tr>`;
-  return `<div class="sect">Hedefler: şimdi alınırsa<small>${a.karar.ic?"Kural alım bölgesinde.":"Kural şu an BEKLE diyor; bu seviyeler yine de şimdi girersen geçerli olanlar."} Olasılık: ${h.ufuk} gün içinde stopa değmeden ulaşma.</small></div>
+  return `<div class="sect">Hedefler: şimdi alınırsa<small>${a.karar.bilgi?"Bu bir al tavsiyesi değil; şimdi girersen geçerli seviyeler.":a.karar.ic?"Kural alım bölgesinde.":"Kural şu an BEKLE diyor; bu seviyeler yine de şimdi girersen geçerli olanlar."} Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde stopa değmeden ulaşma.</small></div>
     <div class="sekt"><table class="tpt"><tbody>
       <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}<small>şu anki fiyat</small></td><td class="ol"></td></tr>
       ${h.tps.map((t,i)=>satir("TP"+(i+1),t,i)).join("")}
       <tr><td class="ad">Stop</td><td class="fy">${tl(h.stop.fiyat)} ${u}<small>${isaret(h.stop.yuzde)} · günlük oynaklığın 2 katı</small></td><td class="ol">${olasHtml(h.stop.olas,true)}<small>TP1'den önce stopa değme</small></td></tr>
     </tbody></table>
-    <p class="note" style="margin-top:10px">TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak. Olasılıklar bir tahmin değil, bu coinin kendi geçmişinden bir sıklık: ${a.karar.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi hedefe kaç kez ulaşılırdı. ${h.kisa?"Bu coinin geçmişi kısa olduğu için sonuç büyük coinlerin ortalamasına doğru düzeltildi. ":""}Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan. O yüzden "üç aşağı beş yukarı" olarak oku.</p></div>`;
+    <p class="note" style="margin-top:10px">TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak. Olasılıklar bir tahmin değil, bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık: ${a.karar.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi hedefe kaç kez ulaşılırdı${a.tur==="hisse"?" (dolar bazında hesaplanıp bugünkü kurla TL'ye çevrildi)":""}. ${h.kisa?`Geçmişi kısa olduğu için sonuç büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasına doğru düzeltildi. `:""}${h.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."} O yüzden "üç aşağı beş yukarı" olarak oku.</p></div>`;
 }
 function sektorHtml(a){
   const s=a.sektor;if(!s)return "";
   if(s.hata)return `<div class="sect">Sektörü</div><p class="note" style="margin-top:0">${esc(s.hata)}</p>`;
   const yonAd={yukari:"Sektör yükselişte",asagi:"Sektör düşüşte",karisik:"Sektörde net yön yok"}[s.yon];
   const hc=v=>v==null?"<td>—</td>":`<td class="${Math.abs(v)<0.5?"":v>=0?"pos":"neg"}">${isaret(v,0)}</td>`;
-  return `<div class="sect">Sektörü: ${esc(s.adTR)}<small>Aynı kategorideki en büyük coinlerle karşılaştırma (dolar bazında)</small></div>
+  return `<div class="sect">Sektörü: ${esc(s.adTR)}<small>${s.hisse?"Aynı sektördeki en büyük hisselerle karşılaştırma (TL bazında)":"Aynı kategorideki en büyük coinlerle karşılaştırma (dolar bazında)"}</small></div>
     <div class="sekt"><span class="yon ${s.yon}">${yonAd}</span>
     <ul class="blist">${s.yorum.map(x=>`<li>${x}</li>`).join("")}</ul>
-    <table class="table" style="margin-top:6px"><thead><tr><th>Coin</th><th>24 sa</th><th>7 gün</th><th>30 gün</th><th>Birlikte</th></tr></thead><tbody>
+    <table class="table" style="margin-top:6px"><thead><tr><th>${s.hisse?"Hisse":"Coin"}</th><th>${s.hisse?"1 gün":"24 sa"}</th><th>${s.hisse?"1 hafta":"7 gün"}</th><th>${s.hisse?"1 ay":"30 gün"}</th><th>Birlikte</th></tr></thead><tbody>
       <tr class="ben"><td>${esc(a.base)}</td>${hc(s.coin.d24)}${hc(s.coin.d7)}${hc(s.coin.d30)}<td>—</td></tr>
       ${s.esler.map(e=>`<tr><td>${esc(e.sym)}${e.ust===true?" ↑":e.ust===false?" ↓":""}</td>${hc(e.d24)}${hc(e.d7)}${hc(e.d30)}<td>${korKelime(e.r)}</td></tr>`).join("")}
-      <tr class="hl"><td>Tipik coin</td>${hc(s.med.d24)}${hc(s.med.d7)}${hc(s.med.d30)}<td></td></tr>
+      <tr class="hl"><td>Tipik ${s.hisse?"hisse":"coin"}</td>${hc(s.med.d24)}${hc(s.med.d7)}${hc(s.med.d30)}<td></td></tr>
     </tbody></table>
-    <p class="note" style="margin-top:8px">↑ 50 günlük ortalamasının üstünde, ↓ altında. "Birlikte": son 90 günde ${esc(a.base)} ile günlük hareketlerinin ne kadar benzediği. Benzerlik geçmişi anlatır; birlikte hareket eden coinlerin bundan sonra da öyle yapacağının garantisi yoktur.</p></div>`;
+    <p class="note" style="margin-top:8px">↑ 50 günlük ortalamasının üstünde, ↓ altında${s.hisse?" (dolar bazında)":""}. "Birlikte": son ${s.hisse?"3 ayda":"90 günde"} ${esc(a.base)} ile günlük hareketlerinin ne kadar benzediği. Benzerlik geçmişi anlatır; birlikte hareket edenlerin bundan sonra da öyle yapacağının garantisi yoktur.</p></div>`;
 }
 async function analizEt(girdi,piyasa){
   const q=String(girdi||"").trim().toUpperCase();if(!q||aBusy)return;
   const pz=piyasa||aPiyasa();
   aBusy=true;const btn=$("aBtn");btn.disabled=true;btn.textContent="Analiz…";
-  $("aSonuc").innerHTML=`<div class="empty">${esc(q)} analiz ediliyor: fiyat geçmişi, hedefler, temel veriler ve sektördeki coinler alınıyor…</div>`;
+  $("aSonuc").innerHTML=`<div class="empty">${esc(q)} analiz ediliyor: fiyat geçmişi, hedefler, temel veriler ve sektördeki ${pz==="BIST"?"hisseler":"coinler"} alınıyor…</div>`;
   try{
-    const a=await coinAnaliz(q,pz);
+    const a=pz==="BIST"?await hisseAnaliz(q):await coinAnaliz(q,pz);
     const ok=aKaydet(a);aGoster(a,false);
     if(!ok)toast("Telefonun hafızası dolu, analiz kaydedilemedi");
   }catch(e){$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
   finally{aBusy=false;btn.disabled=false;btn.textContent="Analiz et";}
 }
 $("aMkt").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||b.dataset.m===aPiyasa())return;
-  store.set("ddt_apiyasa",b.dataset.m);aMktGoster();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
+  const tur=x=>x==="BIST"?"h":"k",degisti=tur(b.dataset.m)!==tur(aPiyasa());
+  store.set("ddt_apiyasa",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
 aMktGoster();
 $("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
 $("aSon").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(!b||aBusy)return;
@@ -1978,7 +2122,7 @@ $("aSonuc").addEventListener("click",e=>{
 });
 
 /* ═══════════ görünüm ═══════════ */
-const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Bir coini sade bir dille incele"};
+const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Bir coini ya da hisseyi sade bir dille incele"};
 function show(v){
   ["scan","analiz","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
   document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
