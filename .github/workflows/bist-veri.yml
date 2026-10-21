@@ -27,6 +27,8 @@ jobs:
       - name: İndir ve özetle
         env:
           VERI_DIR: ${{ github.workspace }}/bv
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node bot/bist-veri.js
       - name: Kaydet (geçmişsiz, tek kayıt)
         run: |

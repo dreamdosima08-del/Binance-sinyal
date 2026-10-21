@@ -15,6 +15,9 @@ const hucre=s=>s.replace(/<[^>]+>/g," ").replace(/&nbsp;/g," ").replace(/&amp;/g
 const sayi=s=>{if(s==null)return null;const t=String(s).trim();if(!t||t==="-"||t==="A/D")return null;const v=parseFloat(t.replace(/\./g,"").replace(",","."));return isFinite(v)?v:null;};
 const satirlar=tb=>(tb.match(/<tr[\s\S]*?<\/tr>/g)||[]).map(s=>[...s.matchAll(/<td[^>]*>([\s\S]*?)<\/td>/g)].map(m=>hucre(m[1]))).filter(r=>r.length>2);
 const BAS="01-01-2015",BASGUN=gunNo(BAS);
+/* BIST 30 üyeleri, 01.10.2026–31.12.2026 dönemi (3. çeyrek listesi; DSTKF çıktı, TRMET girdi). Her çeyrek güncellenmeli. */
+const BIST30={donem:"1 Ekim – 31 Aralık 2026",bitis:"2027-01-01T00:00:00+03:00",kodlar:["AEFES","AKBNK","ASELS","ASTOR","BIMAS","EKGYO","ENKAI","EREGL","FROTO","GARAN",
+  "GUBRF","ISCTR","KCHOL","KRDMD","MGROS","PETKM","PGSUS","SAHOL","SASA","SISE","TAVHL","TCELL","THYAO","TOASO","TRALT","TRMET","TTKOM","TUPRS","VAKBN","YKBNK"]};
 const log=(...a)=>console.log(...a);
 
 (async()=>{
@@ -103,11 +106,59 @@ const log=(...a)=>console.log(...a);
       ozet[k].es=Object.fromEntries(es.map(e=>[e,benz(hm[k],hm[e])]));}
   }
   const xuUsd=kurD.filter(r=>r[2]>0).map(r=>r[2]/r[1]),xuM=sma(xuUsd,50);
-  fs.writeFileSync(path.join(VD,"ozet.json"),JSON.stringify({zaman:Date.now(),sonGun,kur:kurD.length?kurD[kurD.length-1][1]:null,
+  const ozetObj={zaman:Date.now(),sonGun,kur:kurD.length?kurD[kurD.length-1][1]:null,
     finBaslik:finTh.length?finTh:["F/K","FD/FAVÖK","FD/Satışlar","PD/DD","Dönem"],   // sütun sırası 2026-10'da bankaların A/D değerleriyle doğrulandı
     xu:{c:kurD.length?kurD[kurD.length-1][2]:null,ust:xuM?xuUsd[xuUsd.length-1]>xuM:null,
       g:{d1:getiri(xuSeri,1),d5:getiri(xuSeri,5),d21:getiri(xuSeri,21),d63:getiri(xuSeri,63)},
-      u:{d1:getiri(xuSeri,1,1),d5:getiri(xuSeri,5,1),d21:getiri(xuSeri,21,1),d63:getiri(xuSeri,63,1)}},hisseler:ozet}));
+      u:{d1:getiri(xuSeri,1,1),d5:getiri(xuSeri,5,1),d21:getiri(xuSeri,21,1),d63:getiri(xuSeri,63,1)}},hisseler:ozet};
+  fs.writeFileSync(path.join(VD,"ozet.json"),JSON.stringify(ozetObj));
   log(`özet: ${Object.keys(ozet).length} hisse, son gün ${sonGun?new Date(sonGun*864e5).toISOString().slice(0,10):"-"}, toplam ${((Date.now()-t0)/60e3).toFixed(1)} dk`);
   if(Object.keys(ozet).length<100)process.exit(1);
+
+  /* 4) BIST 30 hedef listesi: sitedeki hisse analiziyle birebir aynı hesap (index.html → hisseHesap) */
+  const C=require("./cekirdek").cekirdegiYukle({});
+  const on={oz:ozetObj,kur:new Map(kurD.map(r=>[r[0],r[1]])),xu:kurD};
+  const liste=[];
+  for(const k of BIST30.kodlar){
+    if(!seriler[k]){log("BIST30 verisi yok:",k);continue;}
+    try{const a=C.hisseHesap(k,seriler[k],on),hd=a.hedef;
+      liste.push({kod:k,ad:a.ad,fiyat:a.fiyat,d1:yuv(a.degisim),ic:a.karar.ic,uzak:yuv(a.karar.uzak),risk:a.risk,gun:a.veriGunu,
+        tps:hd.tps.map(t=>({f:yuv(t.fiyat),y:yuv(t.yuzde),o:Math.round(t.olas)})),stop:{f:yuv(hd.stop.fiyat),y:yuv(hd.stop.yuzde),o:Math.round(hd.stop.olas)}});
+    }catch(e){log("BIST30 hesap hatası",k,e.message);}
+  }
+  fs.writeFileSync(path.join(VD,"bist30.json"),JSON.stringify({zaman:Date.now(),sonGun,donem:BIST30.donem,liste}));
+  log(`BIST 30 listesi: ${liste.length} hisse`);
+  if(Date.now()>Date.parse(BIST30.bitis))log("UYARI: BIST 30 üye listesinin dönemi bitti, yeni dönem listesi girilmeli");
+
+  /* 5) Telegram: her yeni gün sonu verisi için bir kez */
+  const TOKEN=process.env.TELEGRAM_TOKEN;let chat=process.env.TELEGRAM_CHAT_ID;
+  if(!chat){try{chat=(await (await fetch("https://raw.githubusercontent.com/"+(process.env.GITHUB_REPOSITORY||"dreamdosima08-del/Binance-sinyal")+"/bot-veri/durum.json")).json()).chatId;}catch(e){}}
+  const tgF=path.join(VD,"telegram.json");let tg={};try{tg=JSON.parse(fs.readFileSync(tgF,"utf8"));}catch(e){}
+  const guncel=liste.filter(x=>x.gun===sonGun).length;
+  if(!TOKEN||!chat)log("Telegram ayarı yok, mesaj gönderilmedi");
+  else if(sonGun<=(tg.sonGun||0))log("Bu günün listesi zaten gönderildi");
+  else if(guncel<25)log(`Gün sonu verisi henüz tamam değil (${guncel}/30), mesaj sonraki çalışmaya kaldı`);
+  else{
+    const tr=x=>C.tl(x),yz=x=>x==null?"—":(x>=0?"+":"−")+"%"+C.pc(Math.abs(x),1);
+    const sirali=[...liste].sort((a,b)=>(b.ic-a.ic)||a.kod.localeCompare(b.kod));
+    const xu=ozetObj.xu;
+    const satirlar=sirali.map(x=>`${x.ic?"🟢":"🟠"} <b>${x.kod}</b> ${tr(x.fiyat)} TL (${yz(x.d1)})\n    TP1 ${tr(x.tps[0].f)} <i>%${x.tps[0].o}</i> · TP2 ${tr(x.tps[1].f)} <i>%${x.tps[1].o}</i> · TP3 ${tr(x.tps[2].f)} <i>%${x.tps[2].o}</i> · Stop ${tr(x.stop.f)}`);
+    const tarih=new Date(sonGun*864e5).toLocaleDateString("tr-TR",{day:"numeric",month:"long"});
+    const metin=`📋 <b>BIST 30 hedef listesi</b> · ${tarih} kapanışı\n`
+      +`BIST 100 dolar bazında ${xu.ust?"yükselişte 🟢":"zayıf 🟠"}${xu.u&&xu.u.d21!=null?`, son 1 ay ${yz(xu.u.d21)}`:""}.\n`
+      +`🟢 trend yükselişte · 🟠 trend zayıf (dolar bazında). Yüzdeler: 1 ay içinde stopa değmeden ulaşma olasılığı, üç aşağı beş yukarı.\n\n`
+      +satirlar.join("\n")
+      +`\n\n<i>Al tavsiyesi değil: hisseler için testten geçmiş bir al kuralımız yok. Ayrıntı: site → Analiz → Hisse → BIST 30 listesi.</i>`;
+    // Telegram mesaj sınırı 4096 karakter: gerekirse satır sınırından bölünür
+    const parcalar=[];let p="";for(const sat of metin.split("\n")){if((p+"\n"+sat).length>3800){parcalar.push(p);p=sat;}else p=p?p+"\n"+sat:sat;}if(p)parcalar.push(p);
+    try{
+      let ok=true;
+      for(const parca of parcalar){
+        const r=await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({chat_id:chat,text:parca,parse_mode:"HTML",disable_web_page_preview:true})});
+        const j=await r.json();if(!j.ok){ok=false;log("Telegram hatası:",JSON.stringify(j).slice(0,300));break;}
+      }
+      if(ok){tg.sonGun=sonGun;fs.writeFileSync(tgF,JSON.stringify(tg));log("Telegram: BIST 30 listesi gönderildi,",parcalar.length,"mesaj");}
+    }catch(e){log("Telegram gönderilemedi:",e.message);}
+  }
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -90,6 +90,12 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .verdict.al h3{color:var(--gain)} .verdict.bekle h3{color:var(--amber)}
 .verdict p{margin:8px 0 0;font-size:14px}
 #aMkt button small{display:block;margin:2px 0 0;font-size:11px}
+.b30{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.b30r{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:11px 12px;color:var(--text);font:inherit;cursor:pointer}
+.b30h{display:flex;align-items:center;gap:10px;font-size:14px}.b30h b{font-size:15px;min-width:58px}.b30h>span:nth-child(2){flex:1;color:var(--muted)}
+.b30t{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px}.b30t.yuk{color:var(--gain);background:color-mix(in srgb,var(--gain) 14%,transparent)}.b30t.zay{color:var(--amber);background:color-mix(in srgb,var(--amber) 14%,transparent)}
+.b30l{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-top:7px;font-size:13px;font-variant-numeric:tabular-nums}
+.b30o{color:var(--muted);font-weight:700;font-size:12px}
 .aklab{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:2px}
 .chips button small{font-weight:600;opacity:.7;margin-left:4px;font-size:11px}
 .chips button[aria-pressed="true"]{border-color:var(--sonar);color:var(--text)}
@@ -1839,9 +1845,15 @@ const gunTarih=g=>new Date(g*864e5).toLocaleDateString("tr-TR",{day:"numeric",mo
 async function hisseAnaliz(girdi){
   const kod=String(girdi||"").toUpperCase().replace(/\.(IS|E)$/,"").replace(/[^A-Z0-9ÇĞİÖŞÜ]/g,"");
   if(!kod)throw new Error("Bir hisse kodu yaz, örneğin THYAO");
-  const on=await bistOnYukle(),oz=on.oz,h=oz.hisseler[kod];
-  if(!h)throw new Error(`${kod} Borsa İstanbul listesinde bulunamadı. Hisse kodunu kontrol et (örn. THYAO, ASELS, GARAN)`);
-  const g=(await bistGet(`g/${kod}.json`)).d.filter(r=>on.kur.get(r[0])>0);
+  const on=await bistOnYukle();
+  if(!on.oz.hisseler[kod])throw new Error(`${kod} Borsa İstanbul listesinde bulunamadı. Hisse kodunu kontrol et (örn. THYAO, ASELS, GARAN)`);
+  return hisseHesap(kod,(await bistGet(`g/${kod}.json`)).d,on);
+}
+/* Hesap kısmı ağdan bağımsızdır; bot (bist-veri.js) BIST 30 listesi için aynı fonksiyonu kullanır.
+   on = {oz: ozet.json, kur: Map(gün → USD/TRY), xu: kur.json satırları} */
+function hisseHesap(kod,gHam,on){
+  const oz=on.oz,h=oz.hisseler[kod];
+  const g=gHam.filter(r=>on.kur.get(r[0])>0);
   if(g.length<60)throw new Error(`${kod} çok yeni (${g.length} işlem günü). Güvenilir analiz için en az 60 gün gerekiyor`);
   const kurSon=on.kur.get(g[g.length-1][0]);
   // dolar bazlı seri: işlem fiyatı olarak günün ağırlıklı ortalaması (o) kullanılır
@@ -1983,14 +1995,14 @@ const sureMetin=ms=>{const dk=Math.round(ms/60e3);return dk<1?"az önce":dk<60?d
 const zamanMetin=t=>new Date(t).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 const aPiyasa=()=>{const v=store.get("ddt_apiyasa","USDT");return v==="TRY"||v==="BIST"?v:"USDT";};
 function aListeGoster(){
-  const pz=aPiyasa();$("aIn").placeholder=pz==="BIST"?"Hisse kodu yaz, örn. THYAO":"Coin yaz, örn. SOL";
+  const pz=aPiyasa();$("aIn").placeholder=pz==="BIST"?"Hisse kodu, örn. THYAO":"Coin yaz, örn. SOL";
   if(pz==="BIST"&&!aListe.BIST.length)bistOnYukle().then(o=>{aListe.BIST=Object.keys(o.oz.hisseler).sort();if(aPiyasa()==="BIST")aListeGoster();}).catch(()=>{});
   $("aList").innerHTML=aListe[pz].map(b=>`<option value="${b}">`).join("");}
 function aMktGoster(){document.querySelectorAll("#aMkt button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===aPiyasa())));aListeGoster();}
 function renderASon(){
-  const l=aKayitlar();
-  $("aSon").innerHTML=l.length?`<span class="aklab">Kayıtlı analizler</span>`+l.map(x=>{const k=akAnahtar(x);
-    return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="BIST"?"BIST":x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"";
+  const l=aKayitlar(),b30=aPiyasa()==="BIST"?`<button type="button" data-l="bist30"${aGosterilen==="bist30"?' aria-pressed="true"':""}>📋 BIST 30 listesi</button>`:"";
+  $("aSon").innerHTML=b30+(l.length?`<span class="aklab">Kayıtlı analizler</span>`+l.map(x=>{const k=akAnahtar(x);
+    return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="BIST"?"BIST":x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"");
 }
 function aGoster(a,kayitli){
   aGosterilen=akAnahtar(a);renderAnaliz(a,kayitli);renderASon();
@@ -2115,10 +2127,31 @@ async function analizEt(girdi,piyasa){
 }
 $("aMkt").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||b.dataset.m===aPiyasa())return;
   const tur=x=>x==="BIST"?"h":"k",degisti=tur(b.dataset.m)!==tur(aPiyasa());
-  store.set("ddt_apiyasa",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
+  store.set("ddt_apiyasa",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();renderASon();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
 aMktGoster();
 $("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
-$("aSon").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(!b||aBusy)return;
+async function bist30Goster(){
+  aGosterilen="bist30";renderASon();
+  $("aSonuc").innerHTML=`<div class="empty">BIST 30 listesi yükleniyor…</div>`;
+  try{
+    const d=await bistGet("bist30.json"),xu=(await bistOnYukle()).oz.xu;
+    if(aGosterilen!=="bist30")return;
+    const sir=store.get("ddt_b30sira","ad"),l=[...d.liste].sort(sir==="tp1"?(a,b)=>b.tps[0].o-a.tps[0].o:sir==="trend"?(a,b)=>(b.ic-a.ic)||a.kod.localeCompare(b.kod):(a,b)=>a.kod.localeCompare(b.kod));
+    const ol=o=>`<span class="b30o">%${o}</span>`;
+    $("aSonuc").innerHTML=`<div class="sect" style="margin-top:14px">BIST 30 hedef listesi<small>${gunTarih(d.sonGun)} kapanışı · her akşam kapanıştan sonra güncellenir · üyeler: ${esc(d.donem)}</small></div>
+      <div class="kbar" style="margin-top:0"><span>BIST 100 dolar bazında ${xu.ust?"yükselişte":"zayıf"}${xu.u&&xu.u.d21!=null?`, son 1 ay ${isaret(xu.u.d21,0)}`:""}.</span></div>
+      <div class="chips b30s">${[["ad","A–Z"],["trend","Trende göre"],["tp1","TP1 olasılığına göre"]].map(([k,a])=>`<button type="button" data-s="${k}"${sir===k?' aria-pressed="true"':""}>${a}</button>`).join("")}</div>
+      <div class="b30">${l.map(x=>`<button type="button" class="b30r" data-h="${esc(x.kod)}">
+        <div class="b30h"><b>${esc(x.kod)}</b><span>${tl(x.fiyat)} TL <span class="${x.d1>=0?"pos":"neg"}">${isaret(x.d1)}</span></span><span class="b30t ${x.ic?"yuk":"zay"}">${x.ic?"Yükselişte":"Zayıf"}</span></div>
+        <div class="b30l"><span>TP1 ${tl(x.tps[0].f)} ${ol(x.tps[0].o)}</span><span>TP2 ${tl(x.tps[1].f)} ${ol(x.tps[1].o)}</span><span>TP3 ${tl(x.tps[2].f)} ${ol(x.tps[2].o)}</span><span class="neg">Stop ${tl(x.stop.f)}</span></div></button>`).join("")}</div>
+      <p class="note">Yüzdeler: 1 ay (21 işlem günü) içinde stopa değmeden o hedefe ulaşma olasılığı, hissenin kendi geçmişinden; üç aşağı beş yukarı. Trend dolar bazında 50 günlük ortalamaya göre. Bir hisseye dokununca tam analizi açılır. Bu liste al tavsiyesi değildir: hisseler için testten geçmiş bir al kuralımız yok. Aynı liste her akşam Telegram'a da gelir.</p>`;
+  }catch(e){if(aGosterilen==="bist30")$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
+}
+$("aSonuc").addEventListener("click",e=>{
+  const s=e.target.closest(".b30s [data-s]");if(s){store.set("ddt_b30sira",s.dataset.s);bist30Goster();return;}
+  const h=e.target.closest("[data-h]");if(h&&!aBusy){$("aIn").value=h.dataset.h;analizEt(h.dataset.h,"BIST");window.scrollTo(0,0);}
+});
+$("aSon").addEventListener("click",e=>{if(e.target.closest("[data-l=bist30]")){if(!aBusy)bist30Goster();return;}const b=e.target.closest("[data-k]");if(!b||aBusy)return;
   const a=aKayitlar().find(x=>akAnahtar(x)===b.dataset.k);if(a){aGoster(a,true);window.scrollTo(0,0);}});
 $("aSonuc").addEventListener("click",e=>{
   const k=aGosterilen;if(!k)return;const a=aKayitlar().find(x=>akAnahtar(x)===k);
