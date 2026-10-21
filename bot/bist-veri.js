@@ -104,7 +104,7 @@ const log=(...a)=>console.log(...a);
   }
   const xuUsd=kurD.filter(r=>r[2]>0).map(r=>r[2]/r[1]),xuM=sma(xuUsd,50);
   fs.writeFileSync(path.join(VD,"ozet.json"),JSON.stringify({zaman:Date.now(),sonGun,kur:kurD.length?kurD[kurD.length-1][1]:null,
-    finBaslik:finTh.length?finTh:basliklar,
+    finBaslik:finTh.length?finTh:["F/K","FD/FAVÖK","FD/Satışlar","PD/DD","Dönem"],   // sütun sırası 2026-10'da bankaların A/D değerleriyle doğrulandı
     xu:{c:kurD.length?kurD[kurD.length-1][2]:null,ust:xuM?xuUsd[xuUsd.length-1]>xuM:null,
       g:{d1:getiri(xuSeri,1),d5:getiri(xuSeri,5),d21:getiri(xuSeri,21),d63:getiri(xuSeri,63)},
       u:{d1:getiri(xuSeri,1,1),d5:getiri(xuSeri,5,1),d21:getiri(xuSeri,21,1),d63:getiri(xuSeri,63,1)}},hisseler:ozet}));

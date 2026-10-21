@@ -1827,10 +1827,13 @@ async function bistOnYukle(){
   const [oz,kur]=await Promise.all([bistGet("ozet.json"),bistGet("kur.json")]);
   bistOn={t:Date.now(),oz,kur:new Map(kur.d.map(r=>[r[0],r[1]])),xu:kur.d};return bistOn;
 }
-function finDeger(oz,h,re){
-  const b=(oz.finBaslik||[]).filter(x=>x&&!/^Kod$/i.test(x)&&!/Kapanış/i.test(x)),i=b.findIndex(x=>re.test(x));
-  return i<0||!h.f?null:sayiTR(h.f[i]);
+// İş Yatırım "temelfinansal" tablosu: Kod | Kapanış | F/K | FD/FAVÖK | FD/Satışlar | PD/DD | Son dönem (bankalarda FD oranları A/D)
+const FIN_VARSAYILAN=["F/K","FD/FAVÖK","FD/Satışlar","PD/DD","Dönem"];
+function finHam(oz,h,re){
+  let b=(oz.finBaslik||[]).filter(x=>x&&!/^Kod$/i.test(x)&&!/Kapanış/i.test(x));if(b.length<4)b=FIN_VARSAYILAN;
+  const i=b.findIndex(x=>re.test(x));return i<0||!h.f?null:h.f[i];
 }
+const finDeger=(oz,h,re)=>sayiTR(finHam(oz,h,re));
 const sayiTR=v=>{if(v==null)return null;const t=String(v).trim();if(!t||t==="-"||/A\/D/i.test(t))return null;const x=parseFloat(t.replace(/\./g,"").replace(",","."));return isFinite(x)?x:null;};
 const gunTarih=g=>new Date(g*864e5).toLocaleDateString("tr-TR",{day:"numeric",month:"long"});
 async function hisseAnaliz(girdi){
@@ -1887,15 +1890,18 @@ async function hisseAnaliz(girdi){
   const temel=[],uyarilar=[];
   const es=Object.entries(oz.hisseler).filter(([k,x])=>x.sektor===h.sektor&&k!==kod);
   const ort=(re,poz)=>medyan(es.map(([,x])=>finDeger(oz,x,re)).filter(v=>v!=null&&(!poz||v>0)));
-  temel.push(`<b>Şirket:</b> ${esc(h.ad)} · Sektör: ${esc(h.sektor)}.`);
+  temel.push(`<b>Şirket:</b> ${esc(h.ad)} · Sektör: ${esc(h.sektor)}${/\.$/.test(h.sektor)?"":"."}`);
   if(h.pdTL)temel.push(`<b>Büyüklük:</b> Piyasa değeri ${kisaPara(h.pdTL*1e6,"TL")}${h.pdUsd?` (yaklaşık ${kisaPara(h.pdUsd*1e6,"$")})`:""}. ${h.pdUsd>=5000?"Borsanın en büyükleri arasında.":h.pdUsd>=1000?"Büyük şirket.":h.pdUsd>=200?"Orta büyüklükte.":"Küçük şirket; fiyatı sert hareket edebilir."}`);
   if(h.hao!=null){temel.push(`<b>Halka açıklık:</b> Hisselerin %${pc(h.hao,1)} kadarı borsada işlem görüyor. ${h.hao<20?"Düşük: az parayla fiyat oynayabilir.":h.hao<35?"Orta.":"Yeterli."}`);if(h.hao<20)uyarilar.push(`Halka açıklık düşük (%${pc(h.hao,0)}): fiyat az parayla sert oynayabilir.`);}
-  const oran=(ad,re,poz,aciklama)=>{const v=finDeger(oz,h,re);if(v==null)return;const m=ort(re,poz);
-    temel.push(`<b>${ad}:</b> ${pc(v,1)}${m!=null&&es.length>=3?`; sektördeki tipik şirket ${pc(m,1)}. ${v<=0?"":v<m*0.75?"Sektörüne göre düşük.":v>m*1.33?"Sektörüne göre yüksek.":"Sektörüyle benzer."}`:"."} ${aciklama}`);};
-  oran("F/K (fiyat / kâr)",/^F\/K$/i,true,"Düşük olması ucuzluk gibi görünür ama kârın düşeceği beklentisini de gösterebilir.");
-  oran("PD/DD (piyasa değeri / defter değeri)",/^PD\/DD$/i,true,"");
-  oran("FD/FAVÖK",/^FD\/FAVÖK$/i,true,"");
-  if(finDeger(oz,h,/^F\/K$/i)!=null&&finDeger(oz,h,/^F\/K$/i)<=0)uyarilar.push("F/K negatif ya da yok: şirket son dönemde zarar etmiş olabilir.");
+  const oran=(ad,re,poz,dusukNot,yuksekNot)=>{const v=finDeger(oz,h,re);if(v==null||(poz&&v<=0))return;const m=ort(re,poz),k=m!=null&&es.length>=3;
+    const dusuk=k&&v<m*0.75,yuksek=k&&v>m*1.33;
+    temel.push(`<b>${ad}:</b> ${pc(v,1)}${k?`; sektördeki tipik şirket ${pc(m,1)}. ${dusuk?"Sektörüne göre düşük.":yuksek?"Sektörüne göre yüksek.":"Sektörüyle benzer."}`:"."}${dusuk&&dusukNot?" "+dusukNot:""}${yuksek&&yuksekNot?" "+yuksekNot:""}`);};
+  oran("F/K (fiyat / kâr)",/^F\/K$/i,true,"Düşük F/K ucuzluk gibi görünür ama piyasanın kârın düşeceğini beklediğini de gösterebilir.","Yüksek F/K, piyasanın güçlü büyüme beklediğini gösterir; beklenti tutmazsa fiyat sert düşebilir.");
+  oran("PD/DD (piyasa değeri / defter değeri)",/^PD\/DD$/i,true);
+  oran("FD/FAVÖK (şirket değeri / faaliyet kârı)",/^FD\/FAVÖK$/i,true);
+  const fkHam=finHam(oz,h,/^F\/K$/i),donem=finHam(oz,h,/Dönem/i);
+  if(fkHam!=null&&(/A\/D/i.test(fkHam)||sayiTR(fkHam)<=0)){temel.push("<b>F/K:</b> hesaplanamıyor. Genelde şirketin son 12 ayda zarar ettiği anlamına gelir.");uyarilar.push("F/K hesaplanamıyor: şirket son 12 ayda zarar etmiş olabilir.");}
+  if(donem&&/\d/.test(donem))temel.push(`<span style="color:var(--muted)">Oranlar ${esc(donem)} dönemi finansallarına göre (İş Yatırım).</span>`);
 
   /* ── sektör ── */
   let sektor=null;
@@ -2074,7 +2080,7 @@ function hedefHtml(a){
   const satir=(ad,t,i)=>`<tr><td class="ad">${ad}</td><td class="fy">${tl(t.fiyat)} ${u}<small>${isaret(t.yuzde)} · ${kay(t)} · risk/ödül 1:${pc(t.rr,1)}</small></td><td class="ol">${olasHtml(t.olas)}</td></tr>`;
   return `<div class="sect">Hedefler: şimdi alınırsa<small>${a.karar.bilgi?"Bu bir al tavsiyesi değil; şimdi girersen geçerli seviyeler.":a.karar.ic?"Kural alım bölgesinde.":"Kural şu an BEKLE diyor; bu seviyeler yine de şimdi girersen geçerli olanlar."} Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde stopa değmeden ulaşma.</small></div>
     <div class="sekt"><table class="tpt"><tbody>
-      <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}<small>şu anki fiyat</small></td><td class="ol"></td></tr>
+      <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}<small>${a.tur==="hisse"?"son kapanış":"şu anki fiyat"}</small></td><td class="ol"></td></tr>
       ${h.tps.map((t,i)=>satir("TP"+(i+1),t,i)).join("")}
       <tr><td class="ad">Stop</td><td class="fy">${tl(h.stop.fiyat)} ${u}<small>${isaret(h.stop.yuzde)} · günlük oynaklığın 2 katı</small></td><td class="ol">${olasHtml(h.stop.olas,true)}<small>TP1'den önce stopa değme</small></td></tr>
     </tbody></table>
