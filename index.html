@@ -97,7 +97,7 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .b30l{display:grid;grid-template-columns:1fr 1fr;gap:3px 12px;margin-top:7px;font-size:13px;font-variant-numeric:tabular-nums}
 .b30d{grid-template-columns:1fr 1fr 1fr;color:var(--muted);border-top:1px dashed var(--line);padding-top:6px}
 .b30o{color:var(--muted);font-weight:700;font-size:12px}
-.aklab{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:2px}
+.aklab{flex-basis:100%;font-size:12.5px;font-weight:700;color:var(--muted);margin:4px 0 -2px}
 .chips button small{font-weight:600;opacity:.7;margin-left:4px;font-size:11px}
 .chips button[aria-pressed="true"]{border-color:var(--sonar);color:var(--text)}
 .kbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;font-size:13px;color:var(--muted)}
@@ -119,10 +119,10 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .obar i{display:block;height:100%;border-radius:4px;background:var(--gain)}
 .obar.st i{background:var(--loss,#e5484d)}
 .sekt{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface);margin-top:4px}
-.sekt .yon{display:inline-block;font-weight:800;font-size:13px;border-radius:999px;padding:3px 10px;margin-bottom:6px}
-.sekt .yon.yukari{background:color-mix(in srgb,var(--gain) 16%,transparent);color:var(--gain)}
-.sekt .yon.asagi{background:color-mix(in srgb,var(--loss,#e5484d) 16%,transparent);color:var(--loss,#e5484d)}
-.sekt .yon.karisik{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
+.yon{display:inline-block;font-weight:800;font-size:13px;border-radius:999px;padding:3px 10px;margin-bottom:6px}
+.yon.yukari{background:color-mix(in srgb,var(--gain) 16%,transparent);color:var(--gain)}
+.yon.asagi{background:color-mix(in srgb,var(--loss,#e5484d) 16%,transparent);color:var(--loss,#e5484d)}
+.yon.karisik{background:color-mix(in srgb,var(--amber) 16%,transparent);color:var(--amber)}
 .table tr.ben td{font-weight:800;background:var(--surface2)}
 .verdict .lvl{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--surface2);font-size:14px}
 .verdict .lvl b{display:block;font-size:13px;color:var(--muted);margin-bottom:2px}
@@ -238,7 +238,8 @@ details.more summary::after{content:" +"} details.more[open] summary::after{cont
   padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));display:flex;justify-content:center}
 .nav div{display:flex;width:100%;max-width:560px}
 .nav button{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
-.nav button svg{width:22px;height:22px}
+.nav button svg{width:22px;height:22px;display:block}
+.nav .ic{display:block;line-height:0}
 .nav button[aria-current="page"]{color:var(--sonar)}
 .nav .dot{position:relative}
 .nav .dot[data-n]::after{content:attr(data-n);position:absolute;top:-6px;right:-12px;background:var(--sonar);color:var(--onSonar);font-size:10px;border-radius:999px;padding:0 5px;line-height:15px}
@@ -249,6 +250,74 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:700;font-size:14px;z-index:30;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion: reduce){.radar.busy::before{animation:none;opacity:.6}.toast{transition:none}}
+/* ── analiz: başlık kartı ── */
+.ahead{margin-top:14px;padding:16px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.ah1{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ahead .pair{font-size:21px;font-weight:800;letter-spacing:-.01em}
+.ahead .pair small{font-size:11.5px;font-weight:700;color:var(--muted);margin-left:8px;padding:2px 7px;border:1px solid var(--line);border-radius:6px;vertical-align:3px}
+.ah2{display:flex;align-items:baseline;gap:12px;margin-top:6px;flex-wrap:wrap}
+.afy{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.afy small{font-size:15px;color:var(--muted);font-weight:700}
+.ah2>span{font-weight:700;font-size:15px}.ah2 small{font-weight:600;color:var(--muted);font-size:12px}
+.aik{color:var(--muted);font-weight:600;font-size:14px}
+.ah3{color:var(--muted);font-size:13px;margin-top:8px}
+.aact{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.aact .btn{flex:none;padding:9px 14px;font-size:13.5px}
+.vnot{margin:10px 0 0;padding:0 0 0 18px;font-size:13.5px}.vnot li{margin:4px 0}
+/* ── seviye merdiveni: TP'ler, şu anki fiyat, destekler ve stop tek ölçekte ── */
+.seviye{margin-top:14px;padding:16px 14px 12px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.sh{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:4px}
+.sh h3{margin:0;font-size:17px;font-weight:800}.sh span{font-size:12.5px;color:var(--muted);text-align:right}
+.merdiven{list-style:none;margin:0;padding:0;position:relative}
+.merdiven::before{content:"";position:absolute;left:21px;top:18px;bottom:18px;width:2px;background:var(--line);border-radius:2px}
+.lv{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:start;padding:10px 0;position:relative}
+.lt{justify-self:center;font-weight:800;font-size:12.5px;width:44px;text-align:center;padding:3px 0;border-radius:8px;background:var(--surface2);position:relative;z-index:1}
+.lv-tp .lt{background:color-mix(in srgb,var(--gain) 22%,var(--surface));color:var(--gain)}
+.lv-s .lt{background:color-mix(in srgb,var(--s-trend) 20%,var(--surface));color:var(--s-trend)}
+.lv-stop .lt{background:color-mix(in srgb,var(--loss) 22%,var(--surface));color:var(--loss)}
+.lv-su{margin:4px -14px;padding:10px 14px;background:color-mix(in srgb,var(--sonar) 12%,var(--surface));border-block:1px solid color-mix(in srgb,var(--sonar) 40%,transparent)}
+.lv-su .lt{background:var(--sonar);color:var(--onSonar);font-size:11.5px}
+.lf{min-width:0}.lf b{font-size:16px}.lf small{display:block;color:var(--muted);font-size:12px;font-weight:600;margin-top:1px}
+.lf small.ik{color:var(--text);opacity:.72}
+.lo{text-align:right;min-width:96px}.lo b{font-size:16px}.lo small{display:block;color:var(--muted);font-size:11.5px;line-height:1.25}
+.lb{display:block;height:5px;border-radius:3px;background:var(--surface2);margin-top:5px;overflow:hidden}
+.lb i{display:block;height:100%;background:var(--gain)}.lv-s .lb i{background:var(--s-trend)}.lv-stop .lb i{background:var(--loss)}
+.plan{font-size:13.5px;margin:10px 0 0;padding-top:10px;border-top:1px dashed var(--line)}
+.nasil{margin-top:6px;font-size:13px;color:var(--muted)}.nasil summary{cursor:pointer;font-weight:700;color:var(--sonar);padding:8px 0}.nasil p{margin:6px 0}
+.dikkat{margin-top:14px;padding:12px 14px;border-radius:14px;border:1px solid color-mix(in srgb,var(--amber) 45%,var(--line));background:color-mix(in srgb,var(--amber) 8%,var(--surface));font-size:14px}
+.dikkat ul{margin:6px 0 0;padding-left:18px}.dikkat li{margin:3px 0}
+/* ── katlanan bölümler: kapalıyken de bir satırlık özet gösterir ── */
+.bolum{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
+.bolum>summary{list-style:none;cursor:pointer;padding:13px 42px 13px 14px;position:relative;min-height:48px}
+.bolum>summary::-webkit-details-marker{display:none}
+.bolum>summary::after{content:"";position:absolute;right:18px;top:21px;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg)}
+.bolum[open]>summary::after{transform:rotate(-135deg);top:25px}
+.bb{display:block;font-weight:800;font-size:15px}
+.bo{display:block;color:var(--muted);font-size:13px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bo .yon{margin:0 6px 0 0;padding:1px 8px;font-size:12px}
+.bi{padding:0 14px 14px}
+/* ── özet ── */
+.ara{display:flex;gap:8px;margin-top:16px}
+.ara input{flex:1;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;font-size:16px;font-weight:700;text-transform:uppercase}
+.ara input::placeholder{text-transform:none;font-weight:600;color:var(--muted)}
+.ara .btn{flex:none;padding:12px 16px;border-radius:14px}
+.oblok{margin-top:22px}
+.oh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.oh h2{font-size:17px;margin:0}
+.lnk{border:0;background:none;color:var(--sonar);font-weight:700;font-size:14px;padding:8px 0 8px 12px;cursor:pointer}
+.orow{display:grid;grid-template-columns:96px auto 1fr;gap:10px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;color:var(--text);font:inherit;cursor:pointer;min-height:52px}
+.orow.sade{cursor:default;grid-template-columns:1fr auto}
+.on em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:1px}.nw{white-space:nowrap}
+#anaTrend .compass{margin-top:14px}
+.on b{font-size:15px}.on small{margin-left:6px;font-size:11px;font-weight:700;color:var(--muted)}
+.op{font-weight:700;font-size:14px;white-space:nowrap}.op small{font-weight:600;font-size:12px;color:var(--muted)}.op small.pos{color:var(--gain)}.op small.neg{color:var(--loss)}
+.od{text-align:right;font-size:13px;color:var(--muted);font-weight:600}.od.pos{color:var(--gain)}.od.neg{color:var(--loss)}
+.obist{display:block;width:100%;text-align:left;margin-top:10px;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.obist small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.okisa{display:flex;gap:8px;margin-top:20px}
+.menu{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.menu button{display:block;width:100%;text-align:left;padding:16px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
+.menu b{display:block;font-size:16px}.menu span{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -258,8 +327,23 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <div class="btc flat" id="btc" aria-live="polite"><span>BTC</span><b>—</b></div>
   </header>
 
+  <!-- ═════════ ÖZET (karşılama) ═════════ -->
+  <main id="v-ozet">
+    <form class="ara" id="oForm" role="search" autocomplete="off"><input id="oIn" placeholder="Coin ya da hisse kodu" list="oList" autocapitalize="characters" spellcheck="false" enterkeyhint="search" aria-label="Analiz edilecek coin ya da hisse"><button class="btn primary" type="submit">Analiz et</button></form>
+    <datalist id="oList"></datalist>
+    <div id="anaTrend"></div>
+    <div id="oBist"></div>
+    <section class="oblok" id="oTakip" aria-label="Kayıtlı analizlerin durumu"></section>
+    <section class="oblok" id="oBot" aria-label="Botun son sinyalleri"></section>
+    <div class="okisa">
+      <button type="button" class="btn" data-git="bist30">BIST 30 hedef listesi</button>
+      <button type="button" class="btn" data-git="scan">Coinleri tara</button>
+    </div>
+    <p class="note">Bu uygulama sinyal ve analiz üretir, emir vermez. İşlemleri borsada sen girersin. Yatırım tavsiyesi değildir.</p>
+  </main>
+
   <!-- ═════════ TARA ═════════ -->
-  <main id="v-scan">
+  <main id="v-scan" hidden>
     <div class="mkt" role="group" aria-label="Piyasa"><button data-m="TRY">Binance TR<small>TRY</small></button><button data-m="USDT">Binance Global<small>USDT</small></button></div>
     <section class="scan">
       <button class="radar" id="scanBtn" aria-label="Taramayı başlat"><span>Tara</span></button>
@@ -267,7 +351,6 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
       <div class="status" id="status">Tüm coinler son 4 saatlik mumlara göre taranır.</div>
     </section>
     <div id="scanAlerts"></div>
-    <div id="anaTrend"></div>
     <div class="alert warn" id="honest" style="font-size:13.5px">Bu sinyaller 2 yıllık gerçek veri testinde kâr göstermedi. Gerçek parayla işlem için değil, gözlem içindir. Sonuçları Karne ekranından takip et.</div>
     <div id="compass"></div>
     <div class="wallet" id="wallet"></div>
@@ -289,6 +372,15 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <datalist id="aList"></datalist>
     <div class="chips" id="aSon"></div>
     <div id="aSonuc"><div class="empty">Bir coinin kısaltmasını yaz (SOL, AVAX, PEPE gibi). Teknik ve temel durumu sade bir dille, test ettiğimiz kurala göre ne zaman alınıp ne zaman çıkılacağını, TP1-TP2-TP3 hedeflerini olasılıklarıyla ve sektöründeki diğer coinlerin gidişatını göstereceğim.</div></div>
+  </main>
+
+  <!-- ═════════ DİĞER ═════════ -->
+  <main id="v-diger" hidden>
+    <div class="menu">
+      <button type="button" data-git="journal"><b>İşlem günlüğü</b><span>Girdiğin işlemler, açık pozisyonlar ve gerçek sonuçların</span></button>
+      <button type="button" data-git="test"><b>Geçmiş test</b><span>Tarama kuralları geçmişte nasıl sonuç verirdi</span></button>
+      <button type="button" data-git="settings"><b>Ayarlar ve yedek</b><span>Stratejiler, sermaye, risk, yedeği indir ya da yükle</span></button>
+    </div>
   </main>
 
   <!-- ═════════ GÜNLÜK ═════════ -->
@@ -375,12 +467,11 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 </div>
 
 <nav class="nav" aria-label="Bölümler"><div>
-  <button data-view="scan" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-4"/></svg>Tara</button>
-  <button data-view="analiz"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>Analiz</button>
-  <button data-view="journal"><span class="dot" id="navJ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 11h6M9 15h6"/></svg></span>Günlük</button>
-  <button data-view="test"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19h16"/><path d="M5 16l4-5 3 3 6-8"/></svg>Test</button>
-  <button data-view="karne"><span class="dot" id="navK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9z"/><path d="M15 5h3v15H6V5h3"/><path d="M9 13l2 2 4-4"/></svg></span>Karne</button>
-  <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Ayarlar</button>
+  <button data-view="ozet" aria-current="page"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6 8 6v8H4z"/><path d="M10 19v-5h4v5"/></svg></span>Özet</button>
+  <button data-view="analiz"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></span>Analiz</button>
+  <button data-view="scan"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12l6-4"/></svg></span>Tara</button>
+  <button data-view="karne"><span class="ic dot" id="navK"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6v3H9z"/><path d="M15 5h3v15H6V5h3"/><path d="M9 13l2 2 4-4"/></svg></span>Karne</button>
+  <button data-view="diger"><span class="ic dot" id="navJ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></span>Diğer</button>
 </div></nav>
 
 <dialog id="dlg">
@@ -500,10 +591,11 @@ async function api(path){
 const parseK=k=>({t:+k[0],o:+k[1],h:+k[2],l:+k[3],c:+k[4],ct:+k[6],qv:+k[7],tq:+k[10]});
 const closedOnly=(cs,now)=>cs.filter(c=>c.ct<now);
 async function pool(items,n,fn,onDone){
-  let i=0,done=0;
+  let i=0,done=0,hata=null;
   await Promise.all(Array.from({length:n},async()=>{
-    while(i<items.length){const it=items[i++];try{await fn(it);}catch(e){if(e instanceof NetErr)throw e;}onDone&&onDone(++done);}
+    while(i<items.length&&!hata){const it=items[i++];try{await fn(it);}catch(e){if(e instanceof NetErr){hata=e;break;}}onDone&&onDone(++done);}
   }));
+  if(hata)throw hata;
 }
 async function marketUniverse(){
   const books=await api("/api/v3/ticker/bookTicker");const bookMap=new Map(),syms=[];
@@ -824,7 +916,9 @@ function stepCandle(p,k,slip){
   if(k.l<=p.stop){const px=Math.min(p.stop,k.o)*(1-slip);p.realized+=p.remaining*(px/p.entry-1);p.remaining=0;p.exitPx=px;
     return p.tp1Hit?(p.stop>p.entry*(1+K.BE/100)*1.001?"İZ STOP":"BAŞABAŞ"):"STOP";}
   if(!p.tp1Hit&&k.h>=p.tp1){p.realized+=K.TP1_SIZE*(p.tp1/p.entry-1);p.remaining-=K.TP1_SIZE;p.tp1Hit=true;p.tp1Event=true;
-    p.stop=Math.max(p.stop,p.entry*(1+K.BE/100));}
+    p.stop=Math.max(p.stop,p.entry*(1+K.BE/100));
+    // aynı mumda dip yeni stopun altındaysa sıra bilinmez: kötümser varsayım, kalan yarı başabaş kapanır
+    if(k.l<=p.stop){const px=p.stop*(1-slip);p.realized+=p.remaining*(px/p.entry-1);p.remaining=0;p.exitPx=px;return "BAŞABAŞ";}}
   if(p.tp1Hit&&k.h>=p.tp2){p.realized+=p.remaining*(p.tp2/p.entry-1);p.remaining=0;p.exitPx=p.tp2;return "TP2";}
   if(p.tp1Hit&&p.trail){p.hh=Math.max(p.hh||0,k.h);p.stop=Math.max(p.stop,p.hh*(1-p.trail/100));}
   return null;
@@ -944,7 +1038,9 @@ function errText(e){
 function showErr(id,e){setAlerts(id,`<div class="alert">${esc(errText(e))}</div>`);}
 function setAlerts(id,h){$(id).innerHTML=h;}
 function renderBtc(b){const el=$("btc");
-  if(!b){el.className="btc flat";el.innerHTML="<span>BTC</span><b>—</b>";return;}
+  if(!b){const an=store.get("ddt_ana",null),x=an&&an.BTC;   // tarama yoksa günlük ana trendi göster
+    if(x&&x.ic!=null){el.className="btc "+(x.ic?"up":"down");el.innerHTML=`<span>BTC ana trend</span><b>${x.ic?"İçeride":"Nakitte"}</b>`;}
+    else{el.className="btc flat";el.innerHTML="<span>BTC</span><b>—</b>";}return;}
   el.className="btc "+(b.above?"up":b.chg<=-K.BTC_PEN?"down":"flat");
   el.innerHTML=`<span>BTC ${b.above?"trend üstü":"trend altı"}</span><b>24 sa ${sgn(b.chg)}</b>`;}
 const REGIME={
@@ -1074,9 +1170,9 @@ async function updateJournal(){
   if(jBusy)return;jBusy=true;
   try{const now=Date.now();
     for(const t of openAll()){
-      const from=Math.max(t.lastChecked||0,Math.ceil(t.openedAt/H1)*H1);if(from>now-H1)continue;
+      const from=Math.max(t.lastChecked||0,Math.floor(t.openedAt/H1)*H1);if(from>now-H1)continue;
       const cs=closedOnly((await api(`/api/v3/klines?symbol=${t.sym}&interval=1h&limit=1000&startTime=${from}`)).map(parseK),now);
-      for(const k of cs){if(applyCandle(t,k,k.ct))break;t.lastChecked=k.ct+1;}
+      for(const k of cs){if(applyCandle(t,k.t<t.openedAt?{...k,o:Math.max(k.o,t.stop),h:-Infinity}:k,k.ct))break;t.lastChecked=k.ct+1;}
     }
     const live=openAll();
     if(live.length){const pr=await prices([...new Set(live.map(t=>t.sym))]);
@@ -1319,7 +1415,7 @@ function renderTest(){
       <div>Ortalama kazanç<b class="pos">${st.wins?sgnTL(st.avgWin):"—"}</b></div><div>Ortalama kayıp<b class="neg">${st.losses?sgnTL(st.avgLoss):"—"}</b></div>
       <div>Ortalama R<b class="${st.avgR>=0?"pos":"neg"}">${rStr(st.avgR)}</b></div><div>En uzun kayıp serisi<b>${st.maxRun} işlem</b></div>
       <div>Komisyon maliyeti<b>${money(st.fee)} ${U()}</b></div><div>Kayma etkisi<b>${money(st.slip)} ${U()}</b></div></div>`:""}
-    ${pf.skipped?`<p class="note" style="margin-top:0">${pf.skipped} sinyal, açık işlem sınırı dolu olduğu için atlandı.</p>`:""}
+    ${pf.skipped?`<p class="note" style="margin-top:0">${pf.skipped} sinyal atlandı: açık işlem sınırı doluydu ya da boştaki para alım için çok azdı.</p>`:""}
     ${compare}
     <div class="sect">Dönemlere bölünmüş test<small>İlk %60 geliştirme, sonraki %20 doğrulama, son %20 görülmemiş dönem. Her dönem ayrı sermayeyle başlar.</small></div>
     <table class="table">${SEG_HEAD}<tbody>${wf.map(x=>segRow(`${x.name}<br><small style="color:var(--muted)">${dShort(x.from)} – ${dShort(x.to)}</small>`,x.st,x.pf,x.name==="Görülmemiş"?"hl":"")).join("")}</tbody></table>
@@ -1389,9 +1485,10 @@ function recordSignals(r){
   const now=Date.now();let added=0;
   for(const x of r.signals){
     const id=[r.mkt,x.sym,x.kind,x.st.ct].join("|");
-    if(karne.some(k=>k.id===id))continue;
+    // test kurallarıyla aynı: bir coinde aynı anda tek kayıt; aynı mum için ikinci strateji kaydı da açılmaz
+    if(karne.some(k=>k.id===id||(k.mkt===r.mkt&&k.sym===x.sym&&(k.status!=="closed"||k.id.endsWith("|"+x.st.ct)))))continue;
     const s=x.sig;
-    karne.push({id,mkt:r.mkt,sym:x.sym,kind:x.kind,label:s.label,score:s.score,at:now,entry:s.entry,stop:s.stop,stop0:s.stop,
+    karne.push({id,mkt:r.mkt,sym:x.sym,kind:x.kind,label:s.label,score:s.score,at:now,entry:s.entry*(1+K.SLIP/100),stop:s.stop,stop0:s.stop,
       tp1:s.tp1,tp2:s.tp2,trail:s.trail||null,hh:0,stopPct:s.stopPct,holdMs:(s.hold||60)*H4,fee:settings.feePct,
       status:"open",tp1Hit:false,realized:0,remaining:1,lastChecked:0,lastPx:s.entry});
     added++;
@@ -1410,12 +1507,13 @@ async function updateKarne(){
   try{
     const now=Date.now(),open=karne.filter(k=>k.status!=="closed"),slip=K.SLIP/100;
     await pool(open,4,async k=>{
-      const from=Math.max(k.lastChecked||0,Math.ceil(k.at/H1)*H1);if(from>now-H1)return;
+      const from=Math.max(k.lastChecked||0,Math.floor(k.at/H1)*H1);if(from>now-H1)return;
       const cs=closedOnly((await api(`/api/v3/klines?symbol=${k.sym}&interval=1h&limit=1000&startTime=${from}`)).map(parseK),now);
       for(const c of cs){
         if(c.t>=k.at+k.holdMs){                         // süre doldu: o mumun açılışından kapanır
           const px=c.o*(1-slip);k.realized+=k.remaining*(px/k.entry-1);k.remaining=0;k.exitPx=px;closeK(k,"SÜRE",c.t);break;}
-        const reason=stepCandle(k,c,slip);k.lastPx=c.c;
+        // girişin olduğu saatlik mum girişten önce açıldı: o mumda sadece stop kontrol edilir (hedef sayılmaz)
+        const reason=stepCandle(k,c.t<k.at?{...c,o:Math.max(c.o,k.stop),h:-Infinity}:c,slip);k.lastPx=c.c;
         if(k.tp1Event){k.tp1Event=false;k.status="tp1";}
         if(reason){closeK(k,reason,c.ct);break;}
         k.lastChecked=c.ct+1;
@@ -1500,14 +1598,14 @@ function renderAna(){
     <details class="more"><summary>Neden bu kural?</summary><p class="why">2018'den bugüne günlük veriyle test edildi (komisyon ve kayma dahil). BTC'de yıllık %44 (al-tut %26), en büyük düşüş −%58 (al-tut −%77). ETH'de yıllık %51 (al-tut %14), en büyük düşüş −%56 (al-tut −%90). 7 büyük coinin hepsinde riske göre getiri al-tut'tan iyi çıktı.</p>
       <p class="why">Zayıf yanları: düşüşleri azaltır ama sıfırlamaz (2022'de BTC'de −%51). Yatay piyasada çok yanlış sinyal verir (yılda 20–45 al-sat). Güçlü yükselişlerde al-tut'un gerisinde kalabilir. Daha temkinli istersen sermayenin yarısıyla uygula: testte en büyük düşüş −%33–35'e iniyor.</p></details></div>`;
 }
-async function loadAna(){try{ana=await anaTrend();store.set("ddt_ana",ana);}catch(e){}renderAna();}
+async function loadAna(){try{ana=await anaTrend();store.set("ddt_ana",ana);}catch(e){}renderAna();if(!(lastScan&&lastScan.btc))renderBtc(null);}
 
 /* ═══════════ COIN ANALİZİ (hesap; ekrandan bağımsız) ═══════════
    Veri: Binance günlük mumlar (fiyat, teknik), CoinGecko (temel). Karar kısmı yalnızca test edilmiş
    50 günlük ortalama kuralına dayanır; diğer her şey bilgi amaçlıdır. */
 const CG="https://api.coingecko.com/api/v3";
 async function cgGet(path){
-  const r=await fetch(CG+path,{cache:"no-store"});
+  let r;try{r=await fetch(CG+path,{cache:"no-store"});}catch(e){throw new Error("CoinGecko'ya bağlanılamadı");}
   if(r.status===429)throw new Error("CoinGecko şu an yoğun, 1 dakika sonra tekrar dene");
   if(!r.ok)throw new Error("CoinGecko "+r.status);
   return r.json();
@@ -1544,7 +1642,7 @@ function seviyeBul(cs,fiyat){
 }
 const kisaPara=(v,u)=>{if(v==null||!isFinite(v))return "—";const a=Math.abs(v);
   const s=a>=1e12?pc(v/1e12,2)+" trilyon":a>=1e9?pc(v/1e9,2)+" milyar":a>=1e6?pc(v/1e6,1)+" milyon":money(v);return u==="$"?"$"+s:s+" "+u;};
-const isaret=(v,d=1)=>Math.abs(v)<(d?0.05:0.5)?"%0":(v>=0?"+":"−")+"%"+pc(Math.abs(v),d);
+const isaret=(v,d=1)=>v==null||!isFinite(v)?"—":Math.abs(v)<(d?0.05:0.5)?"%0":(v>=0?"+":"−")+"%"+pc(Math.abs(v),d);
 
 /* ── TP hedefleri: seviyeler ATR (günlük ortalama hareket) katlarıyla, yakın dirence oturtularak.
    Olasılık = bu coinin geçmişinde, bugünkü trend durumundaki her günden aynı katlarla girilseydi
@@ -1690,7 +1788,7 @@ async function sektorAnaliz(cg,base,cs,btc){
   // 1) sektörün yönü
   const oran=genis.length?ustS/genis.length:null;
   const yon=oran!=null&&oran>=0.6&&med.d30>0?"yukari":oran!=null&&oran<=0.4&&med.d30<0?"asagi":"karisik";
-  yorum.push(`<b>Sektörün gidişatı:</b> ${adTR} kategorisindeki en büyük ${esler.length} coin (bu coin hariç) için tipik hareket son 7 günde ${isaret(med.d7,0)}, son 30 günde ${isaret(med.d30,0)}`
+  yorum.push(`<b>Sektörün gidişatı:</b> ${esc(adTR)} kategorisindeki en büyük ${esler.length} coin (bu coin hariç) için tipik hareket son 7 günde ${isaret(med.d7,0)}, son 30 günde ${isaret(med.d30,0)}`
     +(genis.length?`; ${genis.length} coinin ${ustS} tanesi 50 günlük ortalamasının üstünde.`:".")
     +(yon==="yukari"?" Sektör genel olarak yükselişte.":yon==="asagi"?" Sektör genel olarak düşüşte.":" Sektörde net bir yön yok."));
   // 2) ortak hareket
@@ -1772,9 +1870,13 @@ async function coinAnaliz(girdi,piyasa){
     karar.ana=`Günlük kapanış 50 günlük ortalamanın %${pc(uzak)} üstünde (${dShort(cs[bas].t)} itibarıyla, ${n-bas+1} gündür). Test ettiğimiz kural bu durumda coini tutmayı söylüyor.`;
     karar.ne="Ne zaman çıkılır";
     karar.neMetin=`Günlük kapanış ${kSev} altına inerse ertesi gün sat${unit==="TL"?" (TL'ye değil USDT'ye geç)":""}. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.`;
-    const dist=Math.max(0.5,(fiyatV-m50[n])/fiyatV*100);
-    karar.boyut=Math.min(100,settings.riskPct/dist*100);
-    karar.boyutMetin=`Çıkış seviyesi şu anki fiyatın %${pc(dist)} altında. İşlem başı %${String(settings.riskPct).replace(".",",")} risk için en fazla sermayenin %${pc(karar.boyut,0)} kadarıyla gir.`;
+    if(fiyatV<=m50[n]){
+      karar.boyutMetin="Fiyat gün içinde çıkış seviyesinin altına indi. Bugünkü günlük kapanış da altında kalırsa kural yarın satmayı söyler; bu yüzden şimdi yeni alım yapma, kapanışı bekle.";
+    }else{
+      const dist=Math.max(0.5,(fiyatV-m50[n])/fiyatV*100);
+      karar.boyut=Math.min(100,settings.riskPct/dist*100);
+      karar.boyutMetin=`Çıkış seviyesi şu anki fiyatın %${pc(dist)} altında. İşlem başı %${String(settings.riskPct).replace(".",",")} risk için en fazla sermayenin %${pc(karar.boyut,0)} kadarıyla gir.`;
+    }
     if(uzak>25)karar.notlar.push(`Fiyat ortalamadan çok uzaklaşmış (%${pc(uzak,0)}). Şimdi girersen çıkış seviyesi uzakta kalır ve geri çekilmede kâr hızla erir. Acele etmeden ortalamaya doğru bir geri çekilme beklemek daha temkinli olur.`);
   }else{
     karar.baslik="Kurala göre: BEKLE";
@@ -1840,7 +1942,7 @@ async function coinAnaliz(girdi,piyasa){
   try{if(unit==="TL"&&cevir)ikinci={birim:"USDT",carpan:1/kur};
     else{const u=+(await api(`/api/v3/ticker/price?symbol=USDTTRY`)).price;if(u>0)ikinci=unit==="TL"?{birim:"USDT",carpan:1/u}:{birim:"TL",carpan:u};}}
   catch(e){if(e instanceof NetErr)throw e;}
-  return {base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,ikinci,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
+  return {cevir,base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,ikinci,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
 }
 
 
@@ -2021,7 +2123,7 @@ const AK_MAX=20,akAnahtar=a=>a.base+"|"+a.piyasa;
 function aKayitlar(){const l=store.get("ddt_akayit",[]);return Array.isArray(l)?l.filter(x=>x&&x.base&&x.hedef!==undefined):[];}
 function aKaydet(a){
   const l=[a,...aKayitlar().filter(x=>akAnahtar(x)!==akAnahtar(a))].slice(0,AK_MAX);
-  for(const n of [AK_MAX,10,5,1]){store.set("ddt_akayit",l.slice(0,n));if(aKayitlar().length===Math.min(n,l.length))return true;}
+  for(const n of [AK_MAX,10,5,1]){store.set("ddt_akayit",l.slice(0,n));const ilk=aKayitlar()[0];if(ilk&&akAnahtar(ilk)===akAnahtar(a)&&ilk.zaman===a.zaman)return true;}
   return false;
 }
 function aKayitSil(k){store.set("ddt_akayit",aKayitlar().filter(x=>akAnahtar(x)!==k));}
@@ -2031,7 +2133,7 @@ const aPiyasa=()=>{const v=store.get("ddt_apiyasa","USDT");return v==="TRY"||v==
 function aListeGoster(){
   const pz=aPiyasa();$("aIn").placeholder=pz==="BIST"?"Hisse kodu, örn. THYAO":"Coin yaz, örn. SOL";
   if(pz==="BIST"&&!aListe.BIST.length)bistOnYukle().then(o=>{aListe.BIST=Object.keys(o.oz.hisseler).sort();if(aPiyasa()==="BIST")aListeGoster();}).catch(()=>{});
-  $("aList").innerHTML=aListe[pz].map(b=>`<option value="${b}">`).join("");}
+  $("aList").innerHTML=(aListe[pz]||[]).map(b=>`<option value="${b}">`).join("");}
 function aMktGoster(){document.querySelectorAll("#aMkt button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===aPiyasa())));aListeGoster();}
 function renderASon(){
   const l=aKayitlar(),b30=aPiyasa()==="BIST"?`<button type="button" data-l="bist30"${aGosterilen==="bist30"?' aria-pressed="true"':""}>📋 BIST 30 listesi</button>`:"";
@@ -2039,7 +2141,9 @@ function renderASon(){
     return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="BIST"?"BIST":x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"");
 }
 function aGoster(a,kayitli){
-  aGosterilen=akAnahtar(a);renderAnaliz(a,kayitli);renderASon();
+  aGosterilen=akAnahtar(a);
+  try{renderAnaliz(a,kayitli);}catch(e){$("aSonuc").innerHTML=`<div class="alert">Bu kayıt uygulamanın eski bir sürümünden ve açılamadı.</div><div class="aact"><button type="button" class="btn" id="aYenile">Yeniden analiz et</button><button type="button" class="btn" id="aSil">Kayıttan sil</button></div>`;kayitli=false;}
+  renderASon();
   if(kayitli)aTakip(a);
 }
 /* analizden bu yana: saatlik (eskiyse 4 saatlik/günlük) mumlarla hangi seviyeye önce değildi */
@@ -2054,7 +2158,7 @@ async function aTakip(a){
       if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
       if(!cs.length){$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Analizden sonra henüz yeni bir gün sonu verisi yok (son veri ${gunTarih(a.veriGunu)} kapanışı). Bir sonraki seans kapanışından sonra burada hedeflere değip değmediğini göreceksin.</p></div>`;return;}
     }else{
-      const bas=Math.floor(a.zaman/aralik[1])*aralik[1];
+      const bas=Math.ceil(a.zaman/aralik[1])*aralik[1];   // analizden önceki fiyatlar sayılmasın diye bir sonraki tam mumdan başlanır
       cs=(await api(`/api/v3/klines?symbol=${a.sym}&interval=${aralik[0]}&startTime=${bas}&limit=1000`)).map(parseK);
       if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
       if(!cs.length)throw new Error("veri yok");
@@ -2076,90 +2180,100 @@ async function aTakip(a){
       <p>Analizdeki fiyat ${tl(a.fiyat)} ${u}, ${a.tur==="hisse"?"son kapanış":"şu an"} ${tl(son)} ${u} (<span class="${deg>=0?"pos":"neg"}">${isaret(deg)}</span>). Bu sürede en yüksek ${tl(yuk)}, en düşük ${tl(dus)}.</p>
       <ul>${sev.map(satir).join("")}</ul>${ozet}
       <p class="tkn" style="color:var(--muted)">Seviyeler analiz anındaki hesaptır. Al/bekle kararı günlük kapanışla değişebileceği için birkaç günde bir yeniden analiz et.</p></div>`;
-  }catch(e){if($("aTakip"))$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Güncel fiyat alınamadı (${esc(errText(e))}). Kayıtlı seviyeler aşağıda.</p></div>`;}
+  }catch(e){if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Güncel fiyat alınamadı (${esc(errText(e))}). Kayıtlı seviyeler aşağıda.</p></div>`;}
 }
 async function aListeDoldur(){
   if(aListeDolu)return;aListeDolu=true;
   try{const t=await api("/api/v3/ticker/price");const u=new Set(),y=new Set();
     for(const r of t){const s=r.symbol;if(s.endsWith("USDT")&&!EXCL.has(s.slice(0,-4)))u.add(s.slice(0,-4));if(s.endsWith("TRY")&&!EXCL.has(s.slice(0,-3)))y.add(s.slice(0,-3));}
-    aListe={USDT:[...u].sort(),TRY:[...y].sort()};aListeGoster();}catch(e){aListeDolu=false;}
+    aListe.USDT=[...u].sort();aListe.TRY=[...y].sort();aListeGoster();}catch(e){aListeDolu=false;}
 }
-function renderAnaliz(a,kayitli){
-  const k=a.karar,g=a.gecmis,u=a.unit,yil=g.gun/(a.tur==="hisse"?252:365),yer=a.tur==="hisse"?"hissede":"coinde";
-  const gecmisMetin=yil<1?`Bu ${a.tur==="hisse"?"hissenin":"coinin"} geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
-    :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?`Bu ${yer} kural hem düşüşü azalttı hem getiriyi artırdı.`
-    :(g.kural.dd<g.altut.dd)?`Bu ${yer} kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı.`
-    :(g.kural.ret>g.altut.ret)?`Bu ${yer} kural getiriyi artırdı ama düşüşleri azaltamadı.`
-    :`Bu ${yer} kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi.${a.tur==="hisse"?"":" Karara daha temkinli yaklaş."}`;
-  const kb=kayitli?`<div class="kbar"><span>📌 Kayıtlı analiz · ${zamanMetin(a.zaman)} (${sureMetin(Date.now()-a.zaman)})</span><span><button type="button" class="btn" id="aYenile">Yeniden analiz et</button> <button type="button" class="btn" id="aSil">Sil</button></span></div>`
-    :`<div class="kbar"><span>✓ Kaydedildi. Üstteki listeden tekrar açabilirsin; açınca fiyatın hedeflere değip değmediğini de gösteririm.</span></div>`;
-  $("aSonuc").innerHTML=kb+`
-    <div class="card" style="margin-top:12px"><div class="head"><div class="pair">${esc(a.base)}<small>${a.tur==="hisse"?" · BIST":"/"+(a.unit==="TL"?"TRY":"USDT")}</small></div>
-      <div class="chip ${a.risk==="Orta"?"watch":"bad"}">Risk: ${a.risk}</div></div>
-      <div class="meta" style="margin-bottom:0">${esc(a.ad)} · ${tl(a.fiyat)} ${u} · ${a.tur==="hisse"?"günlük":"24 sa"} ${isaret(a.degisim)}</div></div>
-    <div id="aTakip"></div>
-    <div class="verdict ${k.bilgi?"bilgi "+(k.ic?"yuk":"zay"):k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
-      <div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>
-      ${k.boyutMetin?`<div class="lvl"><b>Ne kadar</b>${k.boyutMetin}</div>`:""}
-      ${k.notlar.map(x=>`<p>${x}</p>`).join("")}</div>
-    ${a.piyasaNot?`<div class="alert warn" style="margin-top:12px">${esc(a.piyasaNot)}</div>`:""}
-    ${hedefHtml(a)}
-    ${sektorHtml(a)}
-    <div class="sect">Teknik görünüm</div><ul class="blist">${a.teknik.map(x=>`<li>${x}</li>`).join("")}</ul>
-    <div class="sect">Temel görünüm</div><ul class="blist">${a.temel.map(x=>`<li>${x}</li>`).join("")}</ul>
-    <div class="sect">50 günlük kural bu ${a.tur==="hisse"?"hissede (dolar bazında)":"coinde"} geçmişte nasıl çalıştı<small>${dShort(g.bas)} ${new Date(g.bas).getFullYear()} – bugün (${pc(yil,1)} yıl), işlem başı %0,15 maliyet dahil</small></div>
-    <table class="table"><thead><tr><th></th><th>Toplam getiri</th><th>En büyük düşüş</th></tr></thead><tbody>
-      <tr><td>Kural (50 gün)</td><td class="${g.kural.ret>=0?"pos":"neg"}">${isaret(g.kural.ret*100,0)}</td><td class="neg">−%${pc(g.kural.dd*100,0)}</td></tr>
-      <tr><td>Al-tut</td><td class="${g.altut.ret>=0?"pos":"neg"}">${isaret(g.altut.ret*100,0)}</td><td class="neg">−%${pc(g.altut.dd*100,0)}</td></tr></tbody></table>
-    <p class="note" style="margin-top:8px">${gecmisMetin} Kural bu sürede ${g.kural.islem} kez al-sat yaptı.</p>
-    ${a.uyarilar.length?`<div class="sect">Dikkat</div><ul class="blist warn">${a.uyarilar.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}
-    <p class="note">${a.tur==="hisse"?`Veriler: İş Yatırım'ın herkese açık gün sonu verileri (bölünme ve bedelsizlere göre düzeltilmiş), ${gunTarih(a.veriGunu)} kapanışı. Hisselerde al/bekle kararı verilmez çünkü 50 günlük kural Borsa İstanbul'da testten geçmedi; buradaki her şey bilgi amaçlıdır.`
-      :`Veriler: fiyat ve teknik Binance (günlük kapanışlar), temel CoinGecko. ${new Date(a.zaman).toLocaleTimeString("tr-TR",{hour:"2-digit",minute:"2-digit"})} itibarıyla. Karar kısmı yalnızca 2018'den beri test ettiğimiz 50 günlük ortalama kuralına dayanır; diğer bilgiler karar vermene yardım etsin diye var.`} Hiçbir analiz geleceği kesin bilemez; bu bir yatırım tavsiyesi değildir.</p>`;
-}
+/* Analiz sayfası düzeni: önce cevap (fiyat, karar, seviye merdiveni), ayrıntılar katlanan bölümlerde. */
 const olasKelime=p=>p>=60?"Yüksek":p>=40?"Orta":p>=20?"Düşük":"Çok düşük";
 const yuv5=p=>Math.max(0,Math.min(100,Math.round(p/5)*5));
-function olasHtml(p,stop){const o=yuv5(p),lo=Math.max(0,o-10),hi=Math.min(100,o+10);
-  return `<b>%${o}</b>${stop?"":` <span style="color:var(--muted);font-weight:600">· ${olasKelime(p)}</span>`}<small>muhtemelen %${lo}–${hi} arası</small><div class="obar${stop?" st":""}"><i style="width:${o}%"></i></div>`;}
-function hedefHtml(a){
-  const h=a.hedef,u=a.unit;if(!h)return "";
-  const kay=t=>t.kaynak==="zirve"?"zirvenin hemen altı":t.kaynak==="direnc"?"direncin hemen altı":"oynaklığa göre";
-  const ik=a.ikinci,ikf=x=>ik?`<small class="ik">≈ ${tl(x*ik.carpan)} ${ik.birim}</small>`:"";
-  const satir=(ad,t,i)=>`<tr><td class="ad">${ad}</td><td class="fy">${tl(t.fiyat)} ${u}${ikf(t.fiyat)}<small>${isaret(t.yuzde)} · ${kay(t)} · risk/ödül 1:${pc(t.rr,1)}</small></td><td class="ol">${olasHtml(t.olas)}</td></tr>`;
-  return `<div class="sect">Hedefler: şimdi alınırsa<small>${a.karar.bilgi?"Bu bir al tavsiyesi değil; şimdi girersen geçerli seviyeler.":a.karar.ic?"Kural alım bölgesinde.":"Kural şu an BEKLE diyor; bu seviyeler yine de şimdi girersen geçerli olanlar."} Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde stopa değmeden ulaşma.</small></div>
-    <div class="sekt"><table class="tpt"><tbody>
-      <tr><td class="ad">Giriş</td><td class="fy">${tl(a.fiyat)} ${u}${ikf(a.fiyat)}<small>${a.tur==="hisse"?"son kapanış":"şu anki fiyat"}</small></td><td class="ol"></td></tr>
-      ${h.tps.map((t,i)=>satir("TP"+(i+1),t,i)).join("")}
-      <tr><td class="ad">Stop</td><td class="fy">${tl(h.stop.fiyat)} ${u}${ikf(h.stop.fiyat)}<small>${isaret(h.stop.yuzde)} · günlük oynaklığın 2 katı</small></td><td class="ol">${olasHtml(h.stop.olas,true)}<small>TP1'den önce stopa değme</small></td></tr>
-    </tbody></table>
-    <p class="note" style="margin-top:10px">TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak. Olasılıklar bir tahmin değil, bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık: ${a.karar.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi hedefe kaç kez ulaşılırdı${a.tur==="hisse"?" (dolar bazında hesaplanıp bugünkü kurla TL'ye çevrildi)":""}. ${h.kisa?`Geçmişi kısa olduğu için sonuç büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasına doğru düzeltildi. `:""}${h.sinama||"Biz bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."} O yüzden "üç aşağı beş yukarı" olarak oku.</p></div>${destekHtml(a)}`;
+const duzMetin=h=>String(h).replace(/<[^>]+>/g,"");
+function bolum(baslik,ozet,icerik,acik){
+  return `<details class="bolum"${acik?" open":""}><summary><span class="bb">${baslik}</span>${ozet?`<span class="bo">${ozet}</span>`:""}</summary><div class="bi">${icerik}</div></details>`;
 }
-function destekHtml(a){
-  const h=a.hedef,u=a.unit,ik=a.ikinci;if(!h||!h.destekler||!h.destekler.length)return "";
-  const st=h.stop.fiyat;
-  return `<div class="sect">Destekler: S1 – S2 – S3<small>Düşüşte fiyatın tutunabileceği seviyeler. Olasılık: ${h.ufukMetin||h.ufuk+" gün"} içinde o seviyeye inme.</small></div>
-    <div class="sekt"><table class="tpt"><tbody>
-      ${h.destekler.map((d,i)=>`<tr><td class="ad">S${i+1}</td><td class="fy">${tl(d.fiyat)} ${u}${ik?`<small class="ik">≈ ${tl(d.fiyat*ik.carpan)} ${ik.birim}</small>`:""}<small>${isaret(d.yuzde)} · ${d.kaynak==="dip"?(d.temas>1?`${d.temas} kez dönülmüş dip`:"son 1 yılın dibi"):"oynaklığa göre (yakında dip yok)"}${d.fiyat<st?" · stopun altında":""}</small></td><td class="ol">${olasHtml(d.olas,true)}<small>bu seviyeye inme</small></td></tr>`).join("")}
-    </tbody></table>
-    <p class="note" style="margin-top:10px">Destekler ${h.destekTL?"TL grafiğinde ":a.ikinci&&a.unit==="TL"?"USDT grafiğinde (TL'ye bugünkü kurla çevrildi) ":""}son 1 yılın dip noktalarından bulunur; birbirine %3'ten yakın dipler tek seviye sayılır. Destek kırılırsa fiyat genelde bir sonraki desteğe kadar inebilir. İnme olasılıkları da hedeflerdeki gibi bu ${a.tur==="hisse"?"hissenin":"coinin"} kendi geçmişinden bir sıklık; 2022–2025 sınamasında ortalama 6–12 puan saptı.</p></div>`;
+function seviyeHtml(a){
+  const h=a.hedef,u=a.unit,ik=a.ikinci;if(!h)return "";
+  const kay=t=>t.kaynak==="zirve"?"zirvenin altı":t.kaynak==="direnc"?"direncin altı":"oynaklığa göre";
+  const sv=[
+    ...h.tps.map((t,i)=>({tur:"tp",ad:"TP"+(i+1),f:t.fiyat,y:t.yuzde,o:t.olas,not:kay(t),ek:`risk/ödül 1:${pc(t.rr,1)}`,ol:"stopa değmeden ulaşma"})),
+    {tur:"su",ad:"Fiyat",f:a.fiyat,y:0},
+    ...(h.destekler||[]).map((d,i)=>({tur:"s",ad:"S"+(i+1),f:d.fiyat,y:d.yuzde,o:d.olas,
+      not:d.kaynak==="dip"?(d.temas>1?`${d.temas} kez dönülmüş dip`:"son 1 yılın dibi"):"oynaklığa göre",ol:"bu seviyeye inme"})),
+    {tur:"stop",ad:"Stop",f:h.stop.fiyat,y:h.stop.yuzde,o:h.stop.olas,not:"günlük oynaklığın 2 katı",ol:"TP1'den önce gelme"}
+  ].sort((x,y)=>(y.f-x.f)||(x.tur==="stop"?1:-1));
+  const satir=s=>`<li class="lv lv-${s.tur}"><span class="lt">${s.ad}</span>
+    <span class="lf"><b>${tl(s.f)}</b> ${u}${ik?`<small class="ik">≈ ${tl(s.f*ik.carpan)} ${ik.birim}</small>`:""}<small>${s.tur==="su"?(a.tur==="hisse"?"son kapanış":"şu anki fiyat"):`${isaret(s.y)} · ${s.not}`}</small>${s.ek?`<small>${s.ek}</small>`:""}</span>
+    <span class="lo">${s.o!=null?`<b>%${yuv5(s.o)}</b><small>${s.ol}</small><span class="lb"><i style="width:${yuv5(s.o)}%"></i></span>`:""}</span></li>`;
+  const k=a.karar,kim=a.tur==="hisse"?"hissenin":"coinin";
+  return `<section class="seviye" aria-label="Hedef, destek ve stop seviyeleri">
+    <div class="sh"><h3>Seviyeler</h3><span>yüzdeler: ${h.ufukMetin||h.ufuk+" gün"} içinde</span></div>
+    <ol class="merdiven">${sv.map(satir).join("")}</ol>
+    <p class="plan"><b>Plan:</b> TP1'de yarısını sat ve stopu giriş fiyatına çek; kalanı TP2 ve TP3'e bırak.${k.bilgi?" Bu bir al tavsiyesi değil; şimdi girersen geçerli seviyeler.":!k.ic?" Kural şu an beklemeyi söylüyor; seviyeler yine de şimdi girersen geçerli olanlar.":""}</p>
+    <details class="nasil"><summary>Bu yüzdeler nasıl hesaplanıyor?</summary>
+      ${h.n<30?`<p>Bu ${kim} geçmişi çok kısa; yüzdeler büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasından alındı.</p>`:""}<p>Tahmin değil, bu ${kim} kendi geçmişinden bir sıklık: ${k.ic?"50 günlük ortalamanın üstünde olduğu":"50 günlük ortalamanın altında olduğu"} ${h.n} günün her birinden aynı mesafelerle girilseydi, ${h.ufukMetin||h.ufuk+" gün"} içinde TP'lere stopa değmeden kaç kez ulaşılırdı, desteklere kaç kez inilirdi${a.tur==="hisse"?" (dolar bazında hesaplanıp bugünkü kurla TL'ye çevrildi)":""}. ${h.kisa?`Geçmişi kısa olduğu için sonuç büyük ${a.tur==="hisse"?"hisselerin":"coinlerin"} ortalamasına doğru düzeltildi. `:""}</p>
+      <p>${h.sinama||"Bu yöntemi 2022–2025 yıllarında sınadık: tahminler gerçekleşenden ortalama 8 puan saptı, kötü bir yılda 15 puan."} Destek olasılıklarında sapma 6–12 puan. Yani her yüzdeyi ±10 puan, "üç aşağı beş yukarı" oku. ${olasKelime(h.tps[0].olas)} sayılan TP1 bile garanti değildir.</p>
+      <p>TP'ler günlük oynaklığın (ATR) 2, 4 ve 7 katı uzaklıkta, yakında direnç varsa direncin hemen altına çekilir. Destekler ${h.destekTL?"TL grafiğinde ":a.cevir?"USDT grafiğinde (TL'ye bugünkü kurla çevrildi) ":""}son 1 yılın diplerinden bulunur; birbirine %3'ten yakın dipler tek seviye sayılır.</p></details>
+  </section>`;
 }
-function sektorHtml(a){
-  const s=a.sektor;if(!s)return "";
-  if(s.hata)return `<div class="sect">Sektörü</div><p class="note" style="margin-top:0">${esc(s.hata)}</p>`;
-  const yonAd={yukari:"Sektör yükselişte",asagi:"Sektör düşüşte",karisik:"Sektörde net yön yok"}[s.yon];
+function sektorIc(a){
+  const s=a.sektor;
+  if(s.hata)return `<p class="note" style="margin:0">${esc(s.hata)}</p>`;
   const hc=v=>v==null?"<td>—</td>":`<td class="${Math.abs(v)<0.5?"":v>=0?"pos":"neg"}">${isaret(v,0)}</td>`;
-  return `<div class="sect">Sektörü: ${esc(s.adTR)}<small>${s.hisse?"Aynı sektördeki en büyük hisselerle karşılaştırma (TL bazında)":"Aynı kategorideki en büyük coinlerle karşılaştırma (dolar bazında)"}</small></div>
-    <div class="sekt"><span class="yon ${s.yon}">${yonAd}</span>
-    <ul class="blist">${s.yorum.map(x=>`<li>${x}</li>`).join("")}</ul>
+  return `<ul class="blist">${s.yorum.map(x=>`<li>${x}</li>`).join("")}</ul>
     <table class="table" style="margin-top:6px"><thead><tr><th>${s.hisse?"Hisse":"Coin"}</th><th>${s.hisse?"1 gün":"24 sa"}</th><th>${s.hisse?"1 hafta":"7 gün"}</th><th>${s.hisse?"1 ay":"30 gün"}</th><th>Birlikte</th></tr></thead><tbody>
       <tr class="ben"><td>${esc(a.base)}</td>${hc(s.coin.d24)}${hc(s.coin.d7)}${hc(s.coin.d30)}<td>—</td></tr>
       ${s.esler.map(e=>`<tr><td>${esc(e.sym)}${e.ust===true?" ↑":e.ust===false?" ↓":""}</td>${hc(e.d24)}${hc(e.d7)}${hc(e.d30)}<td>${korKelime(e.r)}</td></tr>`).join("")}
       <tr class="hl"><td>Tipik ${s.hisse?"hisse":"coin"}</td>${hc(s.med.d24)}${hc(s.med.d7)}${hc(s.med.d30)}<td></td></tr>
     </tbody></table>
-    <p class="note" style="margin-top:8px">↑ 50 günlük ortalamasının üstünde, ↓ altında${s.hisse?" (dolar bazında)":""}. "Birlikte": son ${s.hisse?"3 ayda":"90 günde"} ${esc(a.base)} ile günlük hareketlerinin ne kadar benzediği. Benzerlik geçmişi anlatır; birlikte hareket edenlerin bundan sonra da öyle yapacağının garantisi yoktur.</p></div>`;
+    <p class="note" style="margin-top:8px">${s.hisse?"Değişimler TL bazında. ":"Değişimler dolar bazında. "}↑ 50 günlük ortalamasının üstünde, ↓ altında${s.hisse?" (dolar bazında)":""}. "Birlikte": son ${s.hisse?"3 ayda":"90 günde"} ${esc(a.base)} ile günlük hareketlerinin ne kadar benzediği. Benzerlik geçmişi anlatır; birlikte hareket edenlerin bundan sonra da öyle yapacağının garantisi yoktur.</p>`;
+}
+function renderAnaliz(a,kayitli){
+  const k=a.karar,g=a.gecmis,u=a.unit,ik=a.ikinci,hisse=a.tur==="hisse",yil=g.gun/(hisse?252:365),yer=hisse?"hissede":"coinde";
+  const gecmisMetin=yil<1?`Bu ${hisse?"hissenin":"coinin"} geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
+    :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?`Bu ${yer} kural hem düşüşü azalttı hem getiriyi artırdı.`
+    :(g.kural.dd<g.altut.dd)?`Bu ${yer} kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı.`
+    :(g.kural.ret>g.altut.ret)?`Bu ${yer} kural getiriyi artırdı ama düşüşleri azaltamadı.`
+    :`Bu ${yer} kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi.${hisse?"":" Karara daha temkinli yaklaş."}`;
+  const zaman=hisse?`${gunTarih(a.veriGunu)} kapanışı`:`${zamanMetin(a.zaman)} fiyatı`;
+  const ust=`<div class="ahead">
+      <div class="ah1"><div class="pair">${esc(a.base)}<small>${hisse?"BIST":(a.unit==="TL"?"TRY":"USDT")}</small></div><span class="chip ${a.risk==="Orta"?"watch":"bad"}">Risk: ${esc(a.risk)}</span></div>
+      <div class="ah2"><b class="afy">${tl(a.fiyat)} <small>${u}</small></b><span class="${a.degisim>=0?"pos":"neg"}">${isaret(a.degisim)} <small>${hisse?"günlük":"24 sa"}</small></span></div>
+      ${ik?`<div class="aik">≈ ${tl(a.fiyat*ik.carpan)} ${ik.birim}</div>`:""}
+      <div class="ah3">${esc(a.ad)} · ${zaman}${kayitli?` · ${sureMetin(Date.now()-a.zaman)} kaydedildi`:""}</div>
+      <div class="aact">${kayitli?`<button type="button" class="btn" id="aYenile">Yeniden analiz et</button><button type="button" class="btn" id="aSil">Kayıttan sil</button>`
+        :`<span>Kaydedildi. Sonra Kayıtlı analizler'den açınca hedeflere değip değmediğini gösteririm.</span>`}</div>
+    </div>`;
+  const karar=`<div class="verdict ${k.bilgi?"bilgi "+(k.ic?"yuk":"zay"):k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
+      ${k.bilgi?`<details class="nasil"><summary>${k.ne}?</summary><p>${k.neMetin}</p></details>`:`<div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>`}
+      ${k.boyutMetin?`<div class="lvl"><b>Ne kadar</b>${k.boyutMetin}</div>`:""}
+      ${k.notlar.length?`<ul class="vnot">${k.notlar.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}</div>`;
+  const s=a.sektor,yonAd=s&&!s.hata?{yukari:"yükselişte",asagi:"düşüşte",karisik:"net yön yok"}[s.yon]:null;
+  const sek=s?bolum(`Sektörü${s.hata?"":": "+esc(s.adTR)}`,s.hata?"karşılaştırma yapılamadı":`<span class="yon ${s.yon}">${yonAd}</span>${s.rS!=null?` birlikte hareket: ${korKelime(s.rS).toLocaleLowerCase("tr-TR")}`:""}`,sektorIc(a),!s.hata):"";
+  const tek=bolum("Teknik görünüm",esc(duzMetin(a.teknik[0]||"").replace(/^[^:]+:\s*/,"")),`<ul class="blist">${a.teknik.map(x=>`<li>${x}</li>`).join("")}</ul>`);
+  const tem=bolum("Temel görünüm",esc(duzMetin(a.temel[1]||a.temel[0]||"").replace(/^[^:]+:\s*/,"").slice(0,80)),`<ul class="blist">${a.temel.map(x=>`<li>${x}</li>`).join("")}</ul>`);
+  const gec=bolum(`50 günlük kural bu ${hisse?"hissede":"coinde"} nasıl çalıştı`,`kural ${isaret(g.kural.ret*100,0)} · al-tut ${isaret(g.altut.ret*100,0)}`,
+    `<p class="note" style="margin:0 0 8px">${dShort(g.bas)} ${new Date(g.bas).getFullYear()} – bugün (${pc(yil,1)} yıl)${hisse?", dolar bazında":""}, işlem başı %0,15 maliyet dahil.</p>
+    <table class="table"><thead><tr><th></th><th>Toplam getiri</th><th>En büyük düşüş</th></tr></thead><tbody>
+      <tr><td>Kural (50 gün)</td><td class="${g.kural.ret>=0?"pos":"neg"}">${isaret(g.kural.ret*100,0)}</td><td class="neg">−%${pc(g.kural.dd*100,0)}</td></tr>
+      <tr><td>Al-tut</td><td class="${g.altut.ret>=0?"pos":"neg"}">${isaret(g.altut.ret*100,0)}</td><td class="neg">−%${pc(g.altut.dd*100,0)}</td></tr></tbody></table>
+    <p class="note" style="margin-top:8px">${gecmisMetin} Kural bu sürede ${g.kural.islem} kez al-sat yaptı.</p>`);
+  $("aSonuc").innerHTML=`${ust}
+    ${a.piyasaNot&&!hisse?`<div class="alert warn" style="margin-top:12px">${esc(a.piyasaNot)}</div>`:""}
+    <div id="aTakip"></div>
+    ${karar}
+    ${seviyeHtml(a)}
+    ${a.uyarilar.length?`<div class="dikkat"><b>Dikkat</b><ul>${a.uyarilar.map(x=>`<li>${x}</li>`).join("")}</ul></div>`:""}
+    ${sek}${tek}${tem}${gec}
+    <p class="note">${hisse?`Veriler: İş Yatırım'ın herkese açık gün sonu verileri (bölünme ve bedelsizlere göre düzeltilmiş). Fiyat anlık değil; işlemden önce aracı kurumunda kontrol et. Hisselerde al/bekle kararı verilmez çünkü 50 günlük kural Borsa İstanbul'da testten geçmedi.`
+      :`Veriler: fiyat ve teknik Binance (günlük kapanışlar), temel ve sektör CoinGecko. Karar kısmı yalnızca 2018'den beri test ettiğimiz 50 günlük ortalama kuralına dayanır; diğer bilgiler karar vermene yardım etsin diye var.`} Hiçbir analiz geleceği kesin bilemez; bu bir yatırım tavsiyesi değildir.</p>`;
 }
 async function analizEt(girdi,piyasa){
   const q=String(girdi||"").trim().toUpperCase();if(!q||aBusy)return;
-  const pz=piyasa||aPiyasa();
+  const pz=piyasa||aPiyasa();aGosterilen=null;
   aBusy=true;const btn=$("aBtn");btn.disabled=true;btn.textContent="Analiz…";
   $("aSonuc").innerHTML=`<div class="empty">${esc(q)} analiz ediliyor: fiyat geçmişi, hedefler, temel veriler ve sektördeki ${pz==="BIST"?"hisseler":"coinler"} alınıyor…</div>`;
   try{
@@ -2171,7 +2285,7 @@ async function analizEt(girdi,piyasa){
 }
 $("aMkt").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||b.dataset.m===aPiyasa())return;
   const tur=x=>x==="BIST"?"h":"k",degisti=tur(b.dataset.m)!==tur(aPiyasa());
-  store.set("ddt_apiyasa",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();renderASon();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
+  store.set("ddt_apiyasa",b.dataset.m);if(b.dataset.m!=="BIST")store.set("ddt_akripto",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();renderASon();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
 aMktGoster();
 $("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
 async function bist30Goster(){
@@ -2204,12 +2318,101 @@ $("aSonuc").addEventListener("click",e=>{
     const s=aKayitlar()[0];if(s)aGoster(s,true);else $("aSonuc").innerHTML=`<div class="empty">Kayıtlı analiz kalmadı.</div>`;toast("Silindi");}
 });
 
+/* ═══════════ ÖZET (karşılama ekranı) ═══════════
+   Sıra: arama → test edilmiş tek kural (BTC/ETH ana trend) → BIST 100 → takip ettiklerin → botun son sinyalleri. */
+const bugunMetin=()=>{const t=new Date().toLocaleDateString("tr-TR",{weekday:"long",day:"numeric",month:"long"});return t.charAt(0).toLocaleUpperCase("tr-TR")+t.slice(1);};
+let oListeDolu=false;
+async function oListeDoldur(){
+  if(oListeDolu)return;oListeDolu=true;
+  try{await aListeDoldur();}catch(e){}
+  let b=[];try{b=Object.keys((await bistOnYukle()).oz.hisseler);}catch(e){}
+  const set=new Set([...aListe.USDT,...aListe.TRY,...b]);
+  $("oList").innerHTML=[...set].sort().map(x=>`<option value="${esc(x)}">`).join("");
+  if(!set.size)oListeDolu=false;
+}
+/* yazılan koda göre piyasayı seç: Binance coini mi, Borsa İstanbul hissesi mi */
+async function hizliAnaliz(girdi){
+  let q=String(girdi||"").trim().toUpperCase().replace(/\s+/g,"");if(!q||aBusy)return;
+  let pz=null;const kripto=store.get("ddt_akripto","USDT");
+  if(/\.(IS|E)$/.test(q)){pz="BIST";q=q.replace(/\.(IS|E)$/,"");}
+  else if(q.length>4&&q.endsWith("USDT"))pz="USDT";
+  else if(q.length>3&&q.endsWith("TRY")){pz="TRY";}
+  if(!pz){
+    try{await aListeDoldur();}catch(e){}
+    const u=aListe.USDT.includes(q),t=aListe.TRY.includes(q);
+    if(u||t)pz=kripto==="TRY"&&t?"TRY":u?"USDT":"TRY";
+    else{try{if((await bistOnYukle()).oz.hisseler[q])pz="BIST";}catch(e){}}
+  }
+  pz=pz||aPiyasa();
+  store.set("ddt_apiyasa",pz);if(pz!=="BIST")store.set("ddt_akripto",pz);
+  aMktGoster();show("analiz");$("aIn").value=q;analizEt(q,pz);
+}
+async function guncelFiyat(a){
+  if(a.tur==="hisse"){const h=(await bistOnYukle()).oz.hisseler[a.base];return h?h.c:null;}
+  return +(await api(`/api/v3/ticker/price?symbol=${a.sym}`)).price||null;
+}
+function takipDurum(a,p){
+  const h=a.hedef;if(!h||!(p>0))return null;const t=h.tps,y=x=>isaret((x/p-1)*100);
+  if(p<=h.stop.fiyat)return {c:"neg",m:`Stop seviyesinin altında (${tl(h.stop.fiyat)})`};
+  if(p>=t[2].fiyat)return {c:"pos",m:"TP3'ün üstünde"};
+  if(p>=t[1].fiyat)return {c:"pos",m:`TP2 geçildi · TP3'e ${y(t[2].fiyat)}`};
+  if(p>=t[0].fiyat)return {c:"pos",m:`TP1 geçildi · TP2'ye ${y(t[1].fiyat)}`};
+  return {c:"",m:`TP1'e ${y(t[0].fiyat)} · stopa ${y(h.stop.fiyat)}`};
+}
+function oTakipSatir(a,p){
+  const d=takipDurum(a,p),deg=p>0?(p/a.fiyat-1)*100:null;
+  return `<button type="button" class="orow" data-k="${esc(akAnahtar(a))}">
+    <span class="on"><b>${esc(a.base)}</b><small>${a.piyasa==="BIST"?"BIST":a.piyasa==="TRY"?"TL":"USDT"}</small></span>
+    <span class="op">${p>0?`${tl(p)} <small class="${deg>=0?"pos":"neg"}">${isaret(deg)}</small>`:`<small>${tl(a.fiyat)}</small>`}</span>
+    <span class="od ${d?d.c:""}">${d?d.m:p===undefined?"fiyat alınıyor…":"güncel fiyat alınamadı"}</span></button>`;
+}
+let oTakipSira=0;
+async function renderOzetTakip(){
+  const box=$("oTakip"),l=aKayitlar().slice(0,6),sira=++oTakipSira;
+  const bas=`<div class="oh"><h2>Takip ettiklerin</h2>${l.length?`<button type="button" class="lnk" data-git="analiz">Tümü</button>`:""}</div>`;
+  if(!l.length){box.innerHTML=bas+`<div class="empty">Analiz ettiğin coin ve hisseler burada durur; fiyatın hedeflere ne kadar yaklaştığını gösterir. Yukarıya bir kod yazarak başla.</div>`;return;}
+  box.innerHTML=bas+l.map(a=>oTakipSatir(a,undefined)).join("")+`<p class="note" style="margin-top:6px">Fiyat ile analizdeki seviyeler karşılaştırılır. Arada hedefe değip değmediğini görmek için satıra dokun.</p>`;
+  const f=await Promise.all(l.map(a=>guncelFiyat(a).catch(()=>null)));
+  if(sira!==oTakipSira||$("v-ozet").hidden)return;
+  box.innerHTML=bas+l.map((a,i)=>oTakipSatir(a,f[i])).join("")+`<p class="note" style="margin-top:6px">Fiyat ile analizdeki seviyeler karşılaştırılır${l.some(a=>a.tur==="hisse")?" (hisselerde son kapanış)":""}. Arada hedefe değip değmediğini görmek için satıra dokun.</p>`;
+}
+async function renderOzetBot(){
+  const box=$("oBot");
+  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2></div><div class="empty">Yükleniyor…</div>`;await loadBot();}
+  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2></div><div class="empty">Bot verisine şu an ulaşılamadı. İnternetini kontrol edip sayfayı yenile.</div>`;return;}
+  const son=[...(botData.karne||[])].sort((a,b)=>b.at-a.at).slice(0,5);
+  const durum=k=>k.status==="closed"?`<span class="${k.pnl>0?"pos":"neg"}">${rStr(k.r)}</span>`:k.status==="tp1"?`<span class="pos">TP1 alındı</span>`:"takipte";
+  box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2><button type="button" class="lnk" data-git="karne">Karne</button></div>
+    ${son.length?son.map(k=>`<div class="orow sade"><span class="on"><b>${esc(k.sym.replace(/(USDT|TRY)$/,""))}</b><small>${k.mkt==="TRY"?"TL":"USDT"}</small><em>${esc(STR[k.kind]?STR[k.kind].name:k.kind)} · ${ago(Date.now()-k.at)}</em></span>
+      <span class="od">${durum(k)}</span></div>`).join("")
+      :`<div class="empty">Bot henüz sinyal üretmedi.</div>`}
+    <p class="note" style="margin-top:6px">Bunlar gözlem sinyalleri: kuralları testte kâr göstermedi. Telegram'a da gelir.${botData.sonCalisma?` Son tarama ${ago(Date.now()-botData.sonCalisma)}.`:""}</p>`;
+}
+async function renderOzetBist(){
+  const box=$("oBist");
+  try{const o=await bistOnYukle(),x=o.oz.xu;if(!x||$("v-ozet").hidden&&!box.innerHTML)return;
+    box.innerHTML=`<button type="button" class="obist" data-git="bist30"><span><b>BIST 100</b> dolar bazında ${x.ust?"yükselişte":"zayıf"}${x.u&&x.u.d21!=null?`, son 1 ay <span class="nw">${isaret(x.u.d21,0)}</span>`:""}</span><small>${gunTarih(o.oz.sonGun)} kapanışı · BIST 30 hedef listesi için dokun</small></button>`;}
+  catch(e){box.innerHTML="";}
+}
+function renderOzet(){renderAna();renderOzetTakip();renderOzetBot();renderOzetBist();oListeDoldur();}
+$("oForm").addEventListener("submit",e=>{e.preventDefault();$("oIn").blur();const v=$("oIn").value;$("oIn").value="";hizliAnaliz(v);});
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-git]");
+  if(g){const v=g.dataset.git;
+    if(v==="bist30"){store.set("ddt_apiyasa","BIST");aMktGoster();show("analiz");bist30Goster();}
+    else show(v);return;}
+  const r=e.target.closest("#oTakip [data-k]");
+  if(r){const a=aKayitlar().find(x=>akAnahtar(x)===r.dataset.k);if(a){show("analiz");aGoster(a,true);}}
+});
+
 /* ═══════════ görünüm ═══════════ */
-const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Bir coini ya da hisseyi sade bir dille incele"};
+const SUBS={diger:"Günlük, geçmiş test ve ayarlar",scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Coin ya da hisse, sade dille"};
 function show(v){
-  ["scan","analiz","journal","test","karne","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
-  document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===v)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
-  $("viewSub").textContent=SUBS[v];window.scrollTo(0,0);
+  ["ozet","analiz","scan","karne","diger","journal","test","settings"].forEach(x=>$("v-"+x).hidden=x!==v);
+  const nv=["journal","test","settings"].includes(v)?"diger":v;
+  document.querySelectorAll(".nav button").forEach(b=>{if(b.dataset.view===nv)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");});
+  $("viewSub").textContent=v==="ozet"?bugunMetin():SUBS[v];window.scrollTo(0,0);
+  if(v==="ozet")renderOzet();
   if(v==="journal"){renderJournal();if(active().length)updateJournal().then(renderJournal).catch(e=>showErr("jAlerts",e));}
   if(v==="settings")fillSettings();
   if(v==="karne"){renderKarne();refreshKarne(false);}
@@ -2275,7 +2478,7 @@ $("bUp").addEventListener("click",()=>$("bFile").click());
 $("bFile").addEventListener("change",e=>{const f=e.target.files&&e.target.files[0];if(f)backupUpload(f);e.target.value="";});
 $("sWipe").addEventListener("click",()=>{if(confirm("Tüm işlem günlüğü silinsin mi? Bu geri alınamaz.")){journal=[];saveJ();renderAll();toast("Günlük sıfırlandı");}});
 
-renderMkt();$("viewSub").textContent=SUBS.scan;syncSegs();renderAll();renderAna();loadAna();
+renderMkt();syncSegs();renderAll();show("ozet");if(!(lastScan&&lastScan.btc))renderBtc(null);loadAna();
 if(lastScan&&lastScan.btc)renderBtc(lastScan.btc);
 if(active().length)updateJournal().then(renderAll).catch(()=>{});
 if(karne.some(k=>k.status!=="closed"))updateKarne().then(renderKarne).catch(()=>{});

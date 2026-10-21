@@ -69,6 +69,9 @@ const log=(...a)=>console.log(...a);
   }
   await Promise.all([isci(),isci(),isci(),isci()]);
   log(`fiyatlar: ${yeni} güncellendi, ${tam} baştan indirildi, ${hata} hata, ${((Date.now()-t0)/60e3).toFixed(1)} dk`);
+  // güvenlik: önceki çalışmada olan hisselerin çoğu bu sefer yoksa dalın üstüne yazma
+  const oncekiSayi=fs.readdirSync(GD).length,simdiki=Object.keys(seriler).length;
+  if(oncekiSayi>100&&simdiki<oncekiSayi*0.9){log(`Hisse sayısı ${oncekiSayi} → ${simdiki} düştü; veri kaydedilmiyor.`);process.exit(1);}
   const kurD=[...kurMap.entries()].filter(([d])=>d>=BASGUN).sort((a,b)=>a[0]-b[0]).map(([d,[k,x]])=>[d,k,x]);
   fs.writeFileSync(path.join(VD,"kur.json"),JSON.stringify({d:kurD}));
 

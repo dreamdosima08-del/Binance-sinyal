@@ -16,7 +16,8 @@ const bekle=ms=>new Promise(r=>setTimeout(r,ms));
 
 /* ── durum ── */
 let durum={surum:1,telegram:"",chatId:null,tgOffset:0,sonCalisma:0,sonOzet:"",sonHata:"",karne:[],piyasalar:{}};
-if(fs.existsSync(DURUM))durum=Object.assign(durum,JSON.parse(fs.readFileSync(DURUM,"utf8")));
+if(fs.existsSync(DURUM)){try{durum=Object.assign(durum,JSON.parse(fs.readFileSync(DURUM,"utf8")));}
+  catch(e){console.log("durum.json okunamadı, varsayılanlarla devam ediliyor:",e.message);}}
 if(SABIT_CHAT)durum.chatId=SABIT_CHAT;
 durum.telegram="";
 
@@ -24,7 +25,7 @@ durum.telegram="";
 const mk={},varsayilan={TRY:{minVol:5,feePct:0.1},USDT:{minVol:2,feePct:0.1}};
 for(const m of ["TRY","USDT"])mk[m]={capital:(AYAR.sermaye||{})[m]||(m==="TRY"?1000:100),...varsayilan[m],...((AYAR.piyasaAyar||{})[m]||{})};
 const depo={
-  ddt_settings:JSON.stringify({market:"TRY",mk,riskPct:AYAR.riskYuzde||2,maxOpen:99,autoRisk:true,
+  ddt_settings:JSON.stringify({v:2,market:"TRY",mk,riskPct:AYAR.riskYuzde||2,maxOpen:99,autoRisk:true,   // v:2 olmazsa sitedeki eski ayar göçü Dip ve Retest'i kapatır
     kinds:Object.assign({dip:true,trend:true,brk:true,rt:true},AYAR.stratejiler||{}),
     strat:(AYAR.enDusukPuan&&AYAR.enDusukPuan!==50)?{WATCH:AYAR.enDusukPuan}:{}}),
   ddt_karne:JSON.stringify(durum.karne||[])
@@ -42,11 +43,25 @@ async function tg(metod,govde){
 }
 const giden=[];
 function yaz(metin){giden.push(metin);}
+/* Telegram aynı sohbete saniyede yaklaşık 1 mesaj kabul eder. Gönderilemeyenler durum.bekleyen'de saklanır, sonraki çalışmada tekrar denenir. */
 async function gonder(){
-  if(!TOKEN){console.log(`[Telegram ayarlı değil — ${giden.length} mesaj gönderilmedi]`);giden.forEach(m=>console.log("---\n"+m));return;}
+  const liste=[...(durum.bekleyen||[]),...giden];durum.bekleyen=[];
+  if(!TOKEN){console.log(`[Telegram ayarlı değil — ${liste.length} mesaj gönderilmedi]`);liste.forEach(m=>console.log("---\n"+m));return;}
   if(!durum.chatId){console.log("[Telegram: henüz kimse /start yazmadı, mesajlar gönderilmedi]");return;}
-  for(const m of giden){const j=await tg("sendMessage",{chat_id:durum.chatId,text:m,parse_mode:"HTML",disable_web_page_preview:true});
-    if(j&&!j.ok)durum.telegram="mesaj gönderilemedi: "+j.description;await bekle(350);}
+  for(const m of liste){
+    let j=null;
+    for(let d=0;d<3;d++){
+      j=await tg("sendMessage",{chat_id:durum.chatId,text:m,parse_mode:"HTML",disable_web_page_preview:true});
+      if(j&&j.ok)break;
+      const ra=j&&j.parameters&&j.parameters.retry_after;
+      if(ra){await bekle((ra+1)*1000);continue;}
+      if(j&&j.error_code===400)break;   // biçim hatası: tekrar denemek işe yaramaz
+      await bekle(2000);
+    }
+    if(!j||!j.ok){durum.telegram="mesaj gönderilemedi: "+((j&&j.description)||"bağlantı yok");if(!(j&&j.error_code===400))durum.bekleyen.push(m);}
+    await bekle(1100);
+  }
+  durum.bekleyen=durum.bekleyen.slice(-30);
 }
 async function sohbetiKaydet(){
   if(!TOKEN){durum.telegram="token yok: GitHub'da TELEGRAM_TOKEN tanımlı değil";return;}
@@ -85,7 +100,7 @@ function sonucMesaji(k){
 }
 function tp1Mesaji(k){
   const u=C.MKT[k.mkt].unit;
-  return `🎯 <b>${C.plain(k.sym)} TP1 geldi</b> (+%${C.pc((k.tp1/k.entry-1)*100)})\nPozisyonun yarısını sat, stop'u girişe çek: <b>${C.tl(k.stop)} ${u}</b>${k.trail?"\nKalan yarı iz süren stopla takip ediliyor.":""}`;
+  return `🎯 <b>${C.plain(k.sym)} TP1 geldi</b> (+%${C.pc((k.tp1/k.entry-1)*100)})\nPozisyonun yarısını sat, stop'u girişe çek: <b>${C.tl(k.entry*(1+C.K.BE/100))} ${u}</b>${k.trail?"\nKalan yarı iz süren stopla takip ediliyor; fiyat yükseldikçe stop da yükselir.":""}`;
 }
 function ozetMesaji(){
   const simdi=Date.now(),gun=86400000;let satir=[];
@@ -147,7 +162,8 @@ function anaDegisim(ad,x){
       const r=await C.scanCore();
       const oncekiler=new Set(C.karne.map(k=>k.id));
       C.recordSignals(r);
-      const yeniler=r.signals.filter(x=>!oncekiler.has([r.mkt,x.sym,x.kind,x.st.ct].join("|")));
+      // yalnızca karneye gerçekten eklenen sinyaller bildirilir (aynı coinde açık kayıt varsa eklenmez)
+      const yeniler=r.signals.filter(x=>{const id=[r.mkt,x.sym,x.kind,x.st.ct].join("|");return !oncekiler.has(id)&&C.karne.some(k=>k.id===id);});
       for(const x of yeniler)yaz(sinyalMesaji(x,r,m));
       durum.piyasalar[m]={zaman:r.time,coin:r.total,sinyal:r.signals.length,yeniSinyal:yeniler.length,takip:r.watch.length,
         elenen:r.rejected.length,rejim:r.regime,genislik:r.breadth,btc:r.btc};
