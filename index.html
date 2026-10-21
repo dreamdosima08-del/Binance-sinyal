@@ -16,15 +16,15 @@
 :root{
   --bg:#0F2230; --surface:#16303F; --surface2:#1C3A4B; --line:#274A5C;
   --text:#E4EDEF; --muted:#8FA9B3; --sonar:#5EC8C0; --amber:#E8B04B;
-  --loss:#E8705F; --gain:#7BD389; --onSonar:#07262A; --nav:#122A38;
+  --loss:#F2806F; --gain:#7BD389; --onSonar:#07262A; --nav:#122A38;
   --s-dip:#5EC8C0; --s-trend:#8FB7F2; --s-brk:#E8B04B; --s-rt:#C9A2F2; --s-man:#8FA9B3;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);
 }
 @media (prefers-color-scheme: light){
   :root{
     --bg:#EEF3F4; --surface:#FFFFFF; --surface2:#E3ECEE; --line:#CFDDE1;
-    --text:#10283A; --muted:#5A7480; --sonar:#16827B; --amber:#A8700F;
-    --loss:#C2412F; --gain:#2E8A4A; --onSonar:#FFFFFF; --nav:#FFFFFF;
+    --text:#10283A; --muted:#4D6672; --sonar:#16827B; --amber:#946209;
+    --loss:#B0362A; --gain:#21743A; --onSonar:#FFFFFF; --nav:#FFFFFF;
     --s-dip:#16827B; --s-trend:#2F63B5; --s-brk:#A8700F; --s-rt:#7B4DB8; --s-man:#5A7480;
   }
 }
@@ -47,7 +47,7 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .btc.up b{color:var(--gain)} .btc.down b{color:var(--loss)} .btc.flat b{color:var(--amber)}
 
 .mkt,.srcsw{display:flex;gap:4px;margin:16px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px}
-.mkt button,.srcsw button{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
+.mkt button,.srcsw button{flex:1;min-height:44px;border:0;background:transparent;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer}
 .mkt button small,.srcsw button small{font-weight:600;opacity:.75;margin-left:4px}
 .mkt button[aria-pressed="true"],.srcsw button[aria-pressed="true"]{background:var(--sonar);color:var(--onSonar)}
 .scan{margin:18px 0 14px;display:flex;flex-direction:column;align-items:center}
@@ -80,7 +80,7 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .aform input{flex:1;min-width:0;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:16px;font-weight:700;text-transform:uppercase}
 .aform .btn{flex:none;padding:12px 16px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
-.chips button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
+.chips button{min-height:40px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 14px;font-weight:700;font-size:13px;color:var(--muted);cursor:pointer}
 .verdict{border-radius:16px;padding:16px;margin:12px 0;border:1px solid var(--line);background:var(--surface)}
 .verdict.al{border-color:color-mix(in srgb,var(--gain) 55%,var(--line));background:color-mix(in srgb,var(--gain) 8%,var(--surface))}
 .verdict.bekle{border-color:color-mix(in srgb,var(--amber) 55%,var(--line));background:color-mix(in srgb,var(--amber) 8%,var(--surface))}
@@ -261,6 +261,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .ah2>span{font-weight:700;font-size:15px}.ah2 small{font-weight:600;color:var(--muted);font-size:12px}
 .aik{color:var(--muted);font-weight:600;font-size:14px}
 .ah3{color:var(--muted);font-size:13px;margin-top:8px}
+.aact:empty{display:none}
 .aact{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .aact .btn{flex:none;padding:9px 14px;font-size:13.5px}
 .vnot{margin:10px 0 0;padding:0 0 0 18px;font-size:13.5px}.vnot li{margin:4px 0}
@@ -304,7 +305,9 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .oblok{margin-top:22px}
 .oh{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
 .oh h2{font-size:17px;margin:0}
-.lnk{border:0;background:none;color:var(--sonar);font-weight:700;font-size:14px;padding:8px 0 8px 12px;cursor:pointer}
+.lnk{border:0;background:none;color:var(--sonar);font-weight:700;font-size:14px;padding:8px 0 8px 12px;min-height:44px;cursor:pointer}
+details>summary{min-height:44px;display:flex;align-items:center;gap:6px}
+.bolum>summary{display:block}
 .orow{display:grid;grid-template-columns:96px auto 1fr;gap:10px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 2px;color:var(--text);font:inherit;cursor:pointer;min-height:52px}
 .orow.sade{cursor:default;grid-template-columns:1fr auto}
 .on em{display:block;font-style:normal;font-size:12.5px;color:var(--muted);font-weight:600;margin-top:1px}.nw{white-space:nowrap}
@@ -318,6 +321,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .menu{display:flex;flex-direction:column;gap:10px;margin-top:16px}
 .menu button{display:block;width:100%;text-align:left;padding:16px;border-radius:16px;border:1px solid var(--line);background:var(--surface);color:var(--text);font:inherit;cursor:pointer}
 .menu b{display:block;font-size:16px}.menu span{display:block;color:var(--muted);font-size:13.5px;margin-top:2px}
+.btn,.seg button{min-height:44px}
 </style>
 </head>
 <body>
@@ -334,11 +338,11 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <div id="anaTrend"></div>
     <div id="oBist"></div>
     <section class="oblok" id="oTakip" aria-label="Kayıtlı analizlerin durumu"></section>
-    <section class="oblok" id="oBot" aria-label="Botun son sinyalleri"></section>
     <div class="okisa">
       <button type="button" class="btn" data-git="bist30">BIST 30 hedef listesi</button>
       <button type="button" class="btn" data-git="scan">Coinleri tara</button>
     </div>
+    <section class="oblok" id="oBot" aria-label="Botun son sinyalleri"></section>
     <p class="note">Bu uygulama sinyal ve analiz üretir, emir vermez. İşlemleri borsada sen girersin. Yatırım tavsiyesi değildir.</p>
   </main>
 
@@ -1594,7 +1598,7 @@ function renderAna(){
   const hepsi=ana.BTC.ic&&ana.ETH&&ana.ETH.ic,hic=!ana.BTC.ic&&ana.ETH&&!ana.ETH.ic;
   box.innerHTML=`<div class="compass ana"><div class="h"><b>Ana trend: BTC ve ETH</b><span class="chip ${hepsi?"strong":hic?"bad":"watch"}">${hepsi?"İçeride":hic?"Nakitte":"Karışık"}</span></div>
     ${satir("BTC")}${satir("ETH")}
-    <p>Kural: günlük kapanış 50 günlük ortalamanın üstündeyse tut; altına inerse ertesi gün sat ve ${Q()==="TRY"?"TL'ye değil USDT'ye geçip":"USDT'de"} bekle. Değişince bot Telegram'dan haber verir.</p>
+    <p><b>İçeride</b> = kurala göre tut, <b>nakitte</b> = sat ve bekle. Kural: günlük kapanış 50 günlük ortalamanın üstündeyse tut; altına inerse ertesi gün sat ve ${Q()==="TRY"?"TL'ye değil USDT'ye geçip":"USDT'de"} bekle. Değişince bot Telegram'dan haber verir.</p>
     <details class="more"><summary>Neden bu kural?</summary><p class="why">2018'den bugüne günlük veriyle test edildi (komisyon ve kayma dahil). BTC'de yıllık %44 (al-tut %26), en büyük düşüş −%58 (al-tut −%77). ETH'de yıllık %51 (al-tut %14), en büyük düşüş −%56 (al-tut −%90). 7 büyük coinin hepsinde riske göre getiri al-tut'tan iyi çıktı.</p>
       <p class="why">Zayıf yanları: düşüşleri azaltır ama sıfırlamaz (2022'de BTC'de −%51). Yatay piyasada çok yanlış sinyal verir (yılda 20–45 al-sat). Güçlü yükselişlerde al-tut'un gerisinde kalabilir. Daha temkinli istersen sermayenin yarısıyla uygula: testte en büyük düşüş −%33–35'e iniyor.</p></details></div>`;
 }
@@ -2142,6 +2146,8 @@ function renderASon(){
 }
 function aGoster(a,kayitli){
   aGosterilen=akAnahtar(a);
+  if(a.piyasa&&a.piyasa!==aPiyasa()){store.set("ddt_apiyasa",a.piyasa);if(a.piyasa!=="BIST")store.set("ddt_akripto",a.piyasa);aMktGoster();}
+  $("aIn").value=a.base;
   try{renderAnaliz(a,kayitli);}catch(e){$("aSonuc").innerHTML=`<div class="alert">Bu kayıt uygulamanın eski bir sürümünden ve açılamadı.</div><div class="aact"><button type="button" class="btn" id="aYenile">Yeniden analiz et</button><button type="button" class="btn" id="aSil">Kayıttan sil</button></div>`;kayitli=false;}
   renderASon();
   if(kayitli)aTakip(a);
@@ -2161,7 +2167,9 @@ async function aTakip(a){
       const bas=Math.ceil(a.zaman/aralik[1])*aralik[1];   // analizden önceki fiyatlar sayılmasın diye bir sonraki tam mumdan başlanır
       cs=(await api(`/api/v3/klines?symbol=${a.sym}&interval=${aralik[0]}&startTime=${bas}&limit=1000`)).map(parseK);
       if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
-      if(!cs.length)throw new Error("veri yok");
+      if(!cs.length){const px=+(await api(`/api/v3/ticker/price?symbol=${a.sym}`)).price;
+        if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
+        $("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b> <span style="color:var(--muted)">(${sureMetin(yas)})</span><p>Şu an ${tl(px)} ${a.unit} (<span class="${px>=a.fiyat?"pos":"neg"}">${isaret((px/a.fiyat-1)*100)}</span>). Analizden sonra henüz yeni bir saatlik mum kapanmadı; hedeflere değip değmediğini bir sonraki saat başından sonra gösteririm.</p></div>`;return;}
     }
     const son=cs[cs.length-1].c,h=a.hedef,sev=[...h.tps.map((t,i)=>({ad:"TP"+(i+1),fiyat:t.fiyat,yukari:true})),{ad:"Stop",fiyat:h.stop.fiyat,yukari:false}];
     let yuk=-Infinity,dus=Infinity;
@@ -2203,10 +2211,10 @@ function seviyeHtml(a){
     {tur:"su",ad:"Fiyat",f:a.fiyat,y:0},
     ...(h.destekler||[]).map((d,i)=>({tur:"s",ad:"S"+(i+1),f:d.fiyat,y:d.yuzde,o:d.olas,
       not:d.kaynak==="dip"?(d.temas>1?`${d.temas} kez dönülmüş dip`:"son 1 yılın dibi"):"oynaklığa göre",ol:"bu seviyeye inme"})),
-    {tur:"stop",ad:"Stop",f:h.stop.fiyat,y:h.stop.yuzde,o:h.stop.olas,not:"günlük oynaklığın 2 katı",ol:"TP1'den önce gelme"}
+    {tur:"stop",ad:"Stop",f:h.stop.fiyat,y:h.stop.yuzde,o:h.stop.olas,not:"günlük oynaklığın 2 katı",ol:"TP1'den önce stop olma"}
   ].sort((x,y)=>(y.f-x.f)||(x.tur==="stop"?1:-1));
   const satir=s=>`<li class="lv lv-${s.tur}"><span class="lt">${s.ad}</span>
-    <span class="lf"><b>${tl(s.f)}</b> ${u}${ik?`<small class="ik">≈ ${tl(s.f*ik.carpan)} ${ik.birim}</small>`:""}<small>${s.tur==="su"?(a.tur==="hisse"?"son kapanış":"şu anki fiyat"):`${isaret(s.y)} · ${s.not}`}</small>${s.ek?`<small>${s.ek}</small>`:""}</span>
+    <span class="lf"><b>${tl(s.f)}</b> ${u}${ik?`<small class="ik">≈ ${tl(s.f*ik.carpan)} ${ik.birim}</small>`:""}<small>${s.tur==="su"?(a.tur==="hisse"?"son kapanış":"şu anki fiyat"):`<span class="nw">${isaret(s.y)}</span> · <span class="nw">${s.not}</span>`}</small>${s.ek?`<small>${s.ek}</small>`:""}</span>
     <span class="lo">${s.o!=null?`<b>%${yuv5(s.o)}</b><small>${s.ol}</small><span class="lb"><i style="width:${yuv5(s.o)}%"></i></span>`:""}</span></li>`;
   const k=a.karar,kim=a.tur==="hisse"?"hissenin":"coinin";
   return `<section class="seviye" aria-label="Hedef, destek ve stop seviyeleri">
@@ -2245,7 +2253,7 @@ function renderAnaliz(a,kayitli){
       ${ik?`<div class="aik">≈ ${tl(a.fiyat*ik.carpan)} ${ik.birim}</div>`:""}
       <div class="ah3">${esc(a.ad)} · ${zaman}${kayitli?` · ${sureMetin(Date.now()-a.zaman)} kaydedildi`:""}</div>
       <div class="aact">${kayitli?`<button type="button" class="btn" id="aYenile">Yeniden analiz et</button><button type="button" class="btn" id="aSil">Kayıttan sil</button>`
-        :`<span>Kaydedildi. Sonra Kayıtlı analizler'den açınca hedeflere değip değmediğini gösteririm.</span>`}</div>
+        :""}</div>
     </div>`;
   const karar=`<div class="verdict ${k.bilgi?"bilgi "+(k.ic?"yuk":"zay"):k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
       ${k.bilgi?`<details class="nasil"><summary>${k.ne}?</summary><p>${k.neMetin}</p></details>`:`<div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>`}
@@ -2279,13 +2287,15 @@ async function analizEt(girdi,piyasa){
   try{
     const a=pz==="BIST"?await hisseAnaliz(q):await coinAnaliz(q,pz);
     const ok=aKaydet(a);aGoster(a,false);
-    if(!ok)toast("Telefonun hafızası dolu, analiz kaydedilemedi");
+    toast(ok?"Analiz kaydedildi":"Telefonun hafızası dolu, analiz kaydedilemedi");
   }catch(e){$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
   finally{aBusy=false;btn.disabled=false;btn.textContent="Analiz et";}
 }
 $("aMkt").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!b||b.dataset.m===aPiyasa())return;
   const tur=x=>x==="BIST"?"h":"k",degisti=tur(b.dataset.m)!==tur(aPiyasa());
-  store.set("ddt_apiyasa",b.dataset.m);if(b.dataset.m!=="BIST")store.set("ddt_akripto",b.dataset.m);if(degisti)$("aIn").value="";aMktGoster();renderASon();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
+  store.set("ddt_apiyasa",b.dataset.m);if(b.dataset.m!=="BIST")store.set("ddt_akripto",b.dataset.m);
+  if(degisti){$("aIn").value="";aGosterilen=null;$("aSonuc").innerHTML=`<div class="empty">${b.dataset.m==="BIST"?"Bir hisse kodu yaz (THYAO, ASELS gibi) ya da BIST 30 listesini aç.":"Bir coin kısaltması yaz (SOL, AVAX gibi)."}</div>`;}
+  aMktGoster();renderASon();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
 aMktGoster();
 $("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
 async function bist30Goster(){
@@ -2378,11 +2388,11 @@ async function renderOzetTakip(){
 }
 async function renderOzetBot(){
   const box=$("oBot");
-  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2></div><div class="empty">Yükleniyor…</div>`;await loadBot();}
-  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2></div><div class="empty">Bot verisine şu an ulaşılamadı. İnternetini kontrol edip sayfayı yenile.</div>`;return;}
+  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun gözlem sinyalleri</h2></div><div class="empty">Yükleniyor…</div>`;await loadBot();}
+  if(!botData){box.innerHTML=`<div class="oh"><h2>Botun gözlem sinyalleri</h2></div><div class="empty">Bot verisine şu an ulaşılamadı. İnternetini kontrol edip sayfayı yenile.</div>`;return;}
   const son=[...(botData.karne||[])].sort((a,b)=>b.at-a.at).slice(0,5);
-  const durum=k=>k.status==="closed"?`<span class="${k.pnl>0?"pos":"neg"}">${rStr(k.r)}</span>`:k.status==="tp1"?`<span class="pos">TP1 alındı</span>`:"takipte";
-  box.innerHTML=`<div class="oh"><h2>Botun son sinyalleri</h2><button type="button" class="lnk" data-git="karne">Karne</button></div>
+  const durum=k=>k.status==="closed"?`<span class="${k.pnl>0?"pos":"neg"}">${sgn(k.pnl*100)}</span>`:k.status==="tp1"?`<span class="pos">TP1 alındı</span>`:"takipte";
+  box.innerHTML=`<div class="oh"><h2>Botun gözlem sinyalleri</h2><button type="button" class="lnk" data-git="karne">Karne</button></div>
     ${son.length?son.map(k=>`<div class="orow sade"><span class="on"><b>${esc(k.sym.replace(/(USDT|TRY)$/,""))}</b><small>${k.mkt==="TRY"?"TL":"USDT"}</small><em>${esc(STR[k.kind]?STR[k.kind].name:k.kind)} · ${ago(Date.now()-k.at)}</em></span>
       <span class="od">${durum(k)}</span></div>`).join("")
       :`<div class="empty">Bot henüz sinyal üretmedi.</div>`}
