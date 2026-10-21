@@ -1,0 +1,39 @@
+
+## yahoo chart THYAO 10y → 429 19 bayt 291ms ACAO=null CT=text/html
+özet hatası Unexpected token 'T', "Too Many Requests
+" is not valid JSON | Too Many Requests 
+
+## yahoo chart XU100 → 429 19 bayt 102ms ACAO=null CT=text/html
+özet hatası Unexpected token 'T', "Too Many Requests
+" is not valid JSON | Too Many Requests 
+
+## yahoo chart USDTRY → 429 19 bayt 58ms ACAO=null CT=text/html
+özet hatası Unexpected token 'T', "Too Many Requests
+" is not valid JSON | Too Many Requests 
+
+## yahoo quoteSummary → 429 19 bayt 205ms ACAO=null CT=text/html
+Too Many Requests
+
+
+## yahoo search → 429 19 bayt 57ms ACAO=null CT=text/html
+özet hatası Unexpected token 'T', "Too Many Requests
+" is not valid JSON | Too Many Requests 
+
+## isyatirim HisseTekil → 200 9995 bayt 1453ms ACAO=null CT=application/json; charset=utf-8
+{"ok":true,"errorCode":null,"errorDescription":null,"transactionId":"232bba2ae0cd4b49838f7291cc26b017","value":[{"HGDG_HS_KODU":"THYAO","HGDG_TARIH":"01-10-2026","HGDG_KAPANIS":286.5000,"HGDG_AOF":287.673,"HGDG_MIN":284.25,"HGDG_MAX":290.5,"HGDG_HACIM":9606660339.000000,"END_ENDEKS_KODU":"01","END_TARIH":1790802000000,"END_SEANS":2,"END_DEGER":12249.04,"DD_DOVIZ_KODU":"USD","DD_DT_KODU":"01","DD_TARIH":1790802000000,"DD_DEGER":49.0348,"DOLAR_BAZLI_FIYAT":5.8428,"ENDEKS_BAZLI_FIYAT":0.0234,"DOLAR
+
+## isyatirim temel degerler → 200 1660237 bayt 1583ms ACAO=null CT=text/html; charset=utf-8
+THYAO konumu 83329, tr sayısı 2922 | EKTU | Tek-Art Turizm</option><option value="TERA">TERA | Tera Yatırım</option><option value="TEZOL">TEZOL | Europap Tezol</option><option value="TGSAS">TGSAS | TGS Dış Ticaret</option><option value="THYAO">THYAO | Türk Hava Yolları</option><option value="TKFEN">TKFEN | Tekfen Holding</option><option value="TKNKA">TKNKA | Teknika Plastik</option><option value="TKNSA">TKNSA | Teknosa İç ve Dış Tic.</option><option value="TLMAN">TLMAN | Trabzon Liman İşletmeciliği</option><option value="TMPOL">TMPOL | TE-MAPOL Polimer Plastik</option><option value="TMSN">TMSN | Tümosan Motor ve Traktör</option><option value="TNZTP">TNZTP | Tapdi Oksijen</option><option value="TOASO">TOASO | Tofaş Fabrika</option><option value="TRALT">TRALT | Türk Altın</option><option value="TRCAS">TRCAS | Turcas Holding</option><option value="TRENJ">TRENJ | TR Doğal Enerji Kaynakları</option><option value="TRGYO">TRGYO | Torunlar GYO</option><option value="TRHOL">TRHOL | Tera Finansal Yat. Holding</option><option value="TRILC">TRILC | Turk İlaç ve Serum Sanayi</option><option value="TRMET">TRMET | TR Anadolu Metal</op
+
+## isyatirim sirket karti → 200 1142743 bayt 10562ms ACAO=null CT=text/html; charset=utf-8
+F/K@256384: F/KyReiN1Q4U0SOPTHc8oGQwOkEzoPMejd7eG4JxR4YJ3zxTCTDOcpw5jdcKPRjobaqeZv2/GOiPjf5G1G/CVRC/uDunHhzCCttYfyD+74PZ1JbiE1ViCDtrsuvMjOCxH6Ny9luFnsUdqIFIlN+2GeMb++nbbb/H6Wdm2MbzYiR8BmkvW+b4xNhHfdGDUdQ/yio0LASRuL7WZvG4DKpEVnNxmgtCbTdDDeEzs51UBjksQs7ctyN2uaEIwI
+PD/DD@626272: PD/DD 0,2 <div id='ozetFinansalGostergeler2' class=
+Piyasa Değeri@632802: Piyasa Değeri 377.430,0 mnTL Net Borç 620.383,0 mnTL 
+Halka Açıklık@633083: Halka Açıklık Oranı (%) 49,1 <div
+Sektör@508806: Sektörel Öneri Sayıları Toplam Öneri Sayıları <a href="/tr-tr/analiz/Sayfalar/vio
+
+## stooq → 403 226 bayt 638ms ACAO=null CT=text/html
+<meta charset=utf-8><title>Stooq</title><center style=font-family:arial;margin-top:50px><p><a href=/><img src=//static.stooq.com/stooq.svg height=68></a><p style=font-size:x-large>Access denied<p><sma
+
+## kap şirketler → 200 1511450 bayt 1882ms ACAO=null CT=text/html; charset=utf-8
+THYAO 291088 uzunluk 1511450
