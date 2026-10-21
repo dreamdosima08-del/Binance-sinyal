@@ -1,0 +1,96 @@
+KOR AVAX-BTC pearson 0.50 spearman 0.63 maxabs 0.230 n 90 t true
+KOR ETH-BTC pearson 0.88 spearman 0.91 maxabs 0.175 n 90 t true
+KOR DOGE-BTC pearson 0.83 spearman 0.72 maxabs 0.144 n 90 t true
+KOR FET-BTC pearson 0.68 spearman 0.64 maxabs 0.198 n 90 t true
+
+══ SOL (TRY) → SOLTRY TL fiyat 5262 24s 2.143 | Kurala göre: BEKLE
+  kural: Günlük kapanış USDT grafiğinde 109,50 USDT (bugünkü kurla yaklaşık 5.417,92 TL) üstüne çıkarsa (şu an %2,7 uzakta) ertesi gün alım sinyali olur. Bu seviye her gün biraz değişir.
+  not: Al-bekle kararı ve seviyeler USDT grafiğinden hesaplanır, çünkü TL'nin değer kaybı TL grafiğini olduğundan daha güçlü gösterir. TL fiyatları bugünkü kurla çevrildi.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  HEDEF (n=1093, kisa=false) stop 4783.095290010406 (-9.1%) önce-stop %44 [kendi 44]
+   TP1 5740.904709989593 (+9.1%) atr kat 2.00 rr 1.00 olas %42 [kendi 42]
+   TP2 6092.797314527504 (+15.8%) direnc kat 3.47 rr 1.73 olas %27 [kendi 27]
+   TP3 7063.627655853314 (+34.2%) direnc kat 7.52 rr 3.76 olas %9 [kendi 9]
+   S1 5230.333991537376 (-0.6%) dip/1 kat 0.13 inme %97
+   S2 4848.85754583921 (-7.9%) dip/3 kat 1.73 inme %55
+   S3 4211.084344146685 (-20.0%) dip/2 kat 4.39 inme %14
+   ikinci: {"birim":"USDT","carpan":0.020210946408209807}
+  SEKTÖR Layer 1 (L1) (layer-1) → Katman 1 (Layer 1) yön asagi rS 0.8083714038770219 rB 0.8322591266411491 ust 2/9
+   coin 24/7/30: 2.1 -0.3 -8.3 | tipik 3.9 -0.4 -6.7
+   BTC      2.2 -0.0 -0.5 r=0.83 ust=true
+   ETH      2.7 -2.0 -8.9 r=0.82 ust=false
+   BNB      2.5 0.9 -4.3 r=0.76 ust=false
+   XRP      4.7 -1.0 -8.1 r=0.80 ust=false
+   TRX      -0.6 -0.6 -4.0 r=0.22 ust=false
+   ZEC      11.4 2.0 -16.7 r=0.64 ust=false
+   HYPE     3.6 -0.2 -14.9 r=- ust=null
+   ADA      4.2 -4.3 -5.2 r=0.69 ust=false
+   NEAR     9.9 3.5 21.1 r=0.55 ust=true
+   XLM      4.6 -2.9 -10.8 r=0.69 ust=false
+   » Sektörün gidişatı: Katman 1 (Layer 1) kategorisindeki en büyük 10 coin (bu coin hariç) için tipik hareket son 7 günde %0, son 30 günde −%7; 9 coinin 2 tanesi 50 günlük ortalamasının üstünde. Sektör genel olarak düşüşte.
+   » Birlikte hareket: Son 90 günde SOL, sektörün geri kalanıyla çok güçlü bir benzerlikle hareket etti (benzerlik 0,81; 1 = tamamen aynı). BTC ile benzerliği de yakın (0,83): bu coin hem sektörüyle hem genel piyasayla birlikte hareket ediyor. Not: kriptoda neredeyse her şey BTC ile birlikte hareket eder; sektöre özgü bir hareketi anlamak için aşağıdaki tablodaki 7 ve 30 günlük farklara bak.
+   » Sektör içindeki yeri: SOL son 30 günde −%8, sektördeki tipik coin −%7. Sektörüyle aşağı yukarı aynı hizada. Son 7 günde ise SOL %0, tipik coin %0.
+  T: Trend: Kısa-orta vadede düşüşte ya da zayıf. Fiyat 50 günlük ortalamanın altında.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 44): satıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %4,5 hareket ediyor (BTC'nin yaklaşık 1,8 katı). Görece sakin.
+  T: Getiri: 7 gün +%2, 30 gün −%11, 90 gün +%40, 1 yıl −%43.
+  T: BTC'ye göre: son 30 günde BTC'den 6 puan daha kötü, son 90 günde 11 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%27: ilgi artıyor.
+  T: Yakın dirençler (son 6 ay): 5.311,97 (2 kez), 5.610,82 (2 kez) TL. Destekler için yukarıdaki S1–S3'e bak.
+
+══ PEPE (USDT) → PEPEUSDT USDT fiyat 0.00000458 24s 9.569 | Kurala göre: ALIM BÖLGESİNDE
+  kural: Günlük kapanış 0,00000398 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  HEDEF (n=528, kisa=false) stop 0.0000039315336841910095 (-14.2%) önce-stop %49 [kendi 50]
+   TP1 0.0000052336999999999995 (+14.3%) direnc kat 2.02 rr 1.01 olas %47 [kendi 46]
+   TP2 0.000005876932631617982 (+28.3%) atr kat 4.00 rr 2.00 olas %29 [kendi 28]
+   TP3 0.00000685555 (+49.7%) direnc kat 7.02 rr 3.51 olas %17 [kendi 16]
+   S1 0.0000043 (-6.1%) dip/1 kat 0.86 inme %83
+   S2 0.00000398 (-13.1%) dip/4 kat 1.85 inme %61
+   S3 0.00000364 (-20.5%) dip/5 kat 2.90 inme %37
+   ikinci: {"birim":"TL","carpan":49.48}
+  SEKTÖR Meme (meme-token) → Meme coinler yön asagi rS 0.8599310192714802 rB 0.7550933053384528 ust 1/10
+   coin 24/7/30: 9.4 9.7 10.5 | tipik 5.5 -2.5 -5.2
+   DOGE     3.5 -3.0 -10.9 r=0.84 ust=false
+   SHIB     4.0 0.5 -9.3 r=0.82 ust=false
+   PUMP     8.5 -4.2 7.6 r=0.52 ust=true
+   TRUMP    7.2 -5.0 -15.1 r=0.64 ust=false
+   PENGU    8.1 4.2 -1.9 r=0.82 ust=false
+   币安人生     1.9 -1.7 -2.1 r=0.41 ust=false
+   BONK     6.3 -2.3 -2.0 r=0.73 ust=false
+   FLOKI    6.3 -2.7 -8.3 r=0.84 ust=false
+   WIF      4.7 1.0 -0.0 r=0.78 ust=false
+   ORDI     4.8 -4.7 -19.0 r=0.67 ust=false
+   » Sektörün gidişatı: Meme coinler kategorisindeki en büyük 10 coin (bu coin hariç) için tipik hareket son 7 günde −%2, son 30 günde −%5; 10 coinin 1 tanesi 50 günlük ortalamasının üstünde. Sektör genel olarak düşüşte.
+   » Birlikte hareket: Son 90 günde PEPE, sektörün geri kalanıyla çok güçlü bir benzerlikle hareket etti (benzerlik 0,86; 1 = tamamen aynı). BTC ile benzerliği 0,76; yani bu coin BTC'den çok kendi sektörüyle birlikte hareket ediyor. Sektörde başlayan bir hareket geçmişte bu coine de yansıdı.
+   » Sektör içindeki yeri: PEPE son 30 günde +%10, sektördeki tipik coin −%5. Sektörünün önünde gidiyor (16 puan daha iyi). Son 7 günde ise PEPE +%10, tipik coin −%2.
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 61): alıcılar biraz daha baskın.
+  T: Oynaklık: Günde ortalama %7,1 hareket ediyor (BTC'nin yaklaşık 2,8 katı). Oynak.
+  T: Getiri: 7 gün +%12, 30 gün −%4, 90 gün +%64, 1 yıl −%34.
+  T: BTC'ye göre: son 30 günde BTC'den 12 puan daha iyi, son 90 günde 32 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%46: ilgi artıyor.
+  T: Yakın dirençler (son 6 ay): 0,00000475, 0,00000536 USDT. Destekler için yukarıdaki S1–S3'e bak.
+
+══ AVAX (USDT) → AVAXUSDT USDT fiyat 9.658 24s 2.483 | Kurala göre: ALIM BÖLGESİNDE
+  kural: Günlük kapanış 9,50 USDT altına inerse ertesi gün sat. Bu seviye her gün biraz değişir; sayfayı açtığında güncel değeri görürsün.
+  not: BTC de kendi ortalamasının üstünde: piyasa genel olarak destekliyor.
+  HEDEF (n=918, kisa=false) stop 8.340261191814406 (-13.6%) önce-stop %45 [kendi 45]
+   TP1 11.059425000000001 (+14.5%) direnc kat 2.13 rr 1.06 olas %50 [kendi 49]
+   TP2 11.947959999999998 (+23.7%) direnc kat 3.48 rr 1.74 olas %36 [kendi 36]
+   TP3 14.75585 (+52.8%) direnc kat 7.74 rr 3.87 olas %20 [kendi 21]
+   S1 9.16 (-5.2%) dip/5 kat 0.76 inme %83
+   S2 8.66 (-10.3%) dip/7 kat 1.51 inme %66
+   S3 7.55 (-21.8%) dip/1 kat 3.20 inme %35
+   ikinci: {"birim":"TL","carpan":49.48}
+  SEKTÖR HATA: CoinGecko şu an yoğun, 1 dakika sonra tekrar dene
+  T: Trend: Kısa-orta vadede yükselişte. Fiyat 50 günlük ortalamanın üstünde.
+  T: Uzun vade: 200 günlük ortalamanın üstünde, uzun vadeli görünüm olumlu; 50 günlük ortalama 200 günlüğün üstünde.
+  T: Alış-satış dengesi (RSI 46): dengede.
+  T: Oynaklık: Günde ortalama %6,8 hareket ediyor (BTC'nin yaklaşık 2,7 katı). Oynak.
+  T: Getiri: 7 gün −%4, 30 gün −%14, 90 gün +%54, 1 yıl −%51.
+  T: BTC'ye göre: son 30 günde BTC'den 16 puan daha kötü, son 90 günde 22 puan daha iyi.
+  T: İlgi (hacim): Son 30 günün işlem hacmi önceki 60 güne göre +%140: ilgi artıyor.
+  T: Yakın dirençler (son 6 ay): 10,49, 11,12 USDT. Destekler için yukarıdaki S1–S3'e bak.
