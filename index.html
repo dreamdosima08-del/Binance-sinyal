@@ -87,6 +87,14 @@ h2{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em}
 .verdict h3{margin:0 0 6px;font-size:19px;letter-spacing:-.01em}
 .verdict.al h3{color:var(--gain)} .verdict.bekle h3{color:var(--amber)}
 .verdict p{margin:8px 0 0;font-size:14px}
+.aklab{font-size:12px;font-weight:700;color:var(--muted);align-self:center;margin-right:2px}
+.chips button small{font-weight:600;opacity:.7;margin-left:4px;font-size:11px}
+.chips button[aria-pressed="true"]{border-color:var(--sonar);color:var(--text)}
+.kbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;font-size:13px;color:var(--muted)}
+.kbar .btn{display:inline-block;flex:none;padding:6px 12px;font-size:13px}
+.tkp{border:1px solid color-mix(in srgb,var(--sonar) 45%,var(--line));background:color-mix(in srgb,var(--sonar) 7%,var(--surface));border-radius:16px;padding:14px;margin-top:12px;font-size:14px}
+.tkp p{margin:6px 0 0}.tkp ul{list-style:none;padding:0;margin:8px 0 0}.tkp li{padding:5px 0;border-bottom:1px dashed var(--line)}.tkp li:last-child{border:0}
+.tkp li.ok{color:var(--gain)}.tkp li.no{color:var(--loss)}.tkp .tkn{font-size:13px}
 .tpt{width:100%;border-collapse:collapse;font-size:14px;margin-top:4px}
 .tpt td{padding:10px 4px;border-bottom:1px dashed var(--line);vertical-align:top}
 .tpt tr:last-child td{border:0}
@@ -348,7 +356,7 @@ dialog .two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
     <div class="field"><label for="sProxy">Worker adresi (sadece bağlantı sorunu olursa)</label><input id="sProxy" type="url" inputmode="url" autocomplete="off" placeholder="https://dip-proxy.kullanici.workers.dev"></div>
     <button class="btn primary" id="sSave">Ayarları kaydet</button>
     <span class="grp">Yedek</span>
-    <p class="sub" style="margin:-4px 0 0">Günlük, karne ve ayarlar sadece bu telefonun tarayıcısında durur. Tarayıcı verilerini silersen ya da telefon değiştirirsen kaybolur; ara sıra yedek indir.</p>
+    <p class="sub" style="margin:-4px 0 0">Günlük, karne, kayıtlı analizler ve ayarlar sadece bu telefonun tarayıcısında durur. Tarayıcı verilerini silersen ya da telefon değiştirirsen kaybolur; ara sıra yedek indir.</p>
     <div class="actions"><button class="btn" id="bDown">Yedeği indir</button><button class="btn" id="bUp">Yedeği yükle</button></div>
     <input type="file" id="bFile" accept="application/json,.json" hidden>
     <div class="actions"><button class="btn danger" id="sWipe">Günlüğü sıfırla</button></div>
@@ -1415,7 +1423,7 @@ function kGroupTable(title,groups,nameOf,clsOf){
 }
 function renderKarne(){
   const bot=kSrc==="bot";
-  document.querySelectorAll(".srcsw button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===kSrc)));
+  document.querySelectorAll(".srcsw button[data-src]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.src===kSrc)));
   $("kWipeBox").hidden=bot;
   $("kNote").textContent=bot?"Bot GitHub'da her 4 saatlik mum kapanışından birkaç dakika sonra iki piyasayı da kendi kendine tarar, çıkan her sinyali kaydeder ve sonucunu saatlik mumlardan hesaplar. Telefonun kapalı olsa da çalışır. Hesap kuralları test ekranıyla aynıdır: aynı mumda hedef ve stop varsa stop sayılır, komisyon ve kayma düşülür."
     :"Tarama yaptığında çıkan her sinyal, işleme girsen de girmesen de buraya kaydedilir ve sonucu saatlik mumlardan hesaplanır: giriş tarama anındaki fiyat, aynı mumda hem hedef hem stop varsa stop sayılır, komisyon ve kayma düşülür. Sadece tarama yaptığın anlarda çıkan sinyaller kaydedilebilir.";
@@ -1791,7 +1799,7 @@ async function coinAnaliz(girdi,piyasa){
   if(cg){try{sektor=await sektorAnaliz(cg,base,veriBirim==="USDT"?cs:[],btc);}catch(e){if(e instanceof NetErr)throw e;sektor={hata:e.message};}}
   else sektor={hata:"Temel veriler alınamadığı için sektör karşılaştırması yapılamadı."};
 
-  return {base,sym,unit,ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
+  return {base,sym,unit,piyasa:sym.endsWith("TRY")?"TRY":"USDT",ad:cg?cg.name:base,fiyat,degisim:+tk.priceChangePercent,karar,hedef,sektor,piyasaNot,teknik,temel,uyarilar,risk,gecmis:gec,gunSayisi:cs.length,zaman:Date.now(),cgVar:!!cg};
 }
 
 /* ═══════════ PİYASA SEÇİMİ ═══════════ */
@@ -1824,29 +1832,78 @@ function switchMarket(m){
 document.querySelectorAll(".mkt button").forEach(b=>b.addEventListener("click",()=>switchMarket(b.dataset.m)));
 
 /* ═══════════ ANALİZ EKRANI ═══════════ */
-let aBusy=false,aListeDolu=false,aListe={USDT:[],TRY:[]};const aCache=new Map();
+let aBusy=false,aListeDolu=false,aListe={USDT:[],TRY:[]},aGosterilen=null;
+/* Kayıtlı analizler: her analiz bu telefonda saklanır (en fazla 20); tekrar açınca veri çekmeden gösterilir,
+   sadece analizden bu yana fiyatın hedeflere ve stopa değip değmediği kontrol edilir. */
+const AK_MAX=20,akAnahtar=a=>a.base+"|"+a.piyasa;
+function aKayitlar(){const l=store.get("ddt_akayit",[]);return Array.isArray(l)?l.filter(x=>x&&x.base&&x.hedef!==undefined):[];}
+function aKaydet(a){
+  const l=[a,...aKayitlar().filter(x=>akAnahtar(x)!==akAnahtar(a))].slice(0,AK_MAX);
+  for(const n of [AK_MAX,10,5,1]){store.set("ddt_akayit",l.slice(0,n));if(aKayitlar().length===Math.min(n,l.length))return true;}
+  return false;
+}
+function aKayitSil(k){store.set("ddt_akayit",aKayitlar().filter(x=>akAnahtar(x)!==k));}
+const sureMetin=ms=>{const dk=Math.round(ms/60e3);return dk<1?"az önce":dk<60?dk+" dk önce":dk<48*60?Math.round(dk/60)+" saat önce":Math.round(dk/1440)+" gün önce";};
+const zamanMetin=t=>new Date(t).toLocaleString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 const aPiyasa=()=>store.get("ddt_apiyasa","USDT")==="TRY"?"TRY":"USDT";
 function aListeGoster(){$("aList").innerHTML=aListe[aPiyasa()].map(b=>`<option value="${b}">`).join("");}
 function aMktGoster(){document.querySelectorAll("#aMkt button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.m===aPiyasa())));aListeGoster();}
-function aSonlar(){return store.get("ddt_ason",[]);}
-function renderASon(){const l=aSonlar();$("aSon").innerHTML=l.map(x=>`<button type="button" data-a="${esc(x)}">${esc(x)}</button>`).join("");}
+function renderASon(){
+  const l=aKayitlar();
+  $("aSon").innerHTML=l.length?`<span class="aklab">Kayıtlı analizler</span>`+l.map(x=>{const k=akAnahtar(x);
+    return `<button type="button" data-k="${esc(k)}"${aGosterilen===k?' aria-pressed="true"':""}>${esc(x.base)}<small>${x.piyasa==="TRY"?"TL":"USDT"}</small></button>`;}).join(""):"";
+}
+function aGoster(a,kayitli){
+  aGosterilen=akAnahtar(a);renderAnaliz(a,kayitli);renderASon();
+  if(kayitli)aTakip(a);
+}
+/* analizden bu yana: saatlik (eskiyse 4 saatlik/günlük) mumlarla hangi seviyeye önce değildi */
+async function aTakip(a){
+  const kutu=$("aTakip");if(!kutu||!a.hedef)return;
+  const yas=Date.now()-a.zaman,aralik=yas<40*864e5?["1h",36e5]:yas<160*864e5?["4h",144e5]:["1d",864e5];
+  kutu.innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Fiyat hareketi kontrol ediliyor…</p></div>`;
+  try{
+    const bas=Math.floor(a.zaman/aralik[1])*aralik[1];
+    const cs=(await api(`/api/v3/klines?symbol=${a.sym}&interval=${aralik[0]}&startTime=${bas}&limit=1000`)).map(parseK);
+    if(aGosterilen!==akAnahtar(a)||!$("aTakip"))return;
+    if(!cs.length)throw new Error("veri yok");
+    const son=cs[cs.length-1].c,h=a.hedef,sev=[...h.tps.map((t,i)=>({ad:"TP"+(i+1),fiyat:t.fiyat,yukari:true})),{ad:"Stop",fiyat:h.stop.fiyat,yukari:false}];
+    let yuk=-Infinity,dus=Infinity;
+    for(const c of cs){yuk=Math.max(yuk,c.h);dus=Math.min(dus,c.l);
+      for(const s of sev)if(!s.t&&(s.yukari?c.h>=s.fiyat:c.l<=s.fiyat))s.t=c.t;}
+    const u=a.unit,deg=(son/a.fiyat-1)*100,stop=sev[3],tp1=sev[0];
+    const satir=s=>s.t?`<li class="${s.yukari?"ok":"no"}">${s.yukari?"✓":"✗"} <b>${s.ad}</b> ${tl(s.fiyat)} ${u}: ${s.yukari?"ulaştı":"değdi"} (${zamanMetin(s.t)} civarı)</li>`
+      :`<li>○ <b>${s.ad}</b> ${tl(s.fiyat)} ${u}: henüz değmedi, şu anki fiyattan ${isaret((s.fiyat/son-1)*100)} uzakta</li>`;
+    let ozet="";
+    if(stop.t&&(!tp1.t||stop.t<tp1.t))ozet=`<p class="tkn">Stop, TP1'den önce geldi: plana uyulsaydı bu işlem zararla kapanmış olurdu.</p>`;
+    else if(tp1.t&&stop.t)ozet=`<p class="tkn">Önce TP1 geldi, sonra fiyat stop seviyesine indi. Plana göre TP1'de yarısı satılıp stop girişe çekildiği için kalan yarı başa baş kapanırdı.</p>`;
+    else if(tp1.t)ozet=`<p class="tkn">TP1 geldi. Plana göre yarısı satılır ve stop giriş fiyatına (${tl(a.fiyat)} ${u}) çekilir.</p>`;
+    kutu.innerHTML=`<div class="tkp"><b>Analizden bu yana</b> <span style="color:var(--muted)">(${sureMetin(yas)})</span>
+      <p>Analizdeki fiyat ${tl(a.fiyat)} ${u}, şu an ${tl(son)} ${u} (<span class="${deg>=0?"pos":"neg"}">${isaret(deg)}</span>). Bu sürede en yüksek ${tl(yuk)}, en düşük ${tl(dus)}.</p>
+      <ul>${sev.map(satir).join("")}</ul>${ozet}
+      <p class="tkn" style="color:var(--muted)">Seviyeler analiz anındaki hesaptır. Al/bekle kararı günlük kapanışla değişebileceği için birkaç günde bir yeniden analiz et.</p></div>`;
+  }catch(e){if($("aTakip"))$("aTakip").innerHTML=`<div class="tkp"><b>Analizden bu yana</b><p>Güncel fiyat alınamadı (${esc(errText(e))}). Kayıtlı seviyeler aşağıda.</p></div>`;}
+}
 async function aListeDoldur(){
   if(aListeDolu)return;aListeDolu=true;
   try{const t=await api("/api/v3/ticker/price");const u=new Set(),y=new Set();
     for(const r of t){const s=r.symbol;if(s.endsWith("USDT")&&!EXCL.has(s.slice(0,-4)))u.add(s.slice(0,-4));if(s.endsWith("TRY")&&!EXCL.has(s.slice(0,-3)))y.add(s.slice(0,-3));}
     aListe={USDT:[...u].sort(),TRY:[...y].sort()};aListeGoster();}catch(e){aListeDolu=false;}
 }
-function renderAnaliz(a){
+function renderAnaliz(a,kayitli){
   const k=a.karar,g=a.gecmis,u=a.unit,yil=g.gun/365;
   const gecmisMetin=yil<1?`Bu coinin geçmişi kısa (${g.gun} gün), sonuçlar az veriye dayanıyor.`
     :(g.kural.dd<g.altut.dd&&g.kural.ret>=g.altut.ret)?"Bu coinde kural hem düşüşü azalttı hem getiriyi artırdı."
     :(g.kural.dd<g.altut.dd)?"Bu coinde kural düşüşleri azalttı ama getiride al-tut'un gerisinde kaldı."
     :(g.kural.ret>g.altut.ret)?"Bu coinde kural getiriyi artırdı ama düşüşleri azaltamadı."
     :"Bu coinde kural geçmişte işe yaramadı: al-tut'tan daha kötü sonuç verdi. Karara daha temkinli yaklaş.";
-  $("aSonuc").innerHTML=`
+  const kb=kayitli?`<div class="kbar"><span>📌 Kayıtlı analiz · ${zamanMetin(a.zaman)} (${sureMetin(Date.now()-a.zaman)})</span><span><button type="button" class="btn" id="aYenile">Yeniden analiz et</button> <button type="button" class="btn" id="aSil">Sil</button></span></div>`
+    :`<div class="kbar"><span>✓ Kaydedildi. Üstteki listeden tekrar açabilirsin; açınca fiyatın hedeflere değip değmediğini de gösteririm.</span></div>`;
+  $("aSonuc").innerHTML=kb+`
     <div class="card" style="margin-top:12px"><div class="head"><div class="pair">${esc(a.base)}<small>/${a.unit==="TL"?"TRY":"USDT"}</small></div>
       <div class="chip ${a.risk==="Orta"?"watch":"bad"}">Risk: ${a.risk}</div></div>
       <div class="meta" style="margin-bottom:0">${esc(a.ad)} · ${tl(a.fiyat)} ${u} · 24 sa ${isaret(a.degisim)}</div></div>
+    <div id="aTakip"></div>
     <div class="verdict ${k.ic?"al":"bekle"}"><h3>${k.baslik}</h3><p>${k.ana}</p>
       <div class="lvl"><b>${k.ne}</b>${k.neMetin}</div>
       ${k.boyutMetin?`<div class="lvl"><b>Ne kadar</b>${k.boyutMetin}</div>`:""}
@@ -1895,14 +1952,15 @@ function sektorHtml(a){
     </tbody></table>
     <p class="note" style="margin-top:8px">↑ 50 günlük ortalamasının üstünde, ↓ altında. "Birlikte": son 90 günde ${esc(a.base)} ile günlük hareketlerinin ne kadar benzediği. Benzerlik geçmişi anlatır; birlikte hareket eden coinlerin bundan sonra da öyle yapacağının garantisi yoktur.</p></div>`;
 }
-async function analizEt(girdi){
+async function analizEt(girdi,piyasa){
   const q=String(girdi||"").trim().toUpperCase();if(!q||aBusy)return;
+  const pz=piyasa||aPiyasa();
   aBusy=true;const btn=$("aBtn");btn.disabled=true;btn.textContent="Analiz…";
   $("aSonuc").innerHTML=`<div class="empty">${esc(q)} analiz ediliyor: fiyat geçmişi, hedefler, temel veriler ve sektördeki coinler alınıyor…</div>`;
   try{
-    const ck=q+"|"+aPiyasa();let a=aCache.get(ck);if(!a||Date.now()-a.zaman>10*60e3){a=await coinAnaliz(q,aPiyasa());aCache.set(ck,a);}
-    renderAnaliz(a);
-    const l=[a.base,...aSonlar().filter(x=>x!==a.base)].slice(0,8);store.set("ddt_ason",l);renderASon();
+    const a=await coinAnaliz(q,pz);
+    const ok=aKaydet(a);aGoster(a,false);
+    if(!ok)toast("Telefonun hafızası dolu, analiz kaydedilemedi");
   }catch(e){$("aSonuc").innerHTML=`<div class="alert">${esc(errText(e))}</div>`;}
   finally{aBusy=false;btn.disabled=false;btn.textContent="Analiz et";}
 }
@@ -1910,7 +1968,14 @@ $("aMkt").addEventListener("click",e=>{const b=e.target.closest("[data-m]");if(!
   store.set("ddt_apiyasa",b.dataset.m);aMktGoster();const v=$("aIn").value.trim();if(v&&!aBusy)analizEt(v);});
 aMktGoster();
 $("aForm").addEventListener("submit",e=>{e.preventDefault();$("aIn").blur();analizEt($("aIn").value);});
-$("aSon").addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b){$("aIn").value=b.dataset.a;analizEt(b.dataset.a);}});
+$("aSon").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(!b||aBusy)return;
+  const a=aKayitlar().find(x=>akAnahtar(x)===b.dataset.k);if(a){aGoster(a,true);window.scrollTo(0,0);}});
+$("aSonuc").addEventListener("click",e=>{
+  const k=aGosterilen;if(!k)return;const a=aKayitlar().find(x=>akAnahtar(x)===k);
+  if(e.target.id==="aYenile"&&a){$("aIn").value=a.base;analizEt(a.base,a.piyasa);}
+  if(e.target.id==="aSil"&&confirm(`${k.replace("|"," ")} kaydı silinsin mi?`)){aKayitSil(k);aGosterilen=null;renderASon();
+    const s=aKayitlar()[0];if(s)aGoster(s,true);else $("aSonuc").innerHTML=`<div class="empty">Kayıtlı analiz kalmadı.</div>`;toast("Silindi");}
+});
 
 /* ═══════════ görünüm ═══════════ */
 const SUBS={scan:"Binance TRY coinlerini tarar",journal:"Girdiğin işlemler ve gerçek sonuçların",test:"Kurallar geçmişte nasıl sonuç verirdi",settings:"Stratejiler, sermaye ve risk",karne:"Çıkan her sinyalin gerçekte ne olduğu",analiz:"Bir coini sade bir dille incele"};
@@ -1921,7 +1986,7 @@ function show(v){
   if(v==="journal"){renderJournal();if(active().length)updateJournal().then(renderJournal).catch(e=>showErr("jAlerts",e));}
   if(v==="settings")fillSettings();
   if(v==="karne"){renderKarne();refreshKarne(false);}
-  if(v==="analiz"){renderASon();aListeDoldur();}
+  if(v==="analiz"){renderASon();aListeDoldur();if(!aGosterilen&&!aBusy&&aKayitlar()[0])aGoster(aKayitlar()[0],true);}
 }
 function renderAll(){renderScan();renderJournal();renderKarne();}
 function syncSegs(){document.querySelectorAll(".seg").forEach(seg=>{const k=seg.dataset.key;
@@ -1956,11 +2021,11 @@ $("tResult").addEventListener("click",e=>{
 $("sSave").addEventListener("click",saveSettings);
 $("sStratReset").addEventListener("click",()=>{settings.strat={};saveS();rebuildK();fillSettings();toast("Varsayılana dönüldü");});
 $("kRefresh").addEventListener("click",()=>refreshKarne(true));
-document.querySelectorAll(".srcsw button").forEach(b=>b.addEventListener("click",()=>{kSrc=b.dataset.src;store.set("ddt_ksrc",kSrc);renderKarne();refreshKarne(false);}));
+document.querySelectorAll(".srcsw button[data-src]").forEach(b=>b.addEventListener("click",()=>{kSrc=b.dataset.src;store.set("ddt_ksrc",kSrc);renderKarne();refreshKarne(false);}));
 $("kWipe").addEventListener("click",()=>{if(confirm(`${MKT[Q()].name} karnesi silinsin mi? Bu geri alınamaz.`)){karne=karne.filter(k=>k.mkt!==Q());saveKarne();renderKarne();toast("Karne sıfırlandı");}});
 function backupDownload(){
   settings.mk[Q()]={capital:settings.capital,minVol:settings.minVol,feePct:settings.feePct};saveS();
-  const data={uygulama:"dipten-donus",surum:1,tarih:new Date().toISOString(),settings,journal,karne,
+  const data={uygulama:"dipten-donus",surum:1,tarih:new Date().toISOString(),settings,journal,karne,akayit:aKayitlar(),
     son:{TRY:store.get(MKT.TRY.lastKey,null),USDT:store.get(MKT.USDT.lastKey,null)}};
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:"application/json"}));
   a.download=`dipten-donus-yedek-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();
@@ -1972,6 +2037,7 @@ function backupUpload(file){
     let d;try{d=JSON.parse(fr.result);if(d.uygulama!=="dipten-donus"||!d.settings)throw 0;}catch(e){toast("Bu dosya geçerli bir yedek değil");return;}
     if(!confirm(`${new Date(d.tarih).toLocaleString("tr-TR")} tarihli yedek yüklensin mi? Bu telefondaki günlük, karne ve ayarların yerini alır.`))return;
     store.set("ddt_settings",d.settings);store.set("ddt_journal",d.journal||[]);store.set("ddt_karne",d.karne||[]);
+    if(Array.isArray(d.akayit))store.set("ddt_akayit",d.akayit);
     if(d.son){if(d.son.TRY)store.set(MKT.TRY.lastKey,d.son.TRY);if(d.son.USDT)store.set(MKT.USDT.lastKey,d.son.USDT);}
     location.reload();
   };
