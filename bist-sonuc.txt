@@ -1,39 +1,63 @@
+tablo sayısı 8
 
-## yahoo chart THYAO 10y → 429 19 bayt 291ms ACAO=null CT=text/html
-özet hatası Unexpected token 'T', "Too Many Requests
-" is not valid JSON | Too Many Requests 
+TABLO 0 satır 5 başlık: SON ÖNCEKİ KAPANIŞ DEĞİŞİM (%)
+  etiket: <table class="chartlist">
 
-## yahoo chart XU100 → 429 19 bayt 102ms ACAO=null CT=text/html
-özet hatası Unexpected token 'T', "Too Many Requests
-" is not valid JSON | Too Many Requests 
+TABLO 1 satır 4 başlık: SON ÖNCEKİ KAPANIŞ DEĞİŞİM (%)
+  etiket: <table class="chartlist">
 
-## yahoo chart USDTRY → 429 19 bayt 58ms ACAO=null CT=text/html
-özet hatası Unexpected token 'T', "Too Many Requests
-" is not valid JSON | Too Many Requests 
+TABLO 2 satır 631 başlık: Kod Hisse Adı Sektör Kapanış (TL) Piyasa Değeri (mn TL) Piyasa Değeri (mn $) Halka Açıklık Oranı (%) Sermaye (mn TL)
+  THYAO: THYAO | Türk Hava Yolları | Havayolları ve Hizm. | 273,50 | 377.430,0 | 7.612,9 | 49,1 | 1.380,0
+  etiket: <table class="dataTable hover nowrap excelexport" data-csvname="temelozet" cellspacing="0" width="100%" id="summaryBasicData">
 
-## yahoo quoteSummary → 429 19 bayt 205ms ACAO=null CT=text/html
-Too Many Requests
+TABLO 3 satır 335 başlık: Kod Kapanış (TL) Bölünme Sonrası Sermaye (TL) Tarih Bedelli Oran (%) Bedelli Nom. Tutar (TL) Diğer (*) Bedelsiz IK Oran (%) Bedelsiz Temettü Oran (%) Nakit Tem.Brüt (%) Nakit Temettü (TL) Hisse Başı Brüt (TL)
+  etiket: <table class="dataTable hover nowrap excelexport" data-csvname="temelsermaye" cellspacing="0" width="100%">
 
+TABLO 4 satır 612 başlık: Kod Kapanış (TL) 20 Ekim 2026 19 Ekim 2026 16 Ekim 2026 15 Ekim 2026 14 Ekim 2026 13 Ekim 2026 12 Ekim 2026 9 Ekim 2026 8 Ekim 2026 7 Ekim 2026 6 Ekim 2026 5 Ekim 2026 2 Ekim 2026 1 Ekim 2026 30 Eylül 2026 29 Eylül 2026 28 Eylül 2026 25 Eylül 2026 24 Eylül 2026 23 Eylül 2026 22 Eylül 2026 21 Eylül 2
+  THYAO: THYAO | 273,50 | 22,95 | 22,94 | -0,42 | 0,00
+  etiket: <table data-sector="" data-start="19-10-2026" data-end="20-10-2026" cellspacing="0" width="100%" class="dataTable hover nowrap  excelexport" data-csvname="temelyabancioran">
 
-## yahoo search → 429 19 bayt 57ms ACAO=null CT=text/html
-özet hatası Unexpected token 'T', "Too Many Requests
-" is not valid JSON | Too Many Requests 
+TABLO 5 satır 73 başlık: F/K FD/FAVÖK PD/DD Kod Kapanış (TL) F/K Tahmin Prim/İsk. (%) FD/FAVÖK Tahmin Prim/İsk. (%) PD/DD Tahmin Prim/İsk. (%)
+  THYAO: THYAO | 273,50 | 4,1 | -25,7 | 5,1 | -28,1 | 0,3 | -69,5
+  etiket: <table class="dataTable hover nowrap excelexport" data-csvname="temeltarihsel" cellspacing="0" width="100%">
 
-## isyatirim HisseTekil → 200 9995 bayt 1453ms ACAO=null CT=application/json; charset=utf-8
-{"ok":true,"errorCode":null,"errorDescription":null,"transactionId":"232bba2ae0cd4b49838f7291cc26b017","value":[{"HGDG_HS_KODU":"THYAO","HGDG_TARIH":"01-10-2026","HGDG_KAPANIS":286.5000,"HGDG_AOF":287.673,"HGDG_MIN":284.25,"HGDG_MAX":290.5,"HGDG_HACIM":9606660339.000000,"END_ENDEKS_KODU":"01","END_TARIH":1790802000000,"END_SEANS":2,"END_DEGER":12249.04,"DD_DOVIZ_KODU":"USD","DD_DT_KODU":"01","DD_TARIH":1790802000000,"DD_DEGER":49.0348,"DOLAR_BAZLI_FIYAT":5.8428,"ENDEKS_BAZLI_FIYAT":0.0234,"DOLAR
+TABLO 6 satır 631 başlık: 
+  THYAO: THYAO | 273,50 | 2,8 | 4,8 | 0,6 | 0,4 | 6/2026
+  etiket: <table class="dataTable hover nowrap excelexport" data-csvname="temelfinansal" cellspacing="0" width="100%">
 
-## isyatirim temel degerler → 200 1660237 bayt 1583ms ACAO=null CT=text/html; charset=utf-8
-THYAO konumu 83329, tr sayısı 2922 | EKTU | Tek-Art Turizm</option><option value="TERA">TERA | Tera Yatırım</option><option value="TEZOL">TEZOL | Europap Tezol</option><option value="TGSAS">TGSAS | TGS Dış Ticaret</option><option value="THYAO">THYAO | Türk Hava Yolları</option><option value="TKFEN">TKFEN | Tekfen Holding</option><option value="TKNKA">TKNKA | Teknika Plastik</option><option value="TKNSA">TKNSA | Teknosa İç ve Dış Tic.</option><option value="TLMAN">TLMAN | Trabzon Liman İşletmeciliği</option><option value="TMPOL">TMPOL | TE-MAPOL Polimer Plastik</option><option value="TMSN">TMSN | Tümosan Motor ve Traktör</option><option value="TNZTP">TNZTP | Tapdi Oksijen</option><option value="TOASO">TOASO | Tofaş Fabrika</option><option value="TRALT">TRALT | Türk Altın</option><option value="TRCAS">TRCAS | Turcas Holding</option><option value="TRENJ">TRENJ | TR Doğal Enerji Kaynakları</option><option value="TRGYO">TRGYO | Torunlar GYO</option><option value="TRHOL">TRHOL | Tera Finansal Yat. Holding</option><option value="TRILC">TRILC | Turk İlaç ve Serum Sanayi</option><option value="TRMET">TRMET | TR Anadolu Metal</op
-
-## isyatirim sirket karti → 200 1142743 bayt 10562ms ACAO=null CT=text/html; charset=utf-8
-F/K@256384: F/KyReiN1Q4U0SOPTHc8oGQwOkEzoPMejd7eG4JxR4YJ3zxTCTDOcpw5jdcKPRjobaqeZv2/GOiPjf5G1G/CVRC/uDunHhzCCttYfyD+74PZ1JbiE1ViCDtrsuvMjOCxH6Ny9luFnsUdqIFIlN+2GeMb++nbbb/H6Wdm2MbzYiR8BmkvW+b4xNhHfdGDUdQ/yio0LASRuL7WZvG4DKpEVnNxmgtCbTdDDeEzs51UBjksQs7ctyN2uaEIwI
-PD/DD@626272: PD/DD 0,2 <div id='ozetFinansalGostergeler2' class=
-Piyasa Değeri@632802: Piyasa Değeri 377.430,0 mnTL Net Borç 620.383,0 mnTL 
-Halka Açıklık@633083: Halka Açıklık Oranı (%) 49,1 <div
-Sektör@508806: Sektörel Öneri Sayıları Toplam Öneri Sayıları <a href="/tr-tr/analiz/Sayfalar/vio
-
-## stooq → 403 226 bayt 638ms ACAO=null CT=text/html
-<meta charset=utf-8><title>Stooq</title><center style=font-family:arial;margin-top:50px><p><a href=/><img src=//static.stooq.com/stooq.svg height=68></a><p style=font-size:x-large>Access denied<p><sma
-
-## kap şirketler → 200 1511450 bayt 1882ms ACAO=null CT=text/html; charset=utf-8
-THYAO 291088 uzunluk 1511450
+TABLO 7 satır 631 başlık: 
+  THYAO: THYAO | 273,50 | 2,82 | -4,45 | -4,20 | 1,86
+  etiket: <table class="dataTable hover nowrap excelexport" data-csvname="temelperformans" cellspacing="0" width="100%">
+özet satır 630
+en büyük 30: ASELS QNBTR TUPRS GARAN KCHOL ENKAI BIMAS ENPRA THYAO AKBNK VAKBN ISCTR HALKB YKBNK EREGL FROTO TCELL CCOLA SAHOL TTKOM ISDMR ASTOR ENJSA TRALT ENERY INVES GUBRF AHGAZ DOCO TOASO
+QNBTR 5467 satır 03-01-2005 51s
+TUPRS 5468 satır 03-01-2005 51s
+GARAN 5468 satır 03-01-2005 49s
+KCHOL 5462 satır 03-01-2005 61s
+ENKAI 5467 satır 03-01-2005 45s
+ENPRA 134 satır 07-04-2026 1s
+THYAO 5468 satır 03-01-2005 40s
+BIMAS 5333 satır 15-07-2005 83s
+AKBNK 5468 satır 03-01-2005 44s
+ISCTR 5468 satır 03-01-2005 58s
+hata fetch failed
+HALKB 4878 satır 10-05-2007 36s
+ASELS 5468 satır 03-01-2005 364s
+EREGL 5468 satır 03-01-2005 49s
+YKBNK HATA Unexpected end of JSON input
+VAKBN HATA Unexpected end of JSON input
+TCELL 5466 satır 03-01-2005 50s
+FROTO 5468 satır 03-01-2005 58s
+CCOLA 5128 satır 12-05-2006 42s
+SAHOL 5468 satır 03-01-2005 28s
+ASTOR 937 satır 18-01-2023 4s
+ISDMR 2645 satır 29-03-2016 24s
+ENJSA 2175 satır 08-02-2018 13s
+ENERY 793 satır 23-08-2023 7s
+TTKOM 4623 satır 15-05-2008 54s
+INVES 1160 satır 01-03-2022 8s
+TRALT 4187 satır 12-02-2010 29s
+AHGAZ 956 satır 22-12-2022 3s
+TOASO 5468 satır 03-01-2005 26s
+DOCO 3988 satır 02-12-2010 34s
+GUBRF 5468 satır 03-01-2005 55s
